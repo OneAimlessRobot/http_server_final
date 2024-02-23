@@ -1,0 +1,23 @@
+div.titlecontainer{
+  opacity: 1;
+  background-color: rgb(0, 0,255,0.5);
+
+
+}
+h1.title{
+	
+	color: rgb(255,255,0,1);
+
+}
+
+ body {
+ background-image: url('../images/nostalgia.png');
+  /*background-color: blue;*/
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  text-align: center;
+}
+
+
+
