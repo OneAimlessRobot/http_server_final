@@ -9,5 +9,9 @@ int sendallchunkedfd(client* c,int fd);
 
 int sendallchunkedstream(client* c,FILE* stream);
 
+int sendallstream(client* c,FILE* stream);
+
+int sendallfd(client* c,int fd);
+
 
 #endif

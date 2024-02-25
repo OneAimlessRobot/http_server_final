@@ -12,6 +12,7 @@ extern int port;
 extern int compression;
 extern int compression_level;
 extern int use_fd;
+extern int use_chunked;
 extern int quota;
 extern int send_socket_size;
 extern int recv_socket_size;

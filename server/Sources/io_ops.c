@@ -286,3 +286,128 @@ send(c->socket, "0\r\n\r\n", 5, 0);
 return 0;
 }
 
+int sendallstream(client*c,FILE* stream){
+
+char buff[BUFFSIZE];
+int numread;
+int sent=0;
+while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
+    
+    int totalsent = 0;
+    while (totalsent < numread) {
+        errno=0;
+	sent = SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent);
+	if(sent==-2){
+
+		if(logging){
+		fprintf(logstream,"Timeout no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
+                }
+		continue;
+	}
+	if(sent<0){
+	
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                if(logging){
+		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
+                }
+		break;
+
+        }
+	else if(errno==EPIPE){
+
+		if(logging){
+		fprintf(logstream,"Pipe partido!!! A socket e %d\n",c->socket);
+		}
+		raise(SIGINT);
+		return -1;
+	}
+        else if(errno == ECONNRESET){
+		if(logging){
+                fprintf(logstream,"Conexão largada!!\nSIGPIPE!!!!!: %s\n",strerror(errno));
+                }
+		raise(SIGINT);
+		return -1;
+	}
+	else {
+		if(logging){
+                fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
+                }
+	
+		break;
+	}
+        }
+	else{
+	if(logging){
+	fprintf(logstream,"send de %d bytes feito!!!!!\n",sent);
+	}
+	totalsent += sent;
+    	}
+	}
+}
+
+return 0;
+}
+
+
+int sendallfd(client*c,int fd){
+
+char buff[BUFFSIZE];
+int numread;
+int sent=0;
+while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
+    
+    int totalsent = 0;
+    while (totalsent < numread) {
+        errno=0;
+	sent = SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent);
+	if(sent==-2){
+
+		if(logging){
+		fprintf(logstream,"Timeout no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
+                }
+		continue;
+	}
+	if(sent<0){
+	
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                if(logging){
+		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
+                }
+		break;
+
+        }
+	else if(errno==EPIPE){
+
+		if(logging){
+		fprintf(logstream,"Pipe partido!!! A socket e %d\n",c->socket);
+		}
+		raise(SIGINT);
+		return -1;
+	}
+        else if(errno == ECONNRESET){
+		if(logging){
+                fprintf(logstream,"Conexão largada!!\nSIGPIPE!!!!!: %s\n",strerror(errno));
+                }
+		raise(SIGINT);
+		return -1;
+	}
+	else {
+		if(logging){
+                fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
+                }
+	
+		break;
+	}
+        }
+	else{
+	if(logging){
+	fprintf(logstream,"send de %d bytes feito!!!!!\n",sent);
+	}
+	totalsent += sent;
+    	}
+	}
+}
+
+return 0;
+}
+

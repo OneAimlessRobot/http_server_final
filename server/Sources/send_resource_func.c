@@ -216,6 +216,7 @@ DIR* directory=opendir(path);
 int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	char path[PATHSIZE]={0};
 	char* ptr= path;
+	u_int64_t fileSize=0;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	
 	comp_result result={0,-1,NULL};
@@ -237,17 +238,37 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	}
 	char headerBuff[PATHSIZE]={0};
 	int needsDelete=0;
-	if(result.comp_enable){
-	needsDelete=1;
-	
-
-		fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,mimetype,servComp.fileExt);
+	if(use_fd){
+	lseek(result.fd,0,SEEK_END);
+	fileSize=lseek(result.fd,0,SEEK_CUR);
+	lseek(result.fd,0,SEEK_SET);
 	
 	}
 	else{
+	fseek(result.stream,0,SEEK_END);
+	fileSize=ftell(result.stream);
+	fseek(result.stream,0,SEEK_SET);
+
+	}
 	
-		fillUpChunkedHeader(headerBuff,chunkedHeaderComp,mimetype);
+	if(result.comp_enable){
+	needsDelete=1;
+		if(use_chunked){
 		
+		fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,mimetype,servComp.fileExt);
+		}
+		else{
+		fillUpNormalHeaderComp(headerBuff,chunkedHeaderComp,fileSize,mimetype,servComp.fileExt);
+		
+		}
+	}
+	else{
+		if(use_chunked){
+		fillUpChunkedHeader(headerBuff,chunkedHeaderComp,mimetype);
+		}
+		else{
+		fillUpNormalHeader(headerBuff,normalHeader,fileSize,mimetype);
+		}
 	}
 		int header_size=strlen(headerBuff);
 			if(send(c->socket,headerBuff,header_size,0)!=(header_size)){
@@ -257,11 +278,22 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 			}
 
 	if(use_fd){
+		if(use_chunked){
 		sendallchunkedfd(c,result.fd);
+		}
+		else{
+		sendallfd(c,result.fd);
 		
+		}
 	}
 	else{
+		if(use_chunked){
 		sendallchunkedstream(c,result.stream);
+		}
+		else{
+		sendallstream(c,result.stream);
+	
+		}
 	}
 	
 	close(result.fd);

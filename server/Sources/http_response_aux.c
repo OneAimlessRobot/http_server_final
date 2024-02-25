@@ -15,7 +15,12 @@ char* chunkedHeader= "HTTP/1.1 200 OK\r\n"
                           "\r\n";
 char* normalHeader= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
-			  "Content-Length: %d\r\n"
+			  "Content-Length: %lu\r\n"
+ 			  "\r\n";
+char* normalHeaderComp= "HTTP/1.1 200 OK\r\n"
+                          "Content-Type: %s\r\n"
+			  "Content-encoding: %s\r\n"
+			  "Content-Length: %lu\r\n"
  			  "\r\n";
 
 char* redirectHeader= "HTTP/1.1 301 See Other\r\n"
@@ -43,5 +48,10 @@ void fillUpChunkedHeaderComp(char headerBuff[PATHSIZE],char* headerTemplate,char
 void fillUpNormalHeader(char headerBuff[PATHSIZE],char* headerTemplate,u_int64_t size,char* mimetype){
 
 	snprintf(headerBuff,PATHSIZE,headerTemplate,mimetype,size);
+
+}
+void fillUpNormalHeaderComp(char headerBuff[PATHSIZE],char* headerTemplate,u_int64_t size,char* mimetype,char* method){
+
+	snprintf(headerBuff,PATHSIZE,headerTemplate,mimetype,method,size);
 
 }

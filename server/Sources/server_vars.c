@@ -28,6 +28,7 @@ int compression_level;
 
 int use_fd;
 
+int use_chunked;
 char currDir[PATHSIZE];
 int serverOn=0;
 FILE* logstream=NULL;

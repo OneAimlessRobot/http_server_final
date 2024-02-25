@@ -178,6 +178,8 @@ void initializeConstants(void){
 	
 	compression_level=atoi(find_value_in_cfg_arr("compression_level",cfgs));
 	
+	use_chunked=atoi(find_value_in_cfg_arr("use_chunked",cfgs));
+	
 	logging=atoi(find_value_in_cfg_arr("logging",cfgs));
 	if(quota<=0){
 		
