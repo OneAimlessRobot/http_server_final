@@ -41,6 +41,7 @@ MimeEntry mime_types[] = {
     {".js", "application/javascript"},
     {".png", "image/png"},
     {".jpg", "image/jpeg"},
+    {".webp", "image/webp"},
     {".mp4", "video/mp4"},
     {".mp3", "audio/mp3"},
     {".wasm", "application/wasm"},
