@@ -28,8 +28,43 @@ typedef struct comp_result{
 	int comp_enable,fd;
 	FILE* stream;
 
-
 }comp_result;
+
+typedef struct {
+    const char *extension;
+    const char *mime_type;
+} MimeEntry;
+
+MimeEntry mime_types[] = {
+    {".html", "text/html"},
+    {".css", "text/css"},
+    {".js", "application/javascript"},
+    {".png", "image/png"},
+    {".jpg", "image/jpeg"},
+    {".mp4", "video/mp4"},
+    {".mp3", "audio/mp3"},
+    {".wasm", "application/wasm"},
+    {".gif", "image/gif"},
+    {".ico", "image/x-icon"},
+    {".json", "application/json"},
+    {".svg", "image/svg+xml"},
+    {".txt", "text/plain"},
+    {NULL, "application/octet-stream"} // Default fallback
+};
+
+const char* get_mime_type(const char *filename) {
+    const char *dot = strrchr(filename, '.'); // Find last dot (file extension)
+    if (!dot) return "application/octet-stream"; // No extension? Default type.
+
+    for (int i = 0; mime_types[i].extension != NULL; i++) {
+        if (strcmp(dot, mime_types[i].extension) == 0) {
+            return mime_types[i].mime_type;
+        }
+    }
+    return "application/octet-stream"; // If no match, return generic type
+}
+
+
 /* Compress from file source to file dest until EOF on source.
    def() returns Z_OK on success, Z_MEM_ERROR if memory could not be
    allocated for processing, Z_STREAM_ERROR if an invalid compression
@@ -256,19 +291,19 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	needsDelete=1;
 		if(use_chunked){
 		
-		fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,mimetype,servComp.fileExt);
+		fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,get_mime_type(resourceTarget),servComp.fileExt);
 		}
 		else{
-		fillUpNormalHeaderComp(headerBuff,normalHeaderComp,fileSize,mimetype,servComp.fileExt);
+		fillUpNormalHeaderComp(headerBuff,normalHeaderComp,fileSize,get_mime_type(resourceTarget),servComp.fileExt);
 		
 		}
 	}
 	else{
 		if(use_chunked){
-		fillUpChunkedHeader(headerBuff,chunkedHeader,mimetype);
+		fillUpChunkedHeader(headerBuff,chunkedHeader,get_mime_type(resourceTarget));
 		}
 		else{
-		fillUpNormalHeader(headerBuff,normalHeader,fileSize,mimetype);
+		fillUpNormalHeader(headerBuff,normalHeader,fileSize,get_mime_type(resourceTarget));
 		}
 	}
 		int header_size=strlen(headerBuff);

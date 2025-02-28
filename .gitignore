@@ -8,6 +8,7 @@
 *.o
 *.exe
 *.d
+*.save
 *.swp
 *.mp3
 .metadata/
