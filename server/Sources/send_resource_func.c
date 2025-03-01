@@ -45,6 +45,7 @@ MimeEntry mime_types[] = {
     {".mp4", "video/mp4"},
     {".mp3", "audio/mp3"},
     {".wasm", "application/wasm"},
+    {".webmanifest", "application/manifest+json"},
     {".gif", "image/gif"},
     {".jfif", "image/jpeg"},
     {".avif", "image/avif"},
