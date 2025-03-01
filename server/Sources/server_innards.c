@@ -28,9 +28,6 @@ static struct sockaddr_in server_address, clientAddress;
 static fd_set readfds;
 static char addressContainer[INET_ADDRSTRLEN];
 
-void sigchld_handler(int signo) {
-    while (waitpid(-1, NULL, WNOHANG) > 0);
-}
 void freeClientArr(client*** arr){
 	if(*arr){
 	for(int i=0;i<quota;i++){
@@ -225,7 +222,7 @@ void initializeConstants(void){
 }
 void initializeServer(void){
 
-	sa.sa_handler=sigchld_handler;
+	sa.sa_handler=SIG_IGN;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags=SA_RESTART|SA_NOCLDWAIT;
 
