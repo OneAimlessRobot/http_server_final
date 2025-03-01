@@ -18,7 +18,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 #define SEND_SOCK_BUFF_SIZE 10000000
-//struct sigaction sa;
+struct sigaction sa;
 
 static socklen_t socklenpointer;
 static int server_socket,currNumOfClients;
@@ -225,8 +225,12 @@ void initializeConstants(void){
 }
 void initializeServer(void){
 
-	signal(SIGCHLD, sigchld_handler);
-	
+	sa.sa_handler=sigchld_handler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags=SA_RESTART|SA_NOCLDWAIT;
+
+	sigaction(SIGCHLD, &sa, NULL);
+		
 	signal(SIGINT,sigint_handler);
 	
 	memset(currDir,0,PATHSIZE);
