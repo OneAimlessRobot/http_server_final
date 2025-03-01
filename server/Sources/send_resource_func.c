@@ -46,6 +46,8 @@ MimeEntry mime_types[] = {
     {".mp3", "audio/mp3"},
     {".wasm", "application/wasm"},
     {".gif", "image/gif"},
+    {".jfif", "image/jpeg"},
+    {".avif", "image/avif"},
     {".ico", "image/x-icon"},
     {".json", "application/json"},
     {".svg", "image/svg+xml"},
