@@ -11,12 +11,14 @@
 #include "../Includes/server_innards.h"
 #include "../Includes/sock_ops.h"
 #include "../Includes/session_ops.h"
+#include <sys/wait.h>
 #include <sys/socket.h>
 #include <errno.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/types.h>
 #define SEND_SOCK_BUFF_SIZE 10000000
+struct sigaction sa;
 
 static socklen_t socklenpointer;
 static int server_socket,currNumOfClients;
@@ -26,6 +28,9 @@ static struct sockaddr_in server_address, clientAddress;
 static fd_set readfds;
 static char addressContainer[INET_ADDRSTRLEN];
 
+void sigchld_handler(int signo) {
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
 void freeClientArr(client*** arr){
 	if(*arr){
 	for(int i=0;i<quota;i++){
@@ -220,6 +225,11 @@ void initializeConstants(void){
 }
 void initializeServer(void){
 
+	sa.sa_handler = sigchld_handler;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = SA_RESTART | SA_NOCLDSTOP;
+	sigaction(SIGCHLD, &sa, NULL);
+	
 	signal(SIGINT,sigint_handler);
 	
 	memset(currDir,0,PATHSIZE);
