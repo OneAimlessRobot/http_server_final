@@ -57,6 +57,7 @@ MimeEntry mime_types[] = {
     {".svg", "image/svg+xml"},
     {".txt", "text/plain"},
     {".webm", "audio/webm"},
+    {".m4a", "audio/mp4"},
     {NULL, "application/octet-stream"} // Default fallback
 };
 
