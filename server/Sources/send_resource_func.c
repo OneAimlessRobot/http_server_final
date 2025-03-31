@@ -237,19 +237,25 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 
 			fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 		}
+		char oldoutpathbuff[PATHSIZE]={0};
+		memcpy(oldoutpathbuff,outpathbuff,PATHSIZE);
 		if(compressFile(notFoundDefaultTarget,compress,&result)<0){
 
 			if(logging){
 
 				fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 			}
+			printf("Trying to delete %s...\n",outpathbuff);
+			remove(outpathbuff);
 			return -1;
 		}
 		else{
-			fprintf(logstream,"Enviando resposta 404...\n");
 			notfound=1;
 			use_chunked_here=0;
-		
+			fprintf(logstream,"Enviando resposta 404...\n");
+			printf("Trying to delete %s...\n",oldoutpathbuff);
+			remove(oldoutpathbuff);
+			
 
 		}
 	}
