@@ -1,7 +1,8 @@
 #ifndef CFG_LOADING_H
 #define CFG_LOADING_H
 #define CFG_DIR "/config.cfg"
-
+#define NO_SUCH_SETTING "NO_SUCH_SETTING"
+#define NO_SETTINGS_LOADED "NO_SETTINGS_LOADED"
 
 typedef struct cfg_field{
         char* mem;

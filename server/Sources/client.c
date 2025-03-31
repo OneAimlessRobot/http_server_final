@@ -76,16 +76,21 @@ static void handleCurrentActivity(client*c,http_request req){
 				handleCustomGetReq(c,header.target,req.data,targetinout);
 				int result=sendMediaData(c,targetinout,defaultMimetype,compress);
 				if(result<0){
-
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
+					int result=sendMediaData(c,notFoundDefaultTarget,defaultMimetype,compress);
+					if(result<0){
+						send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
+					}
 				}
 			}
 			else{
 				int result=sendMediaData(c,header.target,header.mimetype,compress);
 				if(result<0){
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-				
+					int result=sendMediaData(c,notFoundDefaultTarget,defaultMimetype,compress);
+					if(result<0){
+						send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
+					}
 				}
+				
 			}
 	break;
 	case POST:
@@ -94,15 +99,19 @@ static void handleCurrentActivity(client*c,http_request req){
 				handleCustomPostReq(c,header.target,req.data,targetinout);
 				int result=sendMediaData(c,targetinout,defaultMimetype,compress);
 				if(result<0){
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-
+					int result=sendMediaData(c,notFoundDefaultTarget,defaultMimetype,compress);
+					if(result<0){
+						send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
+					}
 				}
 			}
 			else{
 				int result=sendMediaData(c,header.target,header.mimetype,compress);
 				if(result<0){
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-
+					int result=sendMediaData(c,notFoundDefaultTarget,defaultMimetype,compress);
+					if(result<0){
+						send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
+					}
 				}
 			}
 	break;

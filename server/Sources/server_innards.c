@@ -162,6 +162,25 @@ void initializeConstants(void){
 	strncpy(defaultLoginTarget,find_value_in_cfg_arr("defaultLoginTarget",cfgs),FIELDSIZE-1);
 	strncpy(doubleSessionTarget,find_value_in_cfg_arr("defaultSessionTarget",cfgs),FIELDSIZE-1);
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
+	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
+
+	int invalid_string_confs=!((stringsAreEqual(incorrectLoginTarget,NO_SUCH_SETTING)||
+				stringsAreEqual(incorrectLoginTarget,NO_SETTINGS_LOADED))&&
+				(stringsAreEqual(defaultTarget,NO_SUCH_SETTING)||
+				stringsAreEqual(defaultTarget,NO_SETTINGS_LOADED))&&
+				(stringsAreEqual(doubleSessionTarget,NO_SUCH_SETTING)||
+				stringsAreEqual(doubleSessionTarget,NO_SETTINGS_LOADED))&&
+				(stringsAreEqual(defaultLoginTarget,NO_SUCH_SETTING)||
+				stringsAreEqual(defaultLoginTarget,NO_SETTINGS_LOADED))&&
+				(stringsAreEqual(notFoundDefaultTarget,NO_SUCH_SETTING)||
+				stringsAreEqual(notFoundDefaultTarget,NO_SETTINGS_LOADED)));
+	
+	if(!invalid_string_confs){
+
+		printf("Config error: invalid string-type field set!!!!\n");
+		raise(SIGINT);
+
+	}
 	smalltimeoutsecs=atoi(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
 	
 	smalltimeoutusecs=atoi(find_value_in_cfg_arr("smalltimeoutusecs",cfgs));
@@ -184,41 +203,39 @@ void initializeConstants(void){
 	
 	logging=atoi(find_value_in_cfg_arr("logging",cfgs));
 	if(quota<=0){
-		
+
 		quota=500;
 
 	}
 	if(logging<0){
-		
+
 		printf("Config error: logging level must be a non negative 32 bit integer!\n");
 		raise(SIGINT);
 	}
 	if(smalltimeoutsecs<0){
-		
+
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
 		raise(SIGINT);
 	}
 	if(smalltimeoutusecs<0){
-		
+
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
 		raise(SIGINT);
 	}
 	if(bigtimeoutsecs<0){
-		
+
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
 		raise(SIGINT);
 	}
 	if(bigtimeoutusecs<0){
-		
+
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
 		raise(SIGINT);
 	}
 	if(compression_level<0 || compression_level > 9){
-		
 		printf("Config error: compression level must be an integer between 0 and 9!\n");
 		raise(SIGINT);
 	}
-
 }
 void initializeServer(void){
 

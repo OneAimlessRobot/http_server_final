@@ -39,6 +39,7 @@ defaultTarget[FIELDSIZE],
 defaultLoginTarget[FIELDSIZE],
 doubleSessionTarget[FIELDSIZE],
 incorrectLoginTarget[FIELDSIZE],
+notFoundDefaultTarget[FIELDSIZE],
 * defaultVersion,
 * defaultMimetype;
 

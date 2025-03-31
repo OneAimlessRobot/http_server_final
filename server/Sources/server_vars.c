@@ -42,6 +42,7 @@ char defaultLoginTarget[FIELDSIZE]={0};
 char incorrectLoginTarget[FIELDSIZE]={0};
 char doubleSessionTarget[FIELDSIZE]={0};
 char timeoutTarget[FIELDSIZE]={0};
+char notFoundDefaultTarget[FIELDSIZE]={0};
 
 char* defaultVersion="HTTP/1.1";
 char* defaultMimetype="*/*";
