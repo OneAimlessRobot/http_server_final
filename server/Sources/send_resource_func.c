@@ -73,6 +73,11 @@ const char* get_mime_type(const char *filename) {
     return "application/octet-stream"; // If no match, return generic type
 }
 
+static int file_exists(const char *filename)
+{
+    struct stat buffer;
+    return stat(filename, &buffer) == 0;
+}
 
 /* Compress from file source to file dest until EOF on source.
    def() returns Z_OK on success, Z_MEM_ERROR if memory could not be
@@ -135,11 +140,21 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 	memset(outpathbuff,0,PATHSIZE*2);
 	snprintf(outpathbuff,(PATHSIZE*2)-1,"%s.%s",inpathbuff,servComp.fileExt);
 	memset(cmd,0,PATHSIZE*6);
+	
 	int fd=result->fd=open(outpathbuff,O_RDWR|O_CREAT|O_TRUNC,0777);
-	if(result->comp_enable<0){
+	if(result->fd<0){
 			if(logging){
 			fprintf(logstream,"Invalid filepath: %s\n%s\n",outpathbuff,strerror(errno));
 			}
+			return -1;
+	}
+	if(!file_exists(inpathbuff)){
+			if(logging){
+			fprintf(logstream,"Invalid filepath: %s\n%s\n",inpathbuff,strerror(errno));
+			}
+			close(result->fd);
+			result->fd=-1;
+			result->comp_enable=0;
 			return -1;
 	}
 	snprintf(cmd,(PATHSIZE*6)-1,compressionCmd,servComp.cmdTool,compression,inpathbuff);
@@ -180,62 +195,7 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 	}
 	return 0;
 }
-/*
-static int compressFile(char* target,int enable,comp_result* result){
-	memset(inpathbuff,0,PATHSIZE*2);
-	snprintf(inpathbuff,(PATHSIZE*2)-1,"%s%s",currDir,target);
-	if(enable){
-	memset(outpathbuff,0,PATHSIZE*2);
-	snprintf(outpathbuff,(PATHSIZE*2)-1,"%s.%s",inpathbuff,servComp.fileExt);
-	result->fd=open(outpathbuff,O_RDWR|O_CREAT,0777);
-	result->stream=fopen(outpathbuff,"rb+");
-	if((!(result->stream))||(result->fd<0)){
-			if(result->stream){
-				fclose(result->stream);
-			
-			}
-			else if(result->fd>=0){
-				close(result->fd);
-			}
-			if(logging){
-			fprintf(logstream,"Invalid (dest) filepath: %s\n%s\n",inpathbuff,strerror(errno));
-			}
-			return -1;
-	
-	}
-	FILE* in;
-	if(!(in=fopen(inpathbuff,"r"))){
-			if(logging){
-			fprintf(logstream,"Invalid (src) filepath: %s\n%s\n",inpathbuff,strerror(errno));
-			}
-			return -1;
-	}
-	
-	def(in,result->stream,compression_level);
-	result->comp_enable=1;
-	}
-	else{
-	result->fd=open(inpathbuff,O_RDONLY,0777);
-	result->stream=fopen(inpathbuff,"r");
-	if((!(result->stream))||(result->fd<0)){
-			if(result->stream){
-				fclose(result->stream);
-			
-			}
-			else if(result->fd>=0){
-				close(result->fd);
-			}
-			if(logging){
-			fprintf(logstream,"Invalid (src) filepath: %s\n%s\n",inpathbuff,strerror(errno));
-			}
-			return -1;
-	
-	}
-	result->comp_enable=0;
-	}
-	return 0;
-}
-*/
+
 int isDirectory(char* resourceTarget){
         char path[PATHSIZE]={0};
 	char* ptr= path;
@@ -261,6 +221,7 @@ DIR* directory=opendir(path);
 int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	char path[PATHSIZE]={0};
 	char* ptr= path;
+	int use_chunked_here=use_chunked;
 	u_int64_t fileSize=0;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	
@@ -269,13 +230,28 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	if(logging){
 	fprintf(logstream,"Fetching %s...\n",path);
 	}
+	int notfound=0;
 	if(compressFile(resourceTarget,compress,&result)<0){
 
 		if(logging){
 
 			fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 		}
-		return -1;
+		if(compressFile(notFoundDefaultTarget,compress,&result)<0){
+
+			if(logging){
+
+				fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
+			}
+			return -1;
+		}
+		else{
+			fprintf(logstream,"Enviando resposta 404...\n");
+			notfound=1;
+			use_chunked_here=0;
+		
+
+		}
 	}
 	
 	if(logging){
@@ -296,23 +272,36 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 
 	}
 	
+	if(!notfound){
 	if(result.comp_enable){
-	needsDelete=1;
-		if(use_chunked){
-		
-		fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,get_mime_type(resourceTarget),servComp.fileExt);
+		needsDelete=1;
+			if(use_chunked_here){
+			
+			fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
+			}
+			else{
+			fillUpNormalHeaderComp(headerBuff,normalHeaderComp,fileSize,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
+			
+			}
 		}
 		else{
-		fillUpNormalHeaderComp(headerBuff,normalHeaderComp,fileSize,get_mime_type(resourceTarget),servComp.fileExt);
-		
+			if(use_chunked_here){
+			fillUpChunkedHeader(headerBuff,chunkedHeader,(const char*)get_mime_type(resourceTarget));
+			}
+			else{
+			fillUpNormalHeader(headerBuff,normalHeader,fileSize,(const char*)get_mime_type(resourceTarget));
+			}
 		}
 	}
 	else{
-		if(use_chunked){
-		fillUpChunkedHeader(headerBuff,chunkedHeader,get_mime_type(resourceTarget));
+
+		if(result.comp_enable){
+			needsDelete=1;
+			fillUpFileNotFoundHeaderComp(headerBuff,fileSize,(const char*)get_mime_type(notFoundDefaultTarget),servComp.fileExt);
 		}
 		else{
-		fillUpNormalHeader(headerBuff,normalHeader,fileSize,get_mime_type(resourceTarget));
+			fillUpFileNotFoundHeader(headerBuff,fileSize,(const char*)get_mime_type(notFoundDefaultTarget));
+
 		}
 	}
 		int header_size=strlen(headerBuff);
@@ -323,7 +312,7 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 			}
 
 	if(use_fd){
-		if(use_chunked){
+		if(use_chunked_here){
 			sendallchunkedfd(c,result.fd);
 	
 		}
@@ -333,7 +322,7 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 		}
 	}
 	else{
-		if(use_chunked){
+		if(use_chunked_here){
 			sendallchunkedstream(c,result.stream);
 
 		}
