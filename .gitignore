@@ -3,6 +3,7 @@
 *.cmi
 *.class
 *.exec
+*.exe
 *.cmx
 *.a
 *.o

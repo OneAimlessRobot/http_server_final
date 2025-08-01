@@ -39,9 +39,9 @@ static client* spawnEmptyClient(void){
 
 }
 
-static int sendMediaData(client*c,char* buff,char* mimetype,int compress){
+static int sendMediaData(client*c,char* buff,int compress){
 
-	return sendResource(c,buff,mimetype,compress);
+	return sendResource(c,buff,compress);
 }
 
 
@@ -63,7 +63,7 @@ static void handleCurrentActivity(client*c,http_request req){
 	}
 	if(isDirectory(header.target)){
 		
-		sendMediaData(c,generateDirListing(header.target),defaultMimetype,compress);
+		sendMediaData(c,generateDirListing(header.target),compress);
 		deleteDirListingHTML();
 		return;
 	
@@ -74,13 +74,13 @@ static void handleCurrentActivity(client*c,http_request req){
 
 
 				handleCustomGetReq(c,header.target,req.data,targetinout);
-				int result=sendMediaData(c,targetinout,defaultMimetype,compress);
+				int result=sendMediaData(c,targetinout,compress);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
 			}
 			else{
-				int result=sendMediaData(c,header.target,header.mimetype,compress);
+				int result=sendMediaData(c,header.target,compress);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
@@ -91,13 +91,13 @@ static void handleCurrentActivity(client*c,http_request req){
 			if(isCustomPostReq(header.target)){
 
 				handleCustomPostReq(c,header.target,req.data,targetinout);
-				int result=sendMediaData(c,targetinout,defaultMimetype,compress);
+				int result=sendMediaData(c,targetinout,compress);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
 			}
 			else{
-				int result=sendMediaData(c,header.target,header.mimetype,compress);
+				int result=sendMediaData(c,header.target,compress);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
@@ -105,7 +105,7 @@ static void handleCurrentActivity(client*c,http_request req){
 	break;
 	default:
 		
-		sendMediaData(c,header.target,defaultMimetype,compress);
+		sendMediaData(c,header.target,compress);
 	break;
 	}
 	

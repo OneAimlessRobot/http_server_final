@@ -218,7 +218,7 @@ DIR* directory=opendir(path);
 	}
 
 }
-int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
+int sendResource(client* c,char* resourceTarget,int compress){
 	char path[PATHSIZE]={0};
 	char* ptr= path;
 	int use_chunked_here=use_chunked;
@@ -264,7 +264,6 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	fprintf(logstream,"Done!\n");
 	}
 	char headerBuff[PATHSIZE]={0};
-	int needsDelete=0;
 	if(use_fd){
 	lseek(result.fd,0,SEEK_END);
 	fileSize=lseek(result.fd,0,SEEK_CUR);
@@ -280,7 +279,6 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	
 	if(!notfound){
 	if(result.comp_enable){
-		needsDelete=1;
 			if(use_chunked_here){
 			
 			fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
@@ -302,7 +300,6 @@ int sendResource(client* c,char* resourceTarget,char* mimetype,int compress){
 	else{
 
 		if(result.comp_enable){
-			needsDelete=1;
 			fillUpFileNotFoundHeaderComp(headerBuff,fileSize,(const char*)get_mime_type(notFoundDefaultTarget),servComp.fileExt);
 		}
 		else{

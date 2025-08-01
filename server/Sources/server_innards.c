@@ -79,6 +79,10 @@ close(server_socket);
 	fclose(logstream);
 	
 }
+static void sigact_sigint_handler(int arg){
+	serverOn+=(arg*0);
+
+}
 static void sigint_handler(int arg){
 	serverOn=arg=0;
 
@@ -239,7 +243,7 @@ void initializeConstants(void){
 }
 void initializeServer(void){
 
-	sa.sa_handler=SIG_IGN;
+	sa.sa_handler=sigact_sigint_handler;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags=SA_RESTART|SA_NOCLDWAIT;
 

@@ -52,7 +52,7 @@ void print_field_arr(FILE* fstream,http_header_field* fields){
 }
 void print_http_req_header(FILE* fstream,http_header header){
 
-		fprintf(fstream,"HTTP REQUEST HEADER:\n\nType: %s\nTarget: %s\nVersion: %s\nHost: %s\nmimetype: %s\nOS: %s\nContent-Length: %d\nAccepted-encoding: %s\nAccepted-encoding (split): \n",getREQStringFromType(header.type),header.target,header.version,header.host,header.mimetype,header.os,header.content_length,header.encodingcopy);
+		fprintf(fstream,"HTTP REQUEST HEADER:\n\nType: %s\nOrigin: %s\nTarget: %s\nVersion: %s\nHost: %s\nmimetype: %s\nOS: %s\nContent-Length: %d\nAccepted-encoding: %s\nAccepted-encoding (split): \n",getREQStringFromType(header.type),header.origin,header.target,header.version,header.host,header.mimetype,header.os,header.content_length,header.encodingcopy);
 		print_string_arr(fstream,header.split_encoding);
 		fprintf(fstream,"\nContent-Type (raw): %s\nContent-Type (actual): %s\nForm-boundary: %s\nContent-Type (split):\n",header.content_type_copy,header.content_type,header.form_boundary);
 		print_string_arr(fstream,header.content_type_split);
@@ -86,6 +86,7 @@ return arr;
 static void spawnHTTPHeader(char* buff,http_header*result){
 	result->type=INVALID;
 	memset(result->target,0,FIELDSIZE);
+	memset(result->origin,0,FIELDSIZE);
 	memset(result->host,0,FIELDSIZE);
 	memset(result->mimetype,0,FIELDSIZE);
 	memset(result->version,0,FIELDSIZE);
@@ -114,6 +115,7 @@ static void spawnHTTPHeader(char* buff,http_header*result){
 	strcpy(result->target,firstHeaderArr[1]);
 	strcpy(result->version,firstHeaderArr[2]);
 	strcpy(result->host,find_field_value_in_field_arr("Host",fieldarr));
+	strcpy(result->origin,find_field_value_in_field_arr("Origin",fieldarr));
 	//strcpy(result.mimetype,find_field_value_in_field_arr("Accept",fieldarr));
 	strcpy(result->mimetype,defaultMimetype);
 	strcpy(result->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));

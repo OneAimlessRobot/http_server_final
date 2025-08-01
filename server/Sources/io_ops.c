@@ -18,6 +18,7 @@
 #include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
+#include "../Includes/http_response_aux.h"
 #define SEND_FUNC_TO_USE sendsome
 
 
@@ -56,7 +57,16 @@ int timedreadall(client* c,char* buff,u_int64_t size){
                 tv.tv_usec=bigtimeoutusecs;
                 iResult=select(c->socket+1,&rfds,(fd_set*)0,(fd_set*)0,&tv);
                 if(iResult>0){
+			char peek_byte;
+			recv(c->socket, &peek_byte, 1, MSG_PEEK);
 
+			if ((unsigned char)peek_byte == 0x16) {
+				// It's probably HTTPS – drop the connection
+				send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
+				fprintf(logstream,"Recebemos https!!!\nDropping!!!\n");
+				raise(SIGINT);
+				return -1;
+			}
                 return readall(c,buff,size);
 
                 }

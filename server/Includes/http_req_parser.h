@@ -16,6 +16,7 @@ typedef struct http_header{
 		*split_encoding[ARGVMAX],
 		encoding[FIELDSIZE],
 		encodingcopy[FIELDSIZE],
+		origin[FIELDSIZE],
 		mimetype[FIELDSIZE],
 		content_type_raw[FIELDSIZE],
 		content_type_copy[FIELDSIZE],

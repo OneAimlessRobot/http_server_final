@@ -4,53 +4,81 @@
 #include "../Includes/buffSizes.h"
 #include "../Includes/http_response_aux.h"
 
+#define EMBEDDER_POLICY "credentialless"
+/*
+"Cross-Origin-Embedder-Policy: "
+			  EMBEDDER_POLICY
+			   "\r\n"
+*/
 char* chunkedHeaderComp= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
+			  "Origin: https://localho.st:11001\r\n"
 			  "Cross-Origin-Opener-Policy: same-origin\r\n"
-                          "Cross-Origin-Embedder-Policy: require-corp\r\n"
+                          "Cross-Origin-Embedder-Policy: "
+			  EMBEDDER_POLICY
+			   "\r\n"
                           "content-encoding: %s\r\n"
                           "Transfer-Encoding: chunked\r\n"
                           "\r\n";
 char* chunkedHeader= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
+			  "Origin: https://localho.st:11001\r\n"
 			  "Cross-Origin-Opener-Policy: same-origin\r\n"
                           "Cross-Origin-Embedder-Policy: require-corp\r\n"
+			  "Cross-Origin-Embedder-Policy: "
+			  EMBEDDER_POLICY
+			  "\r\n"
 			  "Transfer-Encoding: chunked\r\n"
                           "\r\n";
 char* normalHeader= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
+			  "Origin: https://localho.st:11001\r\n"
 			  "Cross-Origin-Opener-Policy: same-origin\r\n"
-                          "Cross-Origin-Embedder-Policy: require-corp\r\n"
-			  "Content-Length: %lu\r\n"
+                          "Cross-Origin-Embedder-Policy: "
+			  EMBEDDER_POLICY
+			   "\r\n"
+			   "Content-Length: %lu\r\n"
  			  "\r\n";
 char* normalHeaderComp= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
+			  "Origin: https://localho.st:11001\r\n"
 			  "Content-encoding: %s\r\n"
 			  "Content-Length: %lu\r\n"
 			  "Cross-Origin-Opener-Policy: same-origin\r\n"
-                          "Cross-Origin-Embedder-Policy: require-corp\r\n"
- 			  "\r\n";
+                          "Cross-Origin-Embedder-Policy: "
+			  EMBEDDER_POLICY
+			   "\r\n"
+			   "\r\n";
 
 char* redirectHeader= "HTTP/1.1 301 See Other\r\n"
 				"Location: %s\r\n"
-				"Content-Length: 0\r\n"
+			  	"Origin: https://localho.st:11001\r\n"
+			  	"Content-Length: 0\r\n"
 			  	"Cross-Origin-Opener-Policy: same-origin\r\n"
-                          	"Cross-Origin-Embedder-Policy: require-corp\r\n"
-				"\r\n";
+                          	"Cross-Origin-Embedder-Policy: "
+			  	EMBEDDER_POLICY
+			   	"\r\n"
+			   	"\r\n";
 
 char* notFoundHeader= "HTTP/1.1 404 Not Found\r\n"
                                 "Content-Type: %s\r\n"
-				"Content-Length: %lu\r\n"
-			  	"Cross-Origin-Opener-Policy: same-origin\r\n"
-                          	"Cross-Origin-Embedder-Policy: require-corp\r\n"
-				"\r\n";
+			  	"Origin: https://localho.st:11001\r\n"
+			  	"Content-Length: %lu\r\n"
+			  	"Cross-Origin-Embedder-Policy: "
+			  	EMBEDDER_POLICY
+			   	"\r\n"
+			   	"Cross-Origin-Opener-Policy: same-origin\r\n"
+                          	"\r\n";
 char* notFoundHeaderComp= "HTTP/1.1 404 Not Found\r\n"
                                 "Content-Type: %s\r\n"
-				"Content-Length: %lu\r\n"
+			  	"Origin: https://localho.st:11001\r\n"
+			  	"Content-Length: %lu\r\n"
 			        "content-encoding: %s\r\n"
-                          	"Cross-Origin-Opener-Policy: same-origin\r\n"
-                          	"Cross-Origin-Embedder-Policy: require-corp\r\n"
-				"\r\n";
+                          	"Cross-Origin-Embedder-Policy: "
+			  	EMBEDDER_POLICY
+			   	"\r\n"
+				"Cross-Origin-Opener-Policy: same-origin\r\n"
+                          	"\r\n";
 
 void fillUpRedirectHeader(char headerBuff[PATHSIZE],char* path){
 
