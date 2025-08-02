@@ -78,6 +78,7 @@ int timedreadall(client* c,char* buff,u_int64_t size){
 
 		fprintf(logstream, "SELECT ERROR!!!!! READ\n");
 		}
+		raise(SIGINT);
 		return -1;
 		}
 }
@@ -103,6 +104,7 @@ int sendsome(int sd,char buff[],u_int64_t size){
 
 		fprintf(logstream, "SELECT ERROR!!!!! SEND\n");
 		}
+		raise(SIGINT);
 		return -1;
 		}
 }
@@ -209,6 +211,7 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
 	
+		raise(SIGINT);
 		break;
 		//continue;
 	
@@ -279,6 +282,7 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
 	
+		raise(SIGINT);
 		break;
 	}
         }
@@ -343,6 +347,7 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
 	
+		raise(SIGINT);
 		break;
 	}
         }
@@ -406,6 +411,7 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
 	
+		raise(SIGINT);
 		break;
 	}
         }
