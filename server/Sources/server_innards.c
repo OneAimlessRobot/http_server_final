@@ -288,7 +288,7 @@ void initializeServer(void){
 	}
 	socklenpointer=sizeof(clientAddress);
 	loadLogins();
-	servComp=bzip2;
+	servComp=br;
 	mainLoop();
 	cleanup();
 }
