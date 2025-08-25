@@ -32,8 +32,11 @@ int use_chunked;
 char currDir[PATHSIZE];
 int serverOn=0;
 FILE* logstream=NULL;
-compMethod br = {"brotli","br"," br"},gzip = {"gzip","gzip"," gzip"},
-deflateM = {"deflate","deflate"," deflate"};
+compMethod br = {"brotli","br"," br"},
+		gzip = {"gzip","gzip"," gzip"},
+		deflateM = {"deflate","deflate"," deflate"},
+		bzip2 = {"bzip2","bz2"," bzip2"};
+
 compMethod servComp;
 
 

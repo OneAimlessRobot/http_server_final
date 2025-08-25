@@ -2,5 +2,5 @@
 #define SEND_RESOURCE_FUNC_H
 #define USEFD 1
 int isDirectory(char* resourceTarget);
-int sendResource(client*c,char* resourceTarget,int compress);
+int sendResource(client*c,char* resourceTarget,int compress,int is_directory);
 #endif

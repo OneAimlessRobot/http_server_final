@@ -20,7 +20,7 @@ extern int session_time_usecs;
 extern char currDir[PATHSIZE];
 extern int serverOn;
 extern FILE* logstream;
-extern compMethod br,gzip,deflateM,servComp;
+extern compMethod br,gzip,deflateM,bzip2,servComp;
 
 /*
 extern char* logfpath,* defaultTarget,

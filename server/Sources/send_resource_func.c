@@ -137,8 +137,9 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 	memset(inpathbuff,0,PATHSIZE*2);
 	snprintf(inpathbuff,(PATHSIZE*2)-1,"%s%s",currDir,target);
 	if(enable){
+	
 	memset(outpathbuff,0,PATHSIZE*2);
-	snprintf(outpathbuff,(PATHSIZE*2)-1,"%s.%s",inpathbuff,servComp.fileExt);
+	snprintf(outpathbuff,(PATHSIZE*2)-1,"%s%s",inpathbuff,servComp.fileExt);
 	memset(cmd,0,PATHSIZE*6);
 	
 	int fd=result->fd=open(outpathbuff,O_RDWR|O_CREAT|O_TRUNC,0777);
@@ -218,13 +219,31 @@ DIR* directory=opendir(path);
 	}
 
 }
-int sendResource(client* c,char* resourceTarget,int compress){
+int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	char path[PATHSIZE]={0};
 	char* ptr= path;
 	int use_chunked_here=use_chunked;
 	u_int64_t fileSize=0;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
-	
+	int we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
+	if(we_in_csgo_mode&&!is_directory){
+		
+		if(logging){
+			fprintf(logstream,"We in csgo mode!!!!\n");
+		}
+		path[strlen(path)-strlen(servComp.fileExt)-1]=0;
+		resourceTarget[strlen(resourceTarget)-strlen(servComp.fileExt)-1]=0;
+		if(logging){
+			fprintf(logstream,"We modified the path to: %s\n",path);
+			fprintf(logstream,"And modified the resource target to: %s\n",resourceTarget);
+		}
+	}
+	else{
+
+		if(logging){
+			fprintf(logstream,"Brother we are NOT in csgo mode\n");
+		}
+	}
 	comp_result result={0,-1,NULL};
 	
 	if(logging){

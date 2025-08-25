@@ -39,9 +39,9 @@ static client* spawnEmptyClient(void){
 
 }
 
-static int sendMediaData(client*c,char* buff,int compress){
+static int sendMediaData(client*c,char* buff,int compress,int is_directory){
 
-	return sendResource(c,buff,compress);
+	return sendResource(c,buff,compress,is_directory);
 }
 
 
@@ -61,9 +61,10 @@ static void handleCurrentActivity(client*c,http_request req){
 	if(findInStringArr(header.split_encoding,servComp.encodingExt)>=0){
 		compress=compression;
 	}
-	if(isDirectory(header.target)){
+	int is_directory=0;
+	if((is_directory=isDirectory(header.target))){
 		
-		sendMediaData(c,generateDirListing(header.target),compress);
+		sendMediaData(c,generateDirListing(header.target),compress,is_directory);
 		deleteDirListingHTML();
 		return;
 	
@@ -74,13 +75,13 @@ static void handleCurrentActivity(client*c,http_request req){
 
 
 				handleCustomGetReq(c,header.target,req.data,targetinout);
-				int result=sendMediaData(c,targetinout,compress);
+				int result=sendMediaData(c,targetinout,compress,is_directory);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
 			}
 			else{
-				int result=sendMediaData(c,header.target,compress);
+				int result=sendMediaData(c,header.target,compress,is_directory);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
@@ -91,13 +92,13 @@ static void handleCurrentActivity(client*c,http_request req){
 			if(isCustomPostReq(header.target)){
 
 				handleCustomPostReq(c,header.target,req.data,targetinout);
-				int result=sendMediaData(c,targetinout,compress);
+				int result=sendMediaData(c,targetinout,compress,is_directory);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
 			}
 			else{
-				int result=sendMediaData(c,header.target,compress);
+				int result=sendMediaData(c,header.target,compress,is_directory);
 				if(result<0){
 					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
 				}
@@ -105,7 +106,7 @@ static void handleCurrentActivity(client*c,http_request req){
 	break;
 	default:
 		
-		sendMediaData(c,header.target,compress);
+		sendMediaData(c,header.target,compress,is_directory);
 	break;
 	}
 	
