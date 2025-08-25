@@ -138,19 +138,22 @@ while(total<size){
 		if(logging){
 		fprintf(logstream,"Pipe partido!!! A socket e %d\n",c->socket);
 		}
+		raise(SIGINT);
 		return -2;
 	}
 	else if(errno==ENOTCONN){
 		if(logging){
 		fprintf(logstream,"Li %ld ao todo!!!! readall saiu com erro!!!!!:\nAvisando server para desconectar!\n%s\n",total,strerror(errno));
 		}
-		
-		return -2;
+		raise(SIGINT);
+		return -1;
 	}
 	else if(len!=-2){
 		if(logging){
 		fprintf(logstream,"Li %ld ao todo!!!! readall saiu com erro!!!!!:\n%s\n",total,strerror(errno));
 		}
+		raise(SIGINT);
+		return -1;
 	}
 	
 	}
@@ -212,7 +215,7 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
                 }
 	
 		raise(SIGINT);
-		break;
+		return -1;
 		//continue;
 	
 	}

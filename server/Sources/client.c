@@ -186,6 +186,6 @@ while(clientOn){
 close(c->socket);
 free(c->peerbuff);
 free(c);
-
+raise(SIGINT);
 
 }

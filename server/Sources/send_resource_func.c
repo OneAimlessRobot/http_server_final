@@ -247,7 +247,6 @@ int sendResource(client* c,char* resourceTarget,int compress){
 			}
 			printf("Trying to delete %s...\n",outpathbuff);
 			remove(outpathbuff);
-			return -1;
 		}
 		else{
 			notfound=1;
@@ -255,9 +254,8 @@ int sendResource(client* c,char* resourceTarget,int compress){
 			fprintf(logstream,"Enviando resposta 404...\n");
 			printf("Trying to delete %s...\n",oldoutpathbuff);
 			remove(oldoutpathbuff);
-			
-
 		}
+		return -1;
 	}
 	
 	if(logging){

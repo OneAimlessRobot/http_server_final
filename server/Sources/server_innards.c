@@ -129,7 +129,7 @@ static void handleIncommingConnections(void){
 			case 0:
 				
 				runClientConnection(client_socket);
-	 			exit(-1);
+				exit(-1);
 			default:
 				close(client_socket);
 				if(logging){
