@@ -168,19 +168,17 @@ void runClientConnection(int sock){
 
 	signal(SIGPIPE,sigpipe_handler);
 	signal(SIGINT,sigint_handler);
-		client*c=spawnEmptyClient();
-		socklenpointer=sizeof(c->client_addr);
-		c->socket=sock;
-		clientOn=1;
-c->peerbuff=malloc(PAGE_DATA_SIZE);
-memset(c->peerbuff,0,PAGE_DATA_SIZE);
-while(clientOn){
-	
-		handleConnection(c);
-	
-}
+	client*c=spawnEmptyClient();
+	socklenpointer=sizeof(c->client_addr);
+	c->socket=sock;
+	//clientOn=1;
+	c->peerbuff=malloc(PAGE_DATA_SIZE);
+	memset(c->peerbuff,0,PAGE_DATA_SIZE);
+
+	handleConnection(c);
+
 	getpeername(c->socket , (struct sockaddr*)&c->client_addr , (socklen_t*)&socklenpointer);
-                    if(logging>0){
+       	if(logging>0){
 			fprintf(logstream,"Host disconnected. Cliente com socket %d ip %s , port %d \n" ,c->socket,inet_ntoa(c->client_addr.sin_addr) , ntohs(c->client_addr.sin_port));
                    
                  }
