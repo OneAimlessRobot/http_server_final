@@ -83,6 +83,7 @@ MimeEntry mime_types[] = {
     {".avi","video/x-msvideo"},
     {".wad","application/x-doom-wad"},
     {".lst","text/plain"},
+    {".db","application/vnd.sqlite3"},
     {NULL, "application/octet-stream"} // Default fallback
 };
 
