@@ -6,8 +6,8 @@ RESDIR= ./resources
 
 CURRDIR=echo `pwd`
 
-CC= clang
-#CC= gcc
+#CC= clang
+CC= gcc
 
 DEPFLAGS= -MP -MD
 
