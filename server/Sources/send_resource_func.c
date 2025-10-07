@@ -21,9 +21,9 @@
 #define CHUNK 16384
 static char* compressionCmd = "%s -c -%d %s";
 //static char* compressionCmd = "gzip -c %s > %s.gzip";
-static char inpathbuff[PATHSIZE*2];
-static char outpathbuff[PATHSIZE*2];
-static char cmd[PATHSIZE*6];
+static char inpathbuff[PATHSIZE*6];
+static char outpathbuff[PATHSIZE*6+1];
+static char cmd[PATHSIZE*30];
 typedef struct comp_result{
 	int comp_enable,fd;
 	FILE* stream;
@@ -160,14 +160,13 @@ static int def(FILE* source, FILE* dest, int level)
     return Z_OK;
 }
 static int compressFile(char* target,int enable,struct comp_result* result){
-	memset(inpathbuff,0,PATHSIZE*2);
-	snprintf(inpathbuff,(PATHSIZE*2)-1,"%s%s",currDir,target);
+	memset(inpathbuff,0,sizeof(inpathbuff)-1);
+	snprintf(inpathbuff,sizeof(inpathbuff)-1,"%s%s",currDir,target);
 	if(enable){
-	
-	memset(outpathbuff,0,PATHSIZE*2);
-	snprintf(outpathbuff,(PATHSIZE*2)-1,"%s%s",inpathbuff,servComp.fileExt);
-	memset(cmd,0,PATHSIZE*6);
-	
+	memset(outpathbuff,0,sizeof(outpathbuff)-1);
+	snprintf(outpathbuff,sizeof(outpathbuff)-1,"%s%s",inpathbuff,servComp.fileExt);
+	memset(cmd,0,sizeof(inpathbuff)-1);
+
 	int fd=result->fd=open(outpathbuff,O_RDWR|O_CREAT|O_TRUNC,0777);
 	if(result->fd<0){
 			if(logging){
@@ -184,7 +183,7 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 			result->comp_enable=0;
 			return -1;
 	}
-	snprintf(cmd,(PATHSIZE*6)-1,compressionCmd,servComp.cmdTool,compression,inpathbuff);
+	snprintf(cmd,sizeof(cmd)-1,compressionCmd,servComp.cmdTool,compression,inpathbuff);
 	printf("%s\n",cmd);
 	char* argv[ARGVMAX]={0};
 	makeargv(cmd,argv);
@@ -283,6 +282,8 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 			fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 		}
 		char oldoutpathbuff[PATHSIZE]={0};
+		char errorbuff[PATHSIZE*10]={0};
+		snprintf(errorbuff, sizeof(errorbuff)-1,"%s%s",currDir,notFoundDefaultTarget);
 		memcpy(oldoutpathbuff,outpathbuff,PATHSIZE);
 		if(compressFile(notFoundDefaultTarget,compress,&result)<0){
 
@@ -297,8 +298,8 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 			notfound=1;
 			use_chunked_here=0;
 			fprintf(logstream,"Enviando resposta 404...\n");
-			printf("Trying to delete %s...\n",oldoutpathbuff);
-			remove(oldoutpathbuff);
+			printf("Trying to delete %s...\n",outpathbuff);
+			remove(outpathbuff);
 		}
 		return -1;
 	}

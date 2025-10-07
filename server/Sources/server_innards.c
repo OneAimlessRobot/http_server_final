@@ -126,6 +126,7 @@ static void handleIncommingConnections(void){
 
 					fprintf(logstream,"Erro no fork!!!\n %s\n",strerror(errno));
 				}
+				exit(-1);
 			case 0:
 				
 				runClientConnection(client_socket);
