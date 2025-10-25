@@ -219,14 +219,9 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
 		//continue;
 	
 	}
-        }
-	else{
-	if(logging){
-	fprintf(logstream,"send de %d bytes feito!!!!!\n",sent);
 	}
 	totalsent += sent;
     	}
-	}
 }
 
 // Send final zero-sized chunk
@@ -288,14 +283,9 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 		raise(SIGINT);
 		break;
 	}
-        }
-	else{
-	if(logging){
-	fprintf(logstream,"send de %d bytes feito!!!!!\n",sent);
 	}
 	totalsent += sent;
     	}
-	}
 }
 
 // Send final zero-sized chunk
@@ -353,14 +343,9 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 		raise(SIGINT);
 		break;
 	}
-        }
-	else{
-	if(logging){
-	fprintf(logstream,"send de %d bytes feito!!!!!\n",sent);
 	}
 	totalsent += sent;
     	}
-	}
 }
 
 return 0;
@@ -417,13 +402,8 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
 		raise(SIGINT);
 		break;
 	}
-        }
-	else{
-	if(logging){
-	fprintf(logstream,"send de %d bytes feito!!!!!\n",sent);
 	}
 	totalsent += sent;
-    	}
 	}
 }
 

@@ -44,6 +44,10 @@ static void generateDirListingPrimitive(char* path){
 	char* cmd= malloc(PATHSIZE);
 	memset(cmd,0,PATHSIZE);
 	snprintf(currSearchedDir,PATHSIZE,"%s%s",currDir,path);
+	/*char the_path_directory[PATHSIZE]={0};
+	memcpy(the_path_directory,currSearchedDir,strlen(currSearchedDir));
+	int decoded=convert_http_encoded_thingie_into_actual_path(the_path_directory);
+	snprintf(cmd,PATHSIZE,"ls -1 %s > %s",the_path_directory,tmpDir);*/
 	snprintf(cmd,PATHSIZE,"ls -1 %s > %s",currSearchedDir,tmpDir);
 	system(cmd);
 	free(cmd);

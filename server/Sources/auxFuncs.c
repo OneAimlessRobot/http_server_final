@@ -1,7 +1,49 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/http_req_parser.h"
 #include "../Includes/auxFuncs.h"
-
+#include <ctype.h>
+static char* reserved_characters[]={
+	"|",
+	">",
+	"<",
+	"\\",
+	"\""
+	":",
+	NULL
+};
+int url_decode(char *src, char *dst) {
+    int result=0;
+    int counter_src=0;
+    int counter_dst=0;
+    while (strnlen(&src[counter_src],PATHSIZE-1)) {
+        //printf("print!\n");
+	if (src[counter_src] == '%' && isxdigit(src[counter_src+1]) && isxdigit(src[counter_src+2])) {
+            //printf("print0!\n");
+	    sscanf(&src[counter_src],"%%%2hhx",&dst[counter_dst]);
+	    if(dst[counter_dst]>126){
+	        //printf("print1!\n");
+		dst[counter_dst] = '\0';
+	    	return 0;
+	    }
+	    counter_dst+=1;
+	    counter_src += 3;
+        }
+	else if(findInStringArrN(reserved_characters,&src[counter_src],1)>=0){
+		//printf("print2!\n");
+		dst[counter_dst] = '\0';
+    		return 0;
+	}
+	 else {
+            //printf("print3!\n");
+	    dst[counter_dst] = src[counter_src];
+	    counter_dst++;
+	    counter_src++;
+	}
+    }
+    dst[counter_dst] = '\0';
+    result=1;
+    return result;
+}
 double genRanddouble(double min, double max){
 
     if (max < min) {
@@ -152,6 +194,20 @@ int findInStringArr(char* arr[],char* nullTermStr){
 
 }
 
+int findInStringArrN(char* arr[],char* nullTermStr,int n){
+
+	
+	for (int i=0;arr[i];i++){
+		if(stringsAreEqualN(nullTermStr,arr[i],n)){
+
+			return i;
+		}
+		
+	}
+	return -1;
+
+}
+
 int get_string_arr_size(char*args[]){
 
 	int i;
@@ -264,4 +320,33 @@ int stringsAreEqual(char* s1,char*s2){
 	int stringsAreTheSame=!(strcmp(s1,s2));
 	return lengthIsTheSame && stringsAreTheSame;
 
+}
+int stringsAreEqualN(char* s1,char*s2,int n){
+
+	int lengthIsTheSame= (strnlen(s1,n)==strnlen(s2,n));
+	int stringsAreTheSame=!(strncmp(s1,s2,n));
+	return lengthIsTheSame && stringsAreTheSame;
+
+}
+
+int convert_http_encoded_thingie_into_actual_path(char* src){
+
+	char buff[PATHSIZE]={0};
+	char buff2[PATHSIZE]={0};
+	memcpy(buff,src,strnlen(src,sizeof(buff)-1));
+	//char* argv_from_src[ARGVMAX]={0};
+	//make_str_arr(buff,"/",argv_from_src,ARGVMAX);
+	//print_string_arr(logstream,argv_from_src);
+	//int length_of_str_arr=get_string_arr_size(argv_from_src);
+	//char* the_string=&(argv_from_src[length_of_str_arr-1][0]);
+	//int64_t str_pos_to_work_with=(int64_t)(the_string-((char*)buff));
+	int64_t str_pos_to_work_with=0;
+	int length_of_str_arr=0;
+	char* the_string=NULL;
+	fprintf(logstream,"original path: %s\nThe path we got: %s\nlength_of_str_arr: %d\nstr_pos_to_work_with: %ld\n",src,the_string,length_of_str_arr,str_pos_to_work_with);
+	int result= url_decode(buff,(char*)(buff2));
+	//char buff2[PATHSIZE+5]={0};
+	snprintf(src,strlen(src)+4,"\"%s\"",buff2);
+	fprintf(logstream,"we modified it to: %s\n",src);
+	return result;
 }

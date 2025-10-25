@@ -162,9 +162,9 @@ static int def(FILE* source, FILE* dest, int level)
 static int compressFile(char* target,int enable,struct comp_result* result){
 	memset(inpathbuff,0,sizeof(inpathbuff)-1);
 	snprintf(inpathbuff,sizeof(inpathbuff)-1,"%s%s",currDir,target);
+
 	if(enable){
 	memset(outpathbuff,0,sizeof(outpathbuff)-1);
-	snprintf(outpathbuff,sizeof(outpathbuff)-1,"%s%s",inpathbuff,servComp.fileExt);
 	memset(cmd,0,sizeof(inpathbuff)-1);
 
 	int fd=result->fd=open(outpathbuff,O_RDWR|O_CREAT|O_TRUNC,0777);
@@ -224,9 +224,8 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 
 int isDirectory(char* resourceTarget){
         char path[PATHSIZE]={0};
-	char* ptr= path;
+	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
-	
 DIR* directory=opendir(path);
 	if(directory){
 		closedir(directory);
@@ -238,6 +237,9 @@ DIR* directory=opendir(path);
 		
 	}
 	else{
+		if(logging){
+			fprintf(logstream,"Not a directory!!!: %s\n%s\n",path,strerror(errno));
+		}
 	errno=0;
 		return 0;
 	
@@ -249,17 +251,17 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	char* ptr= path;
 	int use_chunked_here=use_chunked;
 	u_int64_t fileSize=0;
+	int return_result=0;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
+
 	int we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
 	if(we_in_csgo_mode&&!is_directory){
-		
 		if(logging){
 			fprintf(logstream,"We in csgo mode!!!!\n");
 		}
 		path[strlen(path)-strlen(servComp.fileExt)-1]=0;
 		resourceTarget[strlen(resourceTarget)-strlen(servComp.fileExt)-1]=0;
 		if(logging){
-			fprintf(logstream,"We modified the path to: %s\n",path);
 			fprintf(logstream,"And modified the resource target to: %s\n",resourceTarget);
 		}
 	}
@@ -300,8 +302,8 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 			fprintf(logstream,"Enviando resposta 404...\n");
 			printf("Trying to delete %s...\n",outpathbuff);
 			remove(outpathbuff);
+			return_result=-1;
 		}
-		return -1;
 	}
 	
 	if(logging){
@@ -350,6 +352,7 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 			fillUpFileNotFoundHeader(headerBuff,fileSize,(const char*)get_mime_type(notFoundDefaultTarget));
 
 		}
+		return_result=-1;
 	}
 		int header_size=strlen(headerBuff);
 			if(send(c->socket,headerBuff,header_size,0)!=(header_size)){
@@ -388,6 +391,6 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	if(result.comp_enable){
 		remove(outpathbuff);
 	}
-	return 0;
+	return return_result;
 }
 

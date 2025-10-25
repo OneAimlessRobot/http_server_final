@@ -22,6 +22,7 @@
 #include <sys/types.h>
 //#define READ_FUNC_TO_USE readall
 #define READ_FUNC_TO_USE timedreadall
+
 static socklen_t socklenpointer;
 static int clientOn;
 static void initEmptyClient(client* result){
@@ -47,10 +48,8 @@ static int sendMediaData(client*c,char* buff,int compress,int is_directory){
 
 static void handleCurrentActivity(client*c,http_request req){
 	int compress=0;
-	
 	char targetinout[PATHSIZE]={0};
 	http_header header=*(req.header);
-
 	if(!strcmp(header.target,"/")){
 
 		strcpy(header.target,defaultLoginTarget);
@@ -61,13 +60,11 @@ static void handleCurrentActivity(client*c,http_request req){
 	if(findInStringArr(header.split_encoding,servComp.encodingExt)>=0){
 		compress=compression;
 	}
-	int is_directory=0;
-	if((is_directory=isDirectory(header.target))){
-		
+	int is_directory=isDirectory(header.target);
+	if(is_directory){
 		sendMediaData(c,generateDirListing(header.target),compress,is_directory);
 		deleteDirListingHTML();
 		return;
-	
 	}
 	switch(header.type){
 	case GET:
@@ -75,33 +72,20 @@ static void handleCurrentActivity(client*c,http_request req){
 
 
 				handleCustomGetReq(c,header.target,req.data,targetinout);
-				int result=sendMediaData(c,targetinout,compress,is_directory);
-				if(result<0){
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-				}
+				sendMediaData(c,targetinout,compress,is_directory);
 			}
 			else{
-				int result=sendMediaData(c,header.target,compress,is_directory);
-				if(result<0){
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-				}
-				
+				sendMediaData(c,header.target,compress,is_directory);
 			}
 	break;
 	case POST:
 			if(isCustomPostReq(header.target)){
 
 				handleCustomPostReq(c,header.target,req.data,targetinout);
-				int result=sendMediaData(c,targetinout,compress,is_directory);
-				if(result<0){
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-				}
+				sendMediaData(c,targetinout,compress,is_directory);
 			}
 			else{
-				int result=sendMediaData(c,header.target,compress,is_directory);
-				if(result<0){
-					send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-				}
+				sendMediaData(c,header.target,compress,is_directory);
 			}
 	break;
 	default:

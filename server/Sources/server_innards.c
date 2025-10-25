@@ -110,9 +110,9 @@ static void handleIncommingConnections(void){
 		if(logging){
                 fprintf(logstream,"accept error!!!!: %s\n",strerror(errno));
         	}
-		raise(SIGINT);
-		
-        	}
+			serverOn=0;
+			return;
+		}
 		currNumOfClients++;
 		setNonBlocking(client_socket);
 		getpeername(client_socket , (struct sockaddr*)&clientAddress , (socklen_t*)&socklenpointer);
@@ -130,7 +130,8 @@ static void handleIncommingConnections(void){
 			case 0:
 				
 				runClientConnection(client_socket);
-				exit(-1);
+				serverOn=0;
+				return;
 			default:
 				close(client_socket);
 				if(logging){

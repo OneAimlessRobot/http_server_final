@@ -31,5 +31,9 @@ int make_str_arr(char *s,char*delim, char *argv[ARGVMAX],int maxlen);
 
 
 int stringsAreEqual(char* s1,char* s2);
-
+char from_hex(char c);
+int url_decode(char *src, char *dst);
+int stringsAreEqualN(char* s1,char*s2,int n);
+int findInStringArrN(char* arr[],char* nullTermStr,int n);
+int convert_http_encoded_thingie_into_actual_path(char* src);
 #endif
