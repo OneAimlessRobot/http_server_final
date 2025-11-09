@@ -79,11 +79,11 @@ char* generateDirListing(char* dir){
 	dprintf(fd,"<!DOCTYPE html>"
 			"\n<html>"
 			"\n<head>"
-			"\n<base href=\"/\">"
-			"\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/webcrookedstuff/dir_listing_style.css\">"
-			"\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+			"\n<base href=''>"
+			"\n<link rel='stylesheet' type='text/css' href='/webcrookedstuff/dir_listing_style.css'>"
+			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 			"\n</head>"
-			"\n<body class=\"dir_listing\">");
+			"\n<body class='dir_listing'>");
 	if(!noRoot){
 
 		dprintf(fd,"\n<h1>DIRETORIA ROOT DO SERVER!!!!!</h1>");
@@ -94,12 +94,12 @@ char* generateDirListing(char* dir){
 				"<br>\n"
 				"<br>\n",dir);
 
-		dprintf(fd,"\n<br>\n<a class=\"ref_for_dir\" href='%s/..'>Prev</a><br><br><br>\n",dir);
+		dprintf(fd,"\n<br>\n<a class='ref_for_dir' href='%s/..'>Prev</a><br><br><br>\n",dir);
 
 	}
 	while(fgets(currListing,BUFFSIZE,fstream)){
 		currListing[strlen(currListing)-1]=0;
-		dprintf(fd,"<a class=\"%s\" href='%s/%s'>%s</a><br>\n",get_file_extension(currListing)?"ref_for_file":"ref_for_dir",dir,currListing,currListing);
+		dprintf(fd,"<a class='%s' href='%s/%s'>%s</a><br>\n",get_file_extension(currListing)?"ref_for_file":"ref_for_dir",dir,currListing,currListing);
 	
 	}
 	
