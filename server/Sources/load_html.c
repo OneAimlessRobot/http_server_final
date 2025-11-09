@@ -14,17 +14,6 @@
 #include "../Includes/session_ops.h"
 #include "../Includes/load_html.h"
 
-const char* clientHTMLEntryStyle="<style>\n"
-				"p:{\n"
-				"\n"
-				"font-size: 10px;\n"
-				"}\n"
-				"p.ADMIN:{\n"
-				"color: red;\n"
-				"\n"
-				"}\n"
-				"</style>\n";
-
 
 
 static char* tmpOne="/.tmp.html",* tmpTwo="/.tmp1.html";
@@ -84,22 +73,33 @@ char* generateDirListing(char* dir){
 
 		dir[pathsize-1]=0;
 	}
-	int noRoot=strcmp(dir,"/hackishwebstuff");
+	int noRoot=strcmp(dir,defaultTarget);
 	char* currListing=malloc(BUFFSIZE);
 	memset(currListing,0,BUFFSIZE);
-	dprintf(fd,"<!DOCTYPE html>\n<html>\n<head>\n<base href=''>\n</head>\n<body>");
+	dprintf(fd,"<!DOCTYPE html>"
+			"\n<html>"
+			"\n<head>"
+			"\n<base href=\"/\">"
+			"\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/webcrookedstuff/dir_listing_style.css\">"
+			"\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+			"\n</head>"
+			"\n<body class=\"dir_listing\">");
 	if(!noRoot){
 
 		dprintf(fd,"\n<h1>DIRETORIA ROOT DO SERVER!!!!!</h1>");
 	}
 	else{
-		dprintf(fd,"\n<br>\n<h2>INDEX OF: %s</h2><br>\n<br>\n",dir);
-		dprintf(fd,"\n<br>\n<a href='%s/..'>Prev</a><br><br><br>\n",dir);
-	
+		dprintf(fd,"\n<br>"
+				"\n<h2>INDEX OF: %s</h2>"
+				"<br>\n"
+				"<br>\n",dir);
+
+		dprintf(fd,"\n<br>\n<a class=\"ref_for_dir\" href='%s/..'>Prev</a><br><br><br>\n",dir);
+
 	}
 	while(fgets(currListing,BUFFSIZE,fstream)){
 		currListing[strlen(currListing)-1]=0;
-		dprintf(fd,"<a href='%s/%s'>%s</a><br>\n",dir,currListing,currListing);
+		dprintf(fd,"<a class=\"%s\" href='%s/%s'>%s</a><br>\n",get_file_extension(currListing)?"ref_for_file":"ref_for_dir",dir,currListing,currListing);
 	
 	}
 	
