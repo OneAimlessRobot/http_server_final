@@ -80,7 +80,7 @@ char* generateDirListing(char* dir){
 			"\n<html>"
 			"\n<head>"
 			"\n<base href=''>"
-			"\n<link rel='stylesheet' type='text/css' href='/webcrookedstuff/dir_listing_style.css'>"
+			"\n<link rel='stylesheet' type='text/css' href='/webcrookedstuff/.dir_listing_style.css'>"
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 			"\n</head>"
 			"\n<body class='dir_listing'>");
