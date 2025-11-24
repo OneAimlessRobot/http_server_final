@@ -250,9 +250,7 @@ void initializeServer(void){
 	sa.sa_flags=SA_RESTART|SA_NOCLDWAIT;
 
 	sigaction(SIGCHLD, &sa, NULL);
-		
 	signal(SIGINT,sigint_handler);
-	
 	memset(currDir,0,PATHSIZE);
 	getcwd(currDir,PATHSIZE);
 	printf("Currdir: %s\n",currDir);

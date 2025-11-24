@@ -1,3 +1,4 @@
+#include "../Includes/preprocessor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -63,7 +64,7 @@ int timedreadall(client* c,char* buff,u_int64_t size){
 			if ((unsigned char)peek_byte == 0x16) {
 				// It's probably HTTPS – drop the connection
 				send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-				fprintf(logstream,"Recebemos https!!!\nDropping!!!\n");
+				fprintf(logstream,"Recebemos https!!!\nNOT Dropping!!!\n");
 				raise(SIGINT);
 				return -1;
 			}

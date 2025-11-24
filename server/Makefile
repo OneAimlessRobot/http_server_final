@@ -1,5 +1,4 @@
 BINARY= server.exe
-LDLIBS= -pthread -lz
 INCLUDE= ./Includes .
 SOURCES= . ./Sources
 RESDIR= ./resources
@@ -8,6 +7,7 @@ CURRDIR=echo `pwd`
 
 #CC= clang
 CC= gcc
+LDLIBS := -pthread -lz -lcurl
 
 DEPFLAGS= -MP -MD
 
@@ -35,7 +35,7 @@ $(BINARY): $(OBJECTS)
 
 
 %.o:%.c
-	$(CC) -g  $(CFLAGS) -c -o $@ $< 
+	$(CC) -g  $(CFLAGS) -c -o $@ $<
 	echo $(CFLAGS)
 
 clean:

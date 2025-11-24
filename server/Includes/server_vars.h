@@ -2,23 +2,25 @@
 #define SERVER_VARS_H
 typedef struct compMethod{
 	char * cmdTool,*fileExt,*encodingExt;
-	
+
 
 }compMethod;
-extern int logging,beeping;
-extern int smalltimeoutsecs,smalltimeoutusecs;
-extern int bigtimeoutsecs,bigtimeoutusecs;
-extern int port;
-extern int compression;
-extern int compression_level;
-extern int use_fd;
-extern int use_chunked;
-extern int quota;
-extern int send_socket_size;
-extern int recv_socket_size;
-extern int session_time_usecs;
+extern int logging
+,beeping
+,smalltimeoutsecs,smalltimeoutusecs
+,bigtimeoutsecs,bigtimeoutusecs
+,port
+,compression
+,compression_level
+,use_fd
+,use_chunked
+,quota
+,send_socket_size,
+	recv_socket_size,
+	session_time_usecs,
+	serverOn;
+
 extern char currDir[PATHSIZE];
-extern int serverOn;
 extern FILE* logstream;
 extern compMethod br,gzip,deflateM,bzip2,servComp;
 
@@ -32,7 +34,6 @@ extern char* logfpath,* defaultTarget,
 *timeoutTarget,
 *incorrectLoginTarget;
 */
-
 
 extern char
 defaultTarget[FIELDSIZE],
