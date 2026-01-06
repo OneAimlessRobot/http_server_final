@@ -84,6 +84,7 @@ MimeEntry mime_types[] = {
     {".wad","application/x-doom-wad"},
     {".lst","text/plain"},
     {".db","text/plain"},
+    {".md","text/markdown"},
     {NULL, "application/octet-stream"} // Default fallback
 };
 
@@ -205,12 +206,10 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 
 
 	}
-	
 	}
 	else{
 	result->fd=open(inpathbuff,O_RDONLY,0777);
 	result->comp_enable=0;
-	
 	if(result->fd<0){
 		if(logging){
 			fprintf(logstream,"Invalid filepath: %s\n%s\n",inpathbuff,strerror(errno));
