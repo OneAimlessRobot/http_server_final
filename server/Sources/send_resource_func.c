@@ -166,8 +166,7 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 
 	if(enable){
 	memset(outpathbuff,0,sizeof(outpathbuff)-1);
-	memset(cmd,0,sizeof(inpathbuff)-1);
-
+	snprintf(outpathbuff,sizeof(inpathbuff)+1,"%s.%s",inpathbuff,servComp.fileExt);
 	int fd=result->fd=open(outpathbuff,O_RDWR|O_CREAT|O_TRUNC,0777);
 	if(result->fd<0){
 			if(logging){
@@ -184,7 +183,7 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 			result->comp_enable=0;
 			return -1;
 	}
-	snprintf(cmd,sizeof(cmd)-1,compressionCmd,servComp.cmdTool,compression,inpathbuff);
+	snprintf(cmd,sizeof(cmd)-1,compressionCmd,servComp.cmdTool,compression_level,inpathbuff);
 	printf("%s\n",cmd);
 	char* argv[ARGVMAX]={0};
 	makeargv(cmd,argv);
