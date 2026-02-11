@@ -12,69 +12,71 @@
 #include "../Includes/sock_ops.h"
 #include "../Includes/session_ops.h"
 #include "../Includes/load_html.h"
-
+#include <sys/wait.h>
 
 
 static char* tmpOne="/.tmp.html",* tmpTwo="/.tmp1.html";
 
-static char* tmpDir=NULL,*tmpDir2=NULL,*currSearchedDir=NULL;
+
+static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currSearchedDir[PATHSIZE*2]={0};
 
 static void generateDirListingPrimitive(char* path){
-	tmpDir=malloc(PATHSIZE);
-	memset(tmpDir,0,PATHSIZE);
-	tmpDir2=malloc(PATHSIZE);
-	memset(tmpDir2,0,PATHSIZE);
-	currSearchedDir=malloc(PATHSIZE);
-	memset(currSearchedDir,0,PATHSIZE);
-	snprintf(tmpDir,PATHSIZE,"%s%s",currDir,tmpOne);
-	snprintf(tmpDir2,PATHSIZE,"%s%s",currDir,tmpTwo);
+
 	int outfd= open(tmpDir,O_TRUNC|O_WRONLY|O_CREAT,0777);
-	char* cmd= malloc(PATHSIZE);
-	memset(cmd,0,PATHSIZE);
-	snprintf(currSearchedDir,PATHSIZE,"%s%s",currDir,path);
-	/*char the_path_directory[PATHSIZE]={0};
-	memcpy(the_path_directory,currSearchedDir,strlen(currSearchedDir));
-	int decoded=convert_http_encoded_thingie_into_actual_path(the_path_directory);
-	snprintf(cmd,PATHSIZE,"ls -1 %s > %s",the_path_directory,tmpDir);*/
-	snprintf(cmd,PATHSIZE,"ls -1 %s > %s",currSearchedDir,tmpDir);
-	system(cmd);
-	free(cmd);
+        snprintf(currSearchedDir,PATHSIZE*2-1,"%s%s",currDir,path);
+
+        char* args_cmd[]={"ls","-1", currSearchedDir,NULL};
+        pid_t pid_fork_find_cmd=fork();
+        switch(pid_fork_find_cmd){
+
+                case -1:
+                        close(outfd);
+                        exit(-1);
+                break;
+                case 0:
+                        dup2(outfd,STDOUT_FILENO);
+                        close(outfd);
+                        execvp(args_cmd[0],args_cmd);
+                break;
+                default:
+                        wait(NULL);
+                break;
+
+        }
+        chdir("..");
 	close(outfd);
+
 }
-
-
-
 char* generateDirListing(char* dir){
-	
-	generateDirListingPrimitive(dir);
-	int fd=	open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
-	
-	if(!tmpDir||!tmpDir2){
 
-		return NULL;
-	}
-	if(fd<0){
-		if(logging){
-		fprintf(logstream,"ERRO NAS DIRETORIAS %s\n",tmpDir2);
-		}
-		return NULL;
-	}
-	FILE* fstream;
-	if(!(fstream=fopen(tmpDir,"r"))){
-		if(logging){
-		fprintf(logstream,"ERRO NAS DIRETORIAS %s\n",tmpDir);
-		}
-		return NULL;
-	}
-	remove(tmpDir);
+	logging=1;
+        logstream=stderr;
+        snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
+        snprintf(tmpDir2,PATHSIZE*2-1,"%s%s",currDir,tmpTwo);
+        int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
+        if(fd<0){
+                if(logging){
+                fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",tmpDir2,strerror(errno));
+                }
+                return NULL;
+        }
+        generateDirListingPrimitive(dir);
+        FILE* fstream;
+        if(!(fstream=fopen(tmpDir,"r"))){
+                if(logging){
+                fprintf(logstream,"ERRO NAS DIRETORIAS %s\n",tmpDir);
+                }
+                close(fd);
+                return NULL;
+        }
+        remove(tmpDir);
+        char currListing[PATHSIZE*4-1]={0};
 	int pathsize=strlen(dir);
 	if(pathsize&&!strcmp(dir +pathsize-1,"/")){
 
 		dir[pathsize-1]=0;
 	}
 	int noRoot=strcmp(dir,defaultTarget);
-	char* currListing=malloc(BUFFSIZE);
-	memset(currListing,0,BUFFSIZE);
 	dprintf(fd,"<!DOCTYPE html>"
 			"\n<html>"
 			"\n<head>"
@@ -96,19 +98,15 @@ char* generateDirListing(char* dir){
 		dprintf(fd,"\n<br>\n<a class='ref_for_dir' href='%s/..'>Prev</a><br><br><br>\n",dir);
 
 	}
-	while(fgets(currListing,BUFFSIZE,fstream)){
+	while(fgets(currListing,PATHSIZE,fstream)){
 		currListing[strlen(currListing)-1]=0;
 		dprintf(fd,"<a class='%s' href='%s/%s'>%s</a><br>\n",get_file_extension(currListing)?"ref_for_file":"ref_for_dir",dir,currListing,currListing);
 	
 	}
 	
 	dprintf(fd,"</body>\n</html>\n");
-	free(currListing);
 	fclose(fstream);
 	close(fd);
-	free(tmpDir);
-	free(tmpDir2);
-	free(currSearchedDir);
 	return tmpTwo;
 
 }
