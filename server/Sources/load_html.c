@@ -17,6 +17,7 @@
 
 static char* tmpOne="/.tmp.html",* tmpTwo="/.tmp1.html";
 
+static const char* dir_listing_css_file_path= "/webcrookedstuff/.dir_listing_style.css";
 
 static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currSearchedDir[PATHSIZE*2]={0};
 
@@ -81,10 +82,10 @@ char* generateDirListing(char* dir){
 			"\n<html>"
 			"\n<head>"
 			"\n<base href=''>"
-			"\n<link rel='stylesheet' type='text/css' href='/webcrookedstuff/.dir_listing_style.css'>"
+			"\n<link rel='stylesheet' type='text/css' href='%s'>"
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 			"\n</head>"
-			"\n<body class='dir_listing'>");
+			"\n<body class='dir_listing'>",dir_listing_css_file_path);
 	if(!noRoot){
 
 		dprintf(fd,"\n<h1>DIRETORIA ROOT DO SERVER!!!!!</h1>");
