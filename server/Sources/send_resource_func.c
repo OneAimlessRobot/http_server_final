@@ -86,6 +86,8 @@ MimeEntry mime_types[] = {
     {".lst","text/plain"},
     {".db","text/plain"},
     {".md","text/markdown"},
+    {".php","application/x-httpd-php"},
+    {".pdf","application/pdf"},
     {NULL, "application/octet-stream"} // Default fallback
 };
 
