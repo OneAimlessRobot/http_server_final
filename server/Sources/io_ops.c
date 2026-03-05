@@ -116,9 +116,7 @@ int readall(client*c,char* buff,int64_t size){
 while(total<size){
         len=readsome(c->socket,buff+total,size-total);
 	if(len<=0){
-	
                 break;
-	
 	}
 	else{
 	total+=len;
@@ -127,7 +125,6 @@ while(total<size){
 	break;
 	}
 }
-	
 	if(len<0){
 	if (errno == EAGAIN || errno == EWOULDBLOCK) {
         	if(logging){
@@ -156,9 +153,7 @@ while(total<size){
 		raise(SIGINT);
 		return -1;
 	}
-	
 	}
-        
         return total;
 
 }
@@ -171,11 +166,11 @@ char chunkbuff[2 * BUFFSIZE + 10];  // Additional space for size header and CRLF
 int numread;
 int sent=0;
 while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
-    int truesize = snprintf(chunkbuff, sizeof(chunkbuff), "%x\r\n", numread);
+    int64_t truesize = snprintf(chunkbuff, sizeof(chunkbuff), "%x\r\n", numread);
     memcpy(chunkbuff + truesize, buff, numread);
     memcpy(chunkbuff + truesize + numread, "\r\n", 2);
 
-    int totalsent = 0;
+    int64_t totalsent = 0;
     while (totalsent < truesize + numread + 2) {
         errno=0;
 	sent = SEND_FUNC_TO_USE(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent);
@@ -187,13 +182,11 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
 		continue;
 	}
 	if(sent<0){
-	
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 if(logging){
 		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
                 }
 		break;
-	
         }
 	else if(errno==EPIPE){
 
@@ -214,15 +207,13 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
 		if(logging){
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
-	
 		raise(SIGINT);
 		return -1;
 		//continue;
-	
 	}
 	}
 	totalsent += sent;
-    	fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
+    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
     	}
 }
 
@@ -238,11 +229,11 @@ char chunkbuff[2 * BUFFSIZE + 10];  // Additional space for size header and CRLF
 int numread;
 int sent=0;
 while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
-    int truesize = snprintf(chunkbuff, sizeof(chunkbuff), "%x\r\n", numread);
+    int64_t truesize = snprintf(chunkbuff, sizeof(chunkbuff), "%x\r\n", numread);
     memcpy(chunkbuff + truesize, buff, numread);
     memcpy(chunkbuff + truesize + numread, "\r\n", 2);
 
-    int totalsent = 0;
+    int64_t totalsent = 0;
     while (totalsent < truesize + numread + 2) {
         errno=0;
 	sent = SEND_FUNC_TO_USE(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent);
@@ -254,7 +245,7 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 		continue;
 	}
 	if(sent<0){
-	
+
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 if(logging){
 		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
@@ -281,13 +272,12 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 		if(logging){
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
-	
 		raise(SIGINT);
 		break;
 	}
 	}
 	totalsent += sent;
-    	fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
+    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
 	}
 }
 
@@ -302,8 +292,7 @@ char buff[BUFFSIZE];
 int numread;
 int sent=0;
 while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
-    
-    int totalsent = 0;
+    int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;
 	sent = SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent);
@@ -315,7 +304,6 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 		continue;
 	}
 	if(sent<0){
-	
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 if(logging){
 		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
@@ -342,13 +330,12 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 		if(logging){
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
-	
 		raise(SIGINT);
 		break;
 	}
 	}
 	totalsent += sent;
-    	fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
+    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
     	}
 }
 
@@ -362,8 +349,7 @@ char buff[BUFFSIZE];
 int numread;
 int sent=0;
 while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
-    
-    int totalsent = 0;
+    int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;
 	sent = SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent);
@@ -375,7 +361,6 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
 		continue;
 	}
 	if(sent<0){
-	
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 if(logging){
 		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
@@ -402,13 +387,12 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
 		if(logging){
                 fprintf(logstream,"Outro erro qualquer!!!!!: %d %s\n",errno,strerror(errno));
                 }
-	
 		raise(SIGINT);
 		break;
 	}
 	}
 	totalsent += sent;
-    	fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
+    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
 	}
 }
 

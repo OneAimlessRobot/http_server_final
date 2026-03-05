@@ -20,7 +20,7 @@
 
 #define CHUNK 16384
 static char* compressionCmd = "%s -c -%d %s";
-static char* phpCmd = "php-cgi -f %s";
+static char* phpCmd = "php-cgi8.3 -f %s";
 static char inpathbuff[PATHSIZE*6];
 static char outpathbuff[PATHSIZE*6+10];
 static char cmd[PATHSIZE*30];
