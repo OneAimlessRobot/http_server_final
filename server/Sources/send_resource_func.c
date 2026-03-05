@@ -24,6 +24,7 @@ static char* phpCmd = "php-cgi8.3 -f %s";
 static char inpathbuff[PATHSIZE*6];
 static char outpathbuff[PATHSIZE*6+10];
 static char cmd[PATHSIZE*30];
+static char* query=NULL;
 typedef struct comp_result{
 	int comp_enable,fd;
 	FILE* stream;
@@ -132,10 +133,11 @@ static int phpFileProcess(char* target,int enable,struct comp_result* result){
 			return -1;
 	}
 	printf("Output file path: %s\n",outpathbuff);
+
 	snprintf(cmd,sizeof(cmd)-1,phpCmd,inpathbuff);
 	printf("%s\n",cmd);
-	char* argv[ARGVMAX]={0};
-	makeargv(cmd,argv);
+	char* argv[ARGVMAX]={"php-cgi8.3",NULL};
+	//makeargv(cmd,argv);
 	int pid=fork();
 	switch(pid){
 		case -1:
@@ -143,6 +145,11 @@ static int phpFileProcess(char* target,int enable,struct comp_result* result){
 			return -1;
 		case 0:
 			dup2(fd,1);
+			close(fd);
+			setenv("QUERY_STRING", query, 1);
+			setenv("REQUEST_METHOD", "GET", 1);
+			setenv("SCRIPT_FILENAME", inpathbuff, 1);
+			setenv("REDIRECT_STATUS", "200", 1);
 			execvp(argv[0],argv);
 			perror("exec na compressao\n");
 			exit(-1);
@@ -248,6 +255,18 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	int use_chunked_here=use_chunked;
 	u_int64_t fileSize=0;
 	int return_result=0;
+	query = strchr(resourceTarget, '?');
+	if (query) {
+	    *query = 0;
+	    query++;
+		if(logging){
+			fprintf(logstream,"PHP! Query string: %s\n!!!!",query);
+		}
+	}
+	else{
+
+		query="";
+	}
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 
 	int we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
@@ -268,14 +287,12 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 		}
 	}
 	comp_result result={0,-1,NULL};
-	
 	memcpy(path2,path,PATHSIZE);
 	if(logging){
 	fprintf(logstream,"Fetching %s...\n",path);
 	}
 	int notfound=0;
 	int (*the_func)(char*, int, struct comp_result*);
-	
 	char* ext=get_file_extension(path);
 	if(stringsAreEqual(ext,"php")){
 
