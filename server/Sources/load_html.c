@@ -14,6 +14,7 @@
 #include "../Includes/load_html.h"
 #include <sys/wait.h>
 
+static char* FREEE_ALL_APPS_COUNTDOWN = "<script src='https://keepandroidopen.org/banner.js'></script>";
 
 static char* tmpOne="/.tmp.html",* tmpTwo="/.tmp1.html";
 
@@ -85,7 +86,7 @@ char* generateDirListing(char* dir){
 			"\n<link rel='stylesheet' type='text/css' href='%s'>"
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 			"\n</head>"
-			"\n<body class='dir_listing'>",dir_listing_css_file_path);
+			"\n<body class='dir_listing'><br>\n<br>\n<br>\n<br>%s<br>\n<br>\n<br>\n<br>\n",dir_listing_css_file_path,FREEE_ALL_APPS_COUNTDOWN);
 	if(!noRoot){
 
 		dprintf(fd,"\n<h1>DIRETORIA ROOT DO SERVER!!!!!</h1>");
