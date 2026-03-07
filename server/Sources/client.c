@@ -9,6 +9,7 @@
 #include "../Includes/send_resource_func.h"
 #include "../Includes/load_logins.h"
 #include "../Includes/load_html.h"
+#include "../Includes/load_rss.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/sock_ops.h"
 #include "../Includes/session_ops.h"
@@ -64,6 +65,12 @@ static void handleCurrentActivity(client*c,http_request req){
 	if(is_directory){
 		sendMediaData(c,generateDirListing(header.target),compress,is_directory);
 		deleteDirListingHTML();
+		return;
+	}
+	int is_rss_feed=isRssFeed(header.target);
+	if(is_rss_feed){
+		sendMediaData(c,generateRss(header.target),compress,is_directory);
+		deleteRssXML();
 		return;
 	}
 	switch(header.type){

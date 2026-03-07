@@ -169,7 +169,7 @@ void initializeConstants(void){
 	strncpy(doubleSessionTarget,find_value_in_cfg_arr("defaultSessionTarget",cfgs),FIELDSIZE-1);
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
-
+	strncpy(mainRssFeed,find_value_in_cfg_arr("mainRssFeed",cfgs),FIELDSIZE-1);
 	int invalid_string_confs=!((stringsAreEqual(incorrectLoginTarget,NO_SUCH_SETTING)||
 				stringsAreEqual(incorrectLoginTarget,NO_SETTINGS_LOADED))&&
 				(stringsAreEqual(defaultTarget,NO_SUCH_SETTING)||

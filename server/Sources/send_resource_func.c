@@ -89,6 +89,9 @@ MimeEntry mime_types[] = {
     {".md","text/markdown"},
     {".php","application/x-httpd-php"},
     {".pdf","application/pdf"},
+    {".sh","application/x-sh"},
+    {".rss","application/rss+xml"},
+    {".xml","application/xml"},
     {NULL, "application/octet-stream"} // Default fallback
 };
 
@@ -228,7 +231,7 @@ int isDirectory(char* resourceTarget){
         char path[PATHSIZE]={0};
 	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
-DIR* directory=opendir(path);
+	DIR* directory=opendir(path);
 	if(directory){
 		closedir(directory);
 		if(logging){
@@ -236,7 +239,6 @@ DIR* directory=opendir(path);
 		}
 	errno=0;
 		return 1;
-		
 	}
 	else{
 		if(logging){
@@ -244,7 +246,26 @@ DIR* directory=opendir(path);
 		}
 	errno=0;
 		return 0;
-	
+	}
+
+}
+int isRssFeed(char* resourceTarget){
+        char path[PATHSIZE]={0};
+	char* ptr=path;
+	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
+	char* ext=get_file_extension(path);
+	if(stringsAreEqual(ext,"rss")){
+		if(logging){
+			fprintf(logstream,"RSS feed pedido!!: %s (RSS)\n",path);
+		}
+		return 1;
+	}
+	else{
+		if(logging){
+			fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
+		}
+		return 0;
+
 	}
 
 }

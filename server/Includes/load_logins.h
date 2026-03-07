@@ -1,7 +1,6 @@
 #ifndef LOAD_LOGINS_H
 #define LOAD_LOGINS_H
 typedef struct login{
-	
 	char* mem;
 	char* fields[2];
 

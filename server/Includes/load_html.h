@@ -3,10 +3,6 @@
 
 char* generateDirListing(char* dir);
 
-void generateClientListing(char targetinout[PATHSIZE]);
-
 void deleteDirListingHTML(void);
-
-void deleteClientListingHTML(void);
 
 #endif

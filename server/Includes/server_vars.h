@@ -41,6 +41,7 @@ defaultLoginTarget[FIELDSIZE],
 doubleSessionTarget[FIELDSIZE],
 incorrectLoginTarget[FIELDSIZE],
 notFoundDefaultTarget[FIELDSIZE],
+mainRssFeed[FIELDSIZE],
 * defaultVersion,
 * defaultMimetype;
 
