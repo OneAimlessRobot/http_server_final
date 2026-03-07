@@ -19,6 +19,8 @@ static char* tmpOne="/.tmp.rss",* tmpTwo="/.tmp1.rss";
 
 static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currFetchedRSS[PATHSIZE*2]={0};
 
+static char url_to_visit_buff[PATHSIZE*2]={0};
+
 void print_current_date(char date_buff[PATHSIZE*2]){
 
 	memset(date_buff,0,PATHSIZE*2);
@@ -86,12 +88,21 @@ char* generateRss(char* dir){
 
 		dir[pathsize-1]=0;
 	}
-	dprintf(fd,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-			"\n<rss version=\"2.0\">"
-			"\n<channel>"
-			"\n	<title>Main rss Feed of lena's attic</title>"
-			"\n	<description>Current state of main RSS feed of server</description>"
-			"\n	<generator>Lena'sAtticHTTP/1.0</generator>\n\n");
+	uint64_t obtained_link=(uint64_t)fgets(url_to_visit_buff,PATHSIZE,fstream);
+	if(obtained_link){
+		url_to_visit_buff[strlen(url_to_visit_buff)-1]=0;
+	}
+	dprintf(fd,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+			"<rss version=\"2.0\">\n"
+			"<channel>\n"
+			"	<title>Main rss Feed of lena's attic</title>\n"
+			"	<link>%s</link>\n"
+			"	<description>Current state of main RSS feed of server</description>\n"
+			"	<generator>Lena'sAtticHTTP/1.0</generator>\n\n\n",obtained_link?url_to_visit_buff:"No link was captured!");
+
+	if(!fgets(url_to_visit_buff,PATHSIZE,fstream)){
+		goto print_channel_end;
+	}
 
 	while(fgets(currListing,PATHSIZE,fstream)){
 		currListing[strlen(currListing)-1]=0;
@@ -145,10 +156,11 @@ char* generateRss(char* dir){
 		dprintf(fd,"</item>\n");
 		if(!fgets(currLink,PATHSIZE,fstream)){
 
-			break;
+			goto print_channel_end;
 		}
 	}
-	dprintf(fd,"</channel>\n</rss>\n");
+	print_channel_end:
+		dprintf(fd,"</channel>\n</rss>\n");
 	fclose(fstream);
 	close(fd);
 	return tmpTwo;
