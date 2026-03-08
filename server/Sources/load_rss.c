@@ -14,20 +14,68 @@
 #include "../Includes/load_rss.h"
 #include <sys/wait.h>
 
-
+static char* FREE_ALL_APPS_COUNTDOWN = "/webcrookedstuff/.keep_android_open_please.js";
+static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss";
 static char* tmpOne="/.tmp.rss",* tmpTwo="/.tmp1.rss";
+static char channel_string_buff[PATHSIZE*2]={0};
 
 static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currFetchedRSS[PATHSIZE*2]={0};
 
-static char url_to_visit_buff[PATHSIZE*2]={0};
+typedef enum {ATOM=0,XHTML,MAX_NAMESPACE_URI_ID}namespace_uri_id;
 
-void print_current_date(char date_buff[PATHSIZE*2]){
+static const char* uris_for_namespace_ids[MAX_NAMESPACE_URI_ID]={
+	"http://www.w3.org/2005/Atom",
+	"http://www.w3.org/1999/xhtml"
+};
 
-	memset(date_buff,0,PATHSIZE*2);
-        time_t t = time(NULL);
-        struct tm tm = *localtime(&t);
-        snprintf(date_buff,(PATHSIZE*2)-1,"%d-%02d-%02d %02d:%02d:%02d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
-}
+typedef enum {TITLE=0,DESC,CAT,DATE,LINK,MAX_TAG_ID}tag_id;
+
+static const char* names_for_tag_ids[MAX_TAG_ID]=
+				{"title",
+	         		"description",
+				"category",
+				"pubDate",
+				"link"};
+
+
+static const char* empty_contents_for_tag_ids[MAX_TAG_ID]=
+				{"No title here",
+	         		"No description here",
+				"No category here",
+				"Thu 1970-01-01 01:00:00 CET",
+				"about:blank"};
+
+
+typedef enum {CH_TITLE=0,CH_LINK,CH_LANGUAGE,CH_UPDATE_PERIOD,CH_UPDATE_FREQUENCY,CH_DESCRIPTION,CH_DATE,CH_GENERATOR,MAX_CH_TAG_ID}channel_tag_id;
+/*
+<language>en-us</language>
+ <sy:updatePeriod>hourly</sy:updatePeriod>
+ <sy:updateFrequency>1</sy:updateFrequency>1
+*/
+static const char* names_for_channel_tag_ids[MAX_CH_TAG_ID]=
+				{"title",
+	         		"link",
+				"language",
+				"atom:updatePeriod",
+
+				"atom:updateFrequency",
+				"description",
+				"pubDate",
+				"generator"};
+
+
+static const char* empty_contents_for_channel_tag_ids[MAX_CH_TAG_ID]=
+				{"No channel title here",
+	         		"about:blank",
+				"en",
+				"hourly",
+
+				"1",
+				"No description here",
+				"Thu 1970-01-01 01:00:00 CET",
+				"le generateur"};
+
+
 
 static void generateRssPrimitive(char* path){
 
@@ -56,6 +104,23 @@ static void generateRssPrimitive(char* path){
 	close(outfd);
 
 }
+
+int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const char* names_for_tag_ids[],const char* empty_contents_for_tag_ids[],uint64_t max_len){
+	char* argv[ARGVMAX]={0};
+	int num_tags=make_str_arr(the_listing,"|",argv,max_len);
+	if(num_tags<=0){
+
+		return -1;
+	}
+	argv[max_len-2][strlen(argv[max_len-2])-1]=0;
+	for(uint64_t i=0;i<max_len-1;i++){
+		dprintf(fd,"	<%s>%s</%s>\n",names_for_tag_ids[i],strlen(argv[i])?argv[i]:empty_contents_for_tag_ids[i],names_for_tag_ids[i]);
+	}
+	return 0;
+}
+
+
+
 char* generateRss(char* dir){
 
 	logging=1;
@@ -79,90 +144,42 @@ char* generateRss(char* dir){
                 return NULL;
         }
         remove(tmpDir);
-        char currListing[PATHSIZE*4-1]={0};
-	char currCat[PATHSIZE*4-1]={0};
-	char currLink[PATHSIZE*4-1]={0};
-	char dateBuff[PATHSIZE*2]={0};
 	int pathsize=strlen(dir);
 	if(pathsize&&!strcmp(dir +pathsize-1,"/")){
 
 		dir[pathsize-1]=0;
 	}
-	uint64_t obtained_link=(uint64_t)fgets(url_to_visit_buff,PATHSIZE,fstream);
-	if(obtained_link){
-		url_to_visit_buff[strlen(url_to_visit_buff)-1]=0;
+	skip_comments(fstream);
+	uint64_t obtained_channel=(uint64_t)fgets(channel_string_buff,PATHSIZE,fstream);
+	if(!obtained_channel){
+		goto end;
 	}
 	dprintf(fd,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-			"<rss version=\"2.0\">\n"
+			"<rss version=\"2.0\" xmlns:atom=\"%s\">\n"
+			"<xhtml:script xmlns:xhtml=\"%s\" type=\"application/javascript\"/>\n"
 			"<channel>\n"
-			"	<title>Main rss Feed of lena's attic</title>\n"
-			"	<link>%s</link>\n"
-			"	<description>Current state of main RSS feed of server</description>\n"
-			"	<generator>Lena'sAtticHTTP/1.0</generator>\n\n\n",obtained_link?url_to_visit_buff:"No link was captured!");
+			"<atom:link href=\"%s\" type=\"application/atom+xml\" />\n"
+			"<script src=\"%s\"></script>\n",
+			uris_for_namespace_ids[ATOM],uris_for_namespace_ids[XHTML],rss_feed_self_link,FREE_ALL_APPS_COUNTDOWN);
 
-	if(!fgets(url_to_visit_buff,PATHSIZE,fstream)){
-		goto print_channel_end;
+	int result_from_channel_printing=print_out_rss_line_to_fd(fd,channel_string_buff,names_for_channel_tag_ids,empty_contents_for_channel_tag_ids,MAX_CH_TAG_ID+1);
+	if(result_from_channel_printing<0){
+		goto channel_end;
 	}
+	skip_comments(fstream);
 
+	char currListing[PATHSIZE*2]={0};
 	while(fgets(currListing,PATHSIZE,fstream)){
-		currListing[strlen(currListing)-1]=0;
-		dprintf(fd,"<item>\n"
-			   "	<title>%s</title>\n"
-			   "	<description>%s</description>\n",currListing,currListing);
-
-		if(!fgets(currCat,PATHSIZE,fstream)){
-
-			goto print_end_item;
-		}
-		currCat[strlen(currCat)-1]=0;
-		if(!strlen(currCat)){
-
-			dprintf(fd,"	<category>No category here</category>\n");
-		}
-		else{
-			dprintf(fd,"	<category>%s</category>\n",currCat);
-		}
-
-
-		if(!fgets(dateBuff,PATHSIZE,fstream)){
-
-			goto print_end_item;
-		}
-		dateBuff[strlen(dateBuff)-1]=0;
-		if(!strlen(dateBuff)){
-
-			dprintf(fd,"	<pubDate>No date here</pubDate>\n");
-		}
-		else{
-			dprintf(fd,"	<pubDate>%s</pubDate>\n",dateBuff);
-		}
-
-
-		if(!fgets(currLink,PATHSIZE,fstream)){
-
-			goto print_end_item;
-		}
-		currLink[strlen(currLink)-1]=0;
-		if(!strlen(currLink)){
-
-			dprintf(fd,"	<link>about:blank</link>\n");
-		}
-		else{
-			dprintf(fd,"	<link>%s</link>\n",currLink);
-		}
-
-
-	print_end_item:
+		dprintf(fd,"<item>\n");
+		print_out_rss_line_to_fd(fd, currListing,names_for_tag_ids,empty_contents_for_tag_ids,MAX_TAG_ID+1);
 		dprintf(fd,"</item>\n");
-		if(!fgets(currLink,PATHSIZE,fstream)){
-
-			goto print_channel_end;
-		}
+		skip_comments(fstream);
 	}
-	print_channel_end:
+	channel_end:
 		dprintf(fd,"</channel>\n</rss>\n");
-	fclose(fstream);
-	close(fd);
+	end:
+		fclose(fstream);
+		close(fd);
 	return tmpTwo;
 
 }

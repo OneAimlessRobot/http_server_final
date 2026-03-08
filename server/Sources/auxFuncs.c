@@ -107,7 +107,6 @@ void freeStrArr(char** arr,int size){
 		return;
 
 	}
-	
 	for(int i=0;i<size;i++){
 		if(arr[i]){
 		free(arr[i]);
@@ -179,16 +178,14 @@ int makeargv(char *s, char *argv[ARGVMAX]) {
     return ntokens;
 }
 
-
 int findInStringArr(char* arr[],char* nullTermStr){
 
-	
+
 	for (int i=0;arr[i];i++){
 		if(stringsAreEqual(nullTermStr,arr[i])){
 
 			return i;
 		}
-		
 	}
 	return -1;
 
@@ -196,13 +193,12 @@ int findInStringArr(char* arr[],char* nullTermStr){
 
 int findInStringArrN(char* arr[],char* nullTermStr,int n){
 
-	
+
 	for (int i=0;arr[i];i++){
 		if(stringsAreEqualN(nullTermStr,arr[i],n)){
 
 			return i;
 		}
-		
 	}
 	return -1;
 
@@ -218,7 +214,6 @@ int get_string_arr_size(char*args[]){
 void print_string_arr(FILE* fstream,char * args[]){
 
 	for (int i=0;args[i];i++){
-		
 		fprintf(fstream,"%d: <%s>\n",i,args[i]);
 
 	}
@@ -236,13 +231,11 @@ void splitString(char *input, char *delimiter, char *pair[2]) {
 
         // Allocate memory for the first part and copy the substring
         pair[0] = input;
-        
+
 	pair[0][firstPartLength] = '\0';
 
         // Allocate memory for the second part and copy the remaining string
         pair[1] = delimiterPos+strlen(delimiter);
-	
-	
 	} else {
         // If the delimiter is not found, set the second part to NULL
         pair[0] = input;
@@ -305,7 +298,6 @@ void replaceStringCharacter(char *s,char dirty,char wantthisoneinstead){
 	int size=strlen(s);
 	for(int i=0;i<size;i++){
 		if(s[i]==dirty){
-			
 			s[i]=wantthisoneinstead;
 
 		}
@@ -350,3 +342,41 @@ int convert_http_encoded_thingie_into_actual_path(char* src){
 	fprintf(logstream,"we modified it to: %s\n",src);
 	return result;
 }
+
+void skip_comments(FILE* fp){
+
+	int curr_char=0;
+
+	skip_comment:
+	while(isspace((curr_char=fgetc(fp)))&&curr_char!=EOF);
+	ungetc(curr_char,fp);
+
+	if(curr_char==';'){
+	//
+	 /*result=fgets(buff,strlen(COMMENT_STRING)+1,fp);
+	 buff[strlen(COMMENT_STRING)]=0;
+	 if(!feof(fp)&&strings_are_equal(buff,COMMENT_STRING)){
+	         printf("\nComment string: %s\nString lida: '%s'\n",COMMENT_STRING,buff);
+	         //printf("\nComment string: %s\n",COMMENT_STRING);
+	         for(size_t i=strlen(COMMENT_STRING);i>0;i--){
+	                 ungetc(buff[i-1],fp);
+	         }
+	         while(((curr_char=fgetc(fp))!='\n')&&curr_char!=EOF);
+	         ungetc(curr_char,fp);
+
+	 }*/
+	 if((curr_char=fgetc(fp))!=EOF){
+	         ungetc(curr_char,fp);
+	         while(((curr_char=fgetc(fp))!='\n')&&curr_char!=EOF);
+	         ungetc(curr_char,fp);
+	 }
+
+	}
+
+	while(isspace((curr_char=fgetc(fp)))&&curr_char!=EOF);
+	ungetc(curr_char,fp);
+	if(curr_char==';'){
+	 goto skip_comment;
+	}
+}
+

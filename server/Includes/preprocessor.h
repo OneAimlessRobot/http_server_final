@@ -21,6 +21,7 @@
 #include <netinet/in.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 #include "buffSizes.h"
 #include "client.h"
 #include "server_vars.h"
