@@ -152,6 +152,17 @@ int64_t min(int64_t arg1, int64_t arg2){
 
 
 }
+int64_t max(int64_t arg1, int64_t arg2){
+
+	if(arg1>arg2){
+
+		return arg1;
+
+	}
+	return arg2;
+
+
+}
 char *get_file_extension(const char *path) {
     char *extension = strrchr(path, '.');
 

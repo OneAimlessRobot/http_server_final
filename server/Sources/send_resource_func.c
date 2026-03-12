@@ -254,11 +254,20 @@ int isRssFeed(char* resourceTarget){
 	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	char* ext=get_file_extension(path);
-	if(stringsAreEqual(ext,"rss")){
-		if(logging){
-			fprintf(logstream,"RSS feed pedido!!: %s (RSS)\n",path);
+	if(ext){
+		if(stringsAreEqual(ext,"rss")){
+			if(logging){
+				fprintf(logstream,"RSS feed pedido!!: %s (RSS)\n",path);
+			}
+			return 1;
 		}
-		return 1;
+		else{
+			if(logging){
+				fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
+			}
+			return 0;
+
+		}
 	}
 	else{
 		if(logging){
@@ -315,10 +324,16 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	int notfound=0;
 	int (*the_func)(char*, int, struct comp_result*);
 	char* ext=get_file_extension(path);
-	if(stringsAreEqual(ext,"php")){
+	if(ext){
+		if(stringsAreEqual(ext,"php")){
 
-		the_func=phpFileProcess;
+			the_func=phpFileProcess;
 
+		}
+		else{
+
+			the_func=compressFile;
+		}
 	}
 	else{
 

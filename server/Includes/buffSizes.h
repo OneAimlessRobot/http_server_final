@@ -3,7 +3,7 @@
 
 #define BUFFSIZE (5*1024)
 #define READBUFFSIZE 100
-#define PATHSIZE 1024
+#define PATHSIZE 4096
 #define FIELDSIZE 1024
 #define PAGE_DATA_SIZE 5000
 #define ARGVMAX 100
