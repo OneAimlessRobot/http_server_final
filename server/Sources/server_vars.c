@@ -43,7 +43,7 @@ compMethod br = {"brotli","br"," br"},
 compMethod servComp;
 
 
-char defaultTarget[FIELDSIZE]={0};
+char defaultTarget[]={0};
 char defaultLoginTarget[FIELDSIZE]={0};
 char incorrectLoginTarget[FIELDSIZE]={0};
 char doubleSessionTarget[FIELDSIZE]={0};

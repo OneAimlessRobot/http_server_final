@@ -1,6 +1,7 @@
 #ifndef AUXFUNCS_H
 #define AUXFUNCS_H
 
+
 char* randStr(int size);
 char** randStrArr(int sizeOfStrs,int size);
 
@@ -34,6 +35,7 @@ int stringsAreEqual(char* s1,char* s2);
 char from_hex(char c);
 int url_decode(char *src, char *dst);
 int stringsAreEqualN(char* s1,char*s2,int n);
+
 int findInStringArrN(char* arr[],char* nullTermStr,int n);
 int convert_http_encoded_thingie_into_actual_path(char* src);
 void skip_comments(FILE* fp);

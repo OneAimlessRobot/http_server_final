@@ -331,6 +331,13 @@ int stringsAreEqualN(char* s1,char*s2,int n){
 	return lengthIsTheSame && stringsAreTheSame;
 
 }
+int stringsAreEqualTheFinalString(char* s1,char*s2,int n){
+
+	int lengthIsTheSame= (strnlen(s1,n)==strnlen(s2,n));
+	int stringsAreTheSame=!(strncmp(s1,s2,n));
+	return lengthIsTheSame && stringsAreTheSame;
+
+}
 
 int convert_http_encoded_thingie_into_actual_path(char* src){
 

@@ -65,11 +65,12 @@ static char* tmpOne="/.tmp.html",* tmpTwo="/.tmp1.html";
 
 static const char* dir_listing_css_file_path= "/webcrookedstuff/.dir_listing_style.css";
 
-static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currSearchedDir[PATHSIZE*2]={0};
+static char tmpDir[PATHSIZE*2]={0};
+static char tmpDir2[PATHSIZE*2]={0};
+static char currSearchedDir[PATHSIZE*2]={0};
 static char resolved_abs_path[PATH_MAX]={0};
 static char resolved_rel_path[PATH_MAX]={0};
-static char resolved_tmp_one_path[PATH_MAX]={0};
-static char resolved_tmp_two_path[PATH_MAX]={0};
+static char resolved_default_path[PATH_MAX]={0};
 static char header_buff[4+(PATHSIZE+4)*CATEGORY_ID_MAX]={0};
 static char* curr_listing_argv[ARGVMAX]={0};
 static char* header_argv[ARGVMAX]={0};
@@ -86,7 +87,6 @@ void generate_header_sizes_data(FILE* fstream){
 		makeargv(curr_listing_buff, header_argv);
 		for(uint32_t j=0;j<NUM_OF_FIELDS_TO_PRINT;j++){
 			uint32_t i=print_order[j];
-			//printf("The indexes: i= %u, j= %u\nheader_argv[i]= %s\n",i,j,header_argv[i]);
 			category_curr_sizes[i]=header_argv[i]?strnlen(header_argv[i],PATHSIZE-1):0;
 			if(category_curr_sizes[i]>category_max_sizes[i]){
 				category_max_sizes[i]=max(strlen(category_names[i]),min(PATHSIZE,category_curr_sizes[i]));
@@ -104,16 +104,7 @@ void print_header(int fd){
 		uint32_t i=print_order[j];
 		char curr_printed_category_header_buff[category_max_sizes[i]+PATHSIZE];
 		memset(curr_printed_category_header_buff,0,category_max_sizes[i]+PATHSIZE);
-		/*char spaces_buff[PATHSIZE*strlen("&nbsp")];
-		memset(spaces_buff,0,PATHSIZE*strlen("&nbsp"));
-		char* ptr=spaces_buff;
-//		printf("%lu, %d, %lu, %s\n",category_max_sizes[FILE_NAME]-strlen(curr_listing_argv[FILE_NAME]),category_max_sizes[FILE_NAME],strlen(curr_listing_argv[FILE_NAME]),curr_listing_argv[FILE_NAME]);
-		for(uint32_t k=0;k<category_max_sizes[i]-strlen(category_names[i]);k++){
-
-			ptr+=snprintf(ptr,PATHSIZE-1," ");
-
-		}*/
-		snprintf(curr_printed_category_header_buff,PATHSIZE,"| %s %d  ",category_names[i],category_max_sizes[i]);
+		snprintf(curr_printed_category_header_buff,PATHSIZE,"| %s  ",category_names[i]);
 		curr_ptr+=snprintf(curr_ptr,PATHSIZE-1,"%s",curr_printed_category_header_buff);
 
 	}
@@ -128,16 +119,6 @@ void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir){
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
 		makeargv(curr_listing_buff, curr_listing_argv);
-		/*char spaces_buff[PATHSIZE*strlen("&nbsp")];
-		memset(spaces_buff,0,PATHSIZE*strlen("&nbsp"));
-		char* ptr=spaces_buff;
-//		printf("%lu, %d, %lu, %s\n",category_max_sizes[FILE_NAME]-strlen(curr_listing_argv[FILE_NAME]),category_max_sizes[FILE_NAME],strlen(curr_listing_argv[FILE_NAME]),curr_listing_argv[FILE_NAME]);
-		for(uint32_t i=0;i<category_max_sizes[FILE_NAME]-strlen(curr_listing_argv[FILE_NAME]);i++){
-
-			ptr+=snprintf(ptr,PATHSIZE-1,"&nbsp");
-
-		}
-		*/
 		char full_path_buff_to_test[PATH_MAX*4]={0};
 		snprintf(full_path_buff_to_test,PATH_MAX*3-1,"%s/%s",dir,curr_listing_argv[FILE_NAME]);
 		int is_directory_this_one=isDirectory(full_path_buff_to_test);
@@ -203,8 +184,7 @@ static void generateDirListingPrimitive(char* path){
                 break;
 
         }
-        chdir("..");
-	close(outfd);
+        close(outfd);
 
 }
 char* generateDirListing(char* dir){
@@ -213,9 +193,10 @@ char* generateDirListing(char* dir){
         logstream=stderr;
 
 	resolve_canonical_path_relative(dir,resolved_rel_path);
-	int pathsize0=strlen(defaultTarget);
+	resolve_canonical_path_relative(defaultTarget,resolved_default_path);
 	int pathsize=strlen(dir);
 	int pathsize2=strlen(resolved_rel_path);
+	int pathsize3=strlen(resolved_default_path);
 	if(pathsize&&!strcmp(dir +pathsize-1,"/")){
 
 		dir[pathsize-1]=0;
@@ -224,33 +205,34 @@ char* generateDirListing(char* dir){
 
 		resolved_rel_path[pathsize2-1]=0;
 	}
-	char* test_str1=&resolved_rel_path[pathsize0+1];
-	char* test_str2="..";
-	int noRoot=strcmp(resolved_rel_path,defaultTarget)/*||!stringsAreEqual(test_str1,test_str2)*/;
+	int outOfRoot=strncmp(resolved_rel_path,resolved_default_path,pathsize3)&&pathsize2<pathsize3;
+	if(outOfRoot){
 
-        snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
-	resolve_canonical_path(tmpDir,resolved_tmp_one_path);
+		dir=defaultTarget;
+		pathsize2=pathsize3;
+	}
+        int atRoot=(pathsize2==pathsize3);
+	snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
 
         snprintf(tmpDir2,PATHSIZE*2-1,"%s%s",currDir,tmpTwo);
-	resolve_canonical_path(tmpDir2,resolved_tmp_two_path);
 
-        int fd= open(resolved_tmp_two_path,O_TRUNC|O_WRONLY|O_CREAT,0777);
+        int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
         if(fd<0){
                 if(logging){
                 fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",tmpDir2,strerror(errno));
                 }
                 return NULL;
         }
-        generateDirListingPrimitive(noRoot?dir:defaultTarget);
+        generateDirListingPrimitive(dir);
         FILE* fstream;
-        if(!(fstream=fopen(resolved_tmp_one_path,"r"))){
+        if(!(fstream=fopen(tmpDir,"r"))){
                 if(logging){
                 fprintf(logstream,"ERRO NAS DIRETORIAS %s\n",tmpDir);
                 }
                 close(fd);
                 return NULL;
         }
-        remove(resolved_tmp_one_path);
+        remove(tmpDir);
 	dprintf(fd,"<!DOCTYPE html>"
 			"\n<html>"
 			"\n<head>"
@@ -259,21 +241,23 @@ char* generateDirListing(char* dir){
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
 			"\n</head>"
 			"\n<body class='%s'>\n<br>%s\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN);
-	dprintf(fd,"\n<br>"
-			"\n<h1 class='%s'><span>INDEX OF: %s</span></h2>\n<h1 class='%s'><span>INDEX  2 OF: %s</span></h1>"
-			"<br>dir: %s\n"
-			"<br>test str: %s\n"
-			"<br>Strlen of dir: %lu\n"
-			"<br>Strlen of test str: %lu\n"
-			"<br>Result of stringsAreEqual: %d\n"
-			"<br>Result of stringsAreEqualN with length 4: %d<br><br>\n",SITE_PATH_HEADER_CLASS,dir,PAGE_DEBUG_HEADER_CLASS,&dir[pathsize0],test_str1,test_str2,strlen(test_str1),strlen(test_str2),stringsAreEqual(test_str1,test_str2),stringsAreEqualN(test_str1,test_str2,4));
-	if(!noRoot){
+	if(atRoot){
 
 		dprintf(fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>",SITE_PATH_HEADER_CLASS);
 	}
 	else{
-
-		dprintf(fd,"\n<a class='%s' href='%s/..'>Prev</a><br><br><br>\n",DIR_REF_CLASS,dir);
+		char prev_dir_rel_path[PATHSIZE*2]={0};
+		char prev_dir_to_use[PATHSIZE*2]={0};
+		snprintf(prev_dir_rel_path,PATHSIZE*2-1,"%s",dir);
+		snprintf(prev_dir_to_use,PATHSIZE*2-1,"%s",dir);
+		char* argv_for_slashes[ARGVMAX]={0};
+		uint32_t num_tokens=make_str_arr(prev_dir_rel_path,"/",argv_for_slashes,ARGVMAX)-1;
+		uint32_t wanted_slash_idx=num_tokens-1;
+		uint64_t ptr_to_path_num=(uint64_t)prev_dir_rel_path;
+		uint64_t ptr_to_wanted_slash_num=(uint64_t)argv_for_slashes[wanted_slash_idx];
+		uint64_t subtraction_result=ptr_to_wanted_slash_num-ptr_to_path_num;
+		prev_dir_to_use[subtraction_result-1]=0;
+		dprintf(fd,"\n<a class='%s' href='%s'>Prev</a><br><br><br>\n",DIR_REF_CLASS,prev_dir_to_use);
 
 	}
 	generate_header_sizes_data(fstream);
