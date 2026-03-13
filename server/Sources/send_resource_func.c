@@ -86,7 +86,7 @@ MimeEntry mime_types[] = {
     {".wad","application/x-doom-wad"},
     {".lst","text/plain"},
     {".db","text/plain"},
-    {".md","text/markdown"},
+    {".md","text/plain"},
     {".php","application/x-httpd-php"},
     {".pdf","application/pdf"},
     {".sh","application/x-sh"},
