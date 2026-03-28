@@ -6,10 +6,12 @@
 #include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/client.h"
-#include "../Includes/send_resource_func.h"
 #include "../Includes/load_logins.h"
 #include "../Includes/load_html.h"
 #include "../Includes/load_rss.h"
+#include "../Includes/php_proxy.h"
+#include "../Includes/rcon_proxy.h"
+#include "../Includes/send_resource_func.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/sock_ops.h"
 #include "../Includes/session_ops.h"
@@ -73,6 +75,12 @@ static void handleCurrentActivity(client*c,http_request req){
 		deleteRssXML();
 		return;
 	}
+	int is_php_result=isPHPRequest(header.target);
+	if(is_php_result){
+		sendMediaData(c,generatePHPResult(header.target),compress,is_directory);
+		deletePHPResult();
+		return;
+	}
 	switch(header.type){
 	case GET:
 			if(isCustomGetReq(header.target)){
@@ -87,8 +95,13 @@ static void handleCurrentActivity(client*c,http_request req){
 	break;
 	case POST:
 			if(isCustomPostReq(header.target)){
-
-				handleCustomPostReq(c,header.target,req.data,targetinout);
+				int is_rcon_result=isRconRequest(header.target);
+				if(is_rcon_result){
+					handleCustomPostReq(c,header.target,req.data,targetinout);
+					sendMediaData(c,generateRconResult(header.target,targetinout),compress,is_directory);
+					deleteRconResult();
+					return;
+				}
 				sendMediaData(c,targetinout,compress,is_directory);
 			}
 			else{

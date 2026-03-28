@@ -13,6 +13,7 @@
 #include "../Includes/sock_ops.h"
 #include "../Includes/session_ops.h"
 #include "../Includes/load_html.h"
+#include <dirent.h>
 #include <limits.h>
 #include <sys/wait.h>
 
@@ -77,8 +78,32 @@ static char* header_argv[ARGVMAX]={0};
 static char curr_listing_buff[4+(PATHSIZE+8)*CATEGORY_ID_MAX]={0};
 
 
+int isDirectory(char* resourceTarget){
+        char path[PATHSIZE]={0};
+	char* ptr=path;
+	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
+	DIR* directory=opendir(path);
+	if(directory){
+		closedir(directory);
+		if(logging){
+			fprintf(logstream,"Diretoria encontrada!!: %s\n",path);
+		}
+	errno=0;
+		return 1;
+	}
+	else{
+		if(logging){
+			fprintf(logstream,"Not a directory!!!: %s\n%s\n",path,strerror(errno));
+		}
+	errno=0;
+		return 0;
+	}
 
-void generate_header_sizes_data(FILE* fstream){
+}
+
+
+
+static void generate_header_sizes_data(FILE* fstream){
 
 	memset(curr_listing_buff,0,PATHSIZE);
 	fgets(curr_listing_buff,PATHSIZE,fstream);
@@ -96,7 +121,7 @@ void generate_header_sizes_data(FILE* fstream){
 	}
 
 }
-void print_header(int fd){
+static void print_header(int fd){
 
 	memset(header_buff,0,4+(PATHSIZE+4)*CATEGORY_ID_MAX);
 	char* curr_ptr=header_buff;
@@ -111,7 +136,7 @@ void print_header(int fd){
 	dprintf(fd,"\n<h2 class='%s'><span>%s|</span></h2>\n",DIR_LISTING_HEADER_CLASS,header_buff);
 
 }
-void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir){
+static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir){
 
 
 	memset(curr_listing_buff,0,PATHSIZE);
@@ -128,7 +153,7 @@ void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir){
 	}
 
 }
-void resolve_canonical_path(char raw_path[PATH_MAX],char dst_for_resolved_path[PATH_MAX]){
+static void resolve_canonical_path(char raw_path[PATH_MAX],char dst_for_resolved_path[PATH_MAX]){
 
 	if (realpath(raw_path, dst_for_resolved_path))
 	{
@@ -141,7 +166,7 @@ void resolve_canonical_path(char raw_path[PATH_MAX],char dst_for_resolved_path[P
                 }
 	}
 }
-void resolve_canonical_path_relative(char raw_path[PATH_MAX],char dst_for_resolved_path[PATH_MAX]){
+static void resolve_canonical_path_relative(char raw_path[PATH_MAX],char dst_for_resolved_path[PATH_MAX]){
 	char new_raw_path[PATH_MAX]={0};
 	snprintf(new_raw_path,PATH_MAX-1,".%s",raw_path);
 

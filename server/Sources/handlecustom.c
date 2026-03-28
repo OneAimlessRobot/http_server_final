@@ -18,7 +18,7 @@ static int currvent=0;
 
 char* customgetreqs[]={WRITE_VENT_REQ,SEE_FILES_REQ,SIGN_IN_REQ,NULL};
 
-char* custompostreqs[]={WRITE_VENT_REQ,SIGN_IN_REQ,SEE_CLIENTS_REQ,SIGN_OUT_REQ,KICK_CLIENT_REQ,WRITE_VIDEO_REQ,NULL};
+char* custompostreqs[]={WRITE_VENT_REQ,SIGN_IN_REQ,SEE_CLIENTS_REQ,SIGN_OUT_REQ,KICK_CLIENT_REQ,WRITE_VIDEO_REQ,RCON_REQUEST,NULL};
 
 
 static void handleVentReq(char* fieldmess,char targetinout[PATHSIZE]){
@@ -51,8 +51,27 @@ static void handleVentReq(char* fieldmess,char targetinout[PATHSIZE]){
 	currvent++;
 }
 
+static void handleRconRequest(char* fieldmess,char targetinout[PATHSIZE]){
+	printf("Eis o rcon!!!!\n");
+	char* argv2[ARGVMAX]={0};
+	int size=makeargvdelim(fieldmess,"&",argv2,ARGVMAX);
+	char* the_ptr=targetinout;
+	for(int i=0;i<size;i++){
+		char* pair[2]={0};
+		splitString(argv2[i],"=",pair);
+		if(!strcmp(pair[0],"addr")||
+				!strcmp(pair[0],"port")||
+				!strcmp(pair[0],"rcon_pass")||
+				!strcmp(pair[0],"cmd")){
+		replaceStringCharacter(pair[1],'+',' ');
+		the_ptr+=snprintf(the_ptr,PATHSIZE-1,"%s%s",pair[1],(i==(size-2))?" ":"|");
+		}
+	}
+	printf("Eis o rcon request!!!\ntargetinout = \"%s\"\n",targetinout);
+}
+
 static void handleVideoPostReq(void){
-	
+
 	printf("Video posted!!!!\n");
 
 }
@@ -103,13 +122,12 @@ void handleCustomGetReq(client* c,char*target,char* body,char targetinout[PATHSI
 	
 }
 void handleCustomPostReq(client*c,char* target,char* contents,char targetinout[PATHSIZE]){
+	printf("custom post request!!\n");
 	if(!strcmp(target,WRITE_VENT_REQ)){
 		handleVentReq(contents,targetinout);
-		
 	}
 	else if(!strcmp(target,SIGN_IN_REQ)){
 		handleLogin(c,contents,targetinout);
-		
 	}
 	else if(!strcmp(target,SEE_CLIENTS_REQ)){
 		//generateClientListing(targetinout);
@@ -120,8 +138,11 @@ void handleCustomPostReq(client*c,char* target,char* contents,char targetinout[P
 
 	}
 	else if(!strcmp(target,WRITE_VIDEO_REQ)){
-		
 		handleVideoPostReq();
+
+	}
+	else if(!strcmp(target,RCON_REQUEST)){
+		handleRconRequest(contents,targetinout);
 
 	}
 	/*else if(!strcmp(nulltermedtarget,writeventreq)){

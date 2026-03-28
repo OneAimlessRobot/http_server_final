@@ -8,6 +8,7 @@
 #define KICK_CLIENT_REQ "/kickclient"
 #define WRITE_VIDEO_REQ "/writevideo"
 #define SEE_CLIENTS_REQ "/seeclients"
+#define RCON_REQUEST "/rcon.rcon"
 
 extern char* customgetreqs[];
 

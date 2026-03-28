@@ -76,6 +76,35 @@ static const char* empty_contents_for_channel_tag_ids[MAX_CH_TAG_ID]=
 				"le generateur"};
 
 
+int isRssFeed(char* resourceTarget){
+        char path[PATHSIZE]={0};
+	char* ptr=path;
+	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
+	char* ext=get_file_extension(path);
+	if(ext){
+		if(stringsAreEqual(ext,"rss")){
+			if(logging){
+				fprintf(logstream,"RSS feed pedido!!: %s (RSS)\n",path);
+			}
+			return 1;
+		}
+		else{
+			if(logging){
+				fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
+			}
+			return 0;
+
+		}
+	}
+	else{
+		if(logging){
+			fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
+		}
+		return 0;
+
+	}
+
+}
 
 static void generateRssPrimitive(char* path){
 
@@ -105,7 +134,7 @@ static void generateRssPrimitive(char* path){
 
 }
 
-int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const char* names_for_tag_ids[],const char* empty_contents_for_tag_ids[],uint64_t max_len){
+static int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const char* names_for_tag_ids[],const char* empty_contents_for_tag_ids[],uint64_t max_len){
 	char* argv[ARGVMAX]={0};
 	int num_tags=make_str_arr(the_listing,"|",argv,max_len);
 	if(num_tags<=0){

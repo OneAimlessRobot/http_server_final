@@ -8,7 +8,7 @@ typedef struct http_header_field{
 }http_header_field;
 
 typedef struct http_header{
-	
+
 	http_req_type type;
 	char target[FIELDSIZE],
 		version[FIELDSIZE],
@@ -34,7 +34,6 @@ typedef struct http_request{
 	http_header* header;
 	u_int64_t data_size;
 	char* data;
-	
 
 
 }http_request;

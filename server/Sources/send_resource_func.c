@@ -4,6 +4,11 @@
 #include "../Includes/http_req_parser.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
+#include "../Includes/load_logins.h"
+#include "../Includes/load_html.h"
+#include "../Includes/load_rss.h"
+#include "../Includes/php_proxy.h"
+#include "../Includes/rcon_proxy.h"
 #include "../Includes/send_resource_func.h"
 #include "../Includes/server_innards.h"
 #include <sys/socket.h>
@@ -20,11 +25,9 @@
 
 #define CHUNK 16384
 static char* compressionCmd = "%s -c -%d %s";
-static char* phpCmd = "php-cgi8.3 -f %s";
 static char inpathbuff[PATHSIZE*6];
 static char outpathbuff[PATHSIZE*6+10];
 static char cmd[PATHSIZE*30];
-static char* query=NULL;
 typedef struct comp_result{
 	int comp_enable,fd;
 	FILE* stream;
@@ -88,9 +91,11 @@ MimeEntry mime_types[] = {
     {".db","text/plain"},
     {".md","text/plain"},
     {".php","application/x-httpd-php"},
+    {".php2","application/json"},
     {".pdf","application/pdf"},
     {".sh","application/x-sh"},
     {".rss","application/rss+xml"},
+    {".rcon","text/html"},
     {".xml","application/xml"},
     {NULL, "application/octet-stream"} // Default fallback
 };
@@ -111,60 +116,6 @@ static int file_exists(const char *filename)
 {
     struct stat buffer;
     return stat(filename, &buffer) == 0;
-}
-
-static int phpFileProcess(char* target,int enable,struct comp_result* result){
-	memset(inpathbuff,0,sizeof(inpathbuff)-1+(0*enable));
-	snprintf(inpathbuff,sizeof(inpathbuff)-1,"%s%s",currDir,target);
-
-	memset(outpathbuff,0,sizeof(outpathbuff)-1);
-	snprintf(outpathbuff,sizeof(inpathbuff)+6,"%s.html",inpathbuff);
-	int fd=result->fd=open(outpathbuff,O_RDWR|O_CREAT|O_TRUNC,0777);
-	if(result->fd<0){
-			if(logging){
-			fprintf(logstream,"Invalid filepath: %s\n%s\n",outpathbuff,strerror(errno));
-			}
-			return -1;
-	}
-	if(!file_exists(inpathbuff)){
-			if(logging){
-			fprintf(logstream,"Invalid filepath: %s\n%s\n",inpathbuff,strerror(errno));
-			}
-			close(result->fd);
-			result->fd=-1;
-			result->comp_enable=0;
-			return -1;
-	}
-	printf("Output file path: %s\n",outpathbuff);
-
-	snprintf(cmd,sizeof(cmd)-1,phpCmd,inpathbuff);
-	printf("%s\n",cmd);
-	char* argv[ARGVMAX]={"php-cgi8.3",NULL};
-	//makeargv(cmd,argv);
-	int pid=fork();
-	switch(pid){
-		case -1:
-			close(fd);
-			return -1;
-		case 0:
-			dup2(fd,1);
-			close(fd);
-			setenv("QUERY_STRING", query, 1);
-			setenv("REQUEST_METHOD", "GET", 1);
-			setenv("SCRIPT_FILENAME", inpathbuff, 1);
-			setenv("REDIRECT_STATUS", "200", 1);
-			execvp(argv[0],argv);
-			perror("exec na compressao\n");
-			exit(-1);
-
-		default:
-			wait(NULL);
-			result->comp_enable=0;
-			break;
-
-
-	}
-	return 0;
 }
 
 static int compressFile(char* target,int enable,struct comp_result* result){
@@ -227,57 +178,7 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 	return 0;
 }
 
-int isDirectory(char* resourceTarget){
-        char path[PATHSIZE]={0};
-	char* ptr=path;
-	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
-	DIR* directory=opendir(path);
-	if(directory){
-		closedir(directory);
-		if(logging){
-			fprintf(logstream,"Diretoria encontrada!!: %s\n",path);
-		}
-	errno=0;
-		return 1;
-	}
-	else{
-		if(logging){
-			fprintf(logstream,"Not a directory!!!: %s\n%s\n",path,strerror(errno));
-		}
-	errno=0;
-		return 0;
-	}
 
-}
-int isRssFeed(char* resourceTarget){
-        char path[PATHSIZE]={0};
-	char* ptr=path;
-	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
-	char* ext=get_file_extension(path);
-	if(ext){
-		if(stringsAreEqual(ext,"rss")){
-			if(logging){
-				fprintf(logstream,"RSS feed pedido!!: %s (RSS)\n",path);
-			}
-			return 1;
-		}
-		else{
-			if(logging){
-				fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
-			}
-			return 0;
-
-		}
-	}
-	else{
-		if(logging){
-			fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
-		}
-		return 0;
-
-	}
-
-}
 int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	char path[PATHSIZE]={0},
 		path2[PATHSIZE]={0};
@@ -285,18 +186,6 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	int use_chunked_here=use_chunked;
 	u_int64_t fileSize=0;
 	int return_result=0;
-	query = strchr(resourceTarget, '?');
-	if (query) {
-	    *query = 0;
-	    query++;
-		if(logging){
-			fprintf(logstream,"PHP! Query string: %s\n!!!!",query);
-		}
-	}
-	else{
-
-		query="";
-	}
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 
 	int we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
@@ -322,24 +211,7 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	fprintf(logstream,"Fetching %s...\n",path);
 	}
 	int notfound=0;
-	int (*the_func)(char*, int, struct comp_result*);
-	char* ext=get_file_extension(path);
-	if(ext){
-		if(stringsAreEqual(ext,"php")){
-
-			the_func=phpFileProcess;
-
-		}
-		else{
-
-			the_func=compressFile;
-		}
-	}
-	else{
-
-		the_func=compressFile;
-	}
-	if(the_func(resourceTarget,compress,&result)<0){
+	if(compressFile(resourceTarget,compress,&result)<0){
 
 		if(logging){
 
@@ -367,7 +239,6 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 			return_result=-1;
 		}
 	}
-	
 	if(logging){
 		fprintf(logstream,"Done!\n");
 	}
@@ -376,7 +247,6 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 		lseek(result.fd,0,SEEK_END);
 		fileSize=lseek(result.fd,0,SEEK_CUR);
 		lseek(result.fd,0,SEEK_SET);
-	
 	}
 	else{
 		fseek(result.stream,0,SEEK_END);
@@ -388,12 +258,10 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	if(!notfound){
 		if(result.comp_enable){
 			if(use_chunked_here){
-			
 				fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
 			}
 			else{
 				fillUpNormalHeaderComp(headerBuff,normalHeaderComp,fileSize,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
-			
 			}
 		}
 		else{
@@ -426,11 +294,9 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	if(use_fd){
 		if(use_chunked_here){
 			sendallchunkedfd(c,result.fd);
-	
 		}
 		else{
 			sendallfd(c,result.fd);
-	
 		}
 	}
 	else{
@@ -448,7 +314,7 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 	}
 
 	printf("Trying to delete %s...\n",outpathbuff);
-	if(result.comp_enable||(the_func=phpFileProcess)){
+	if(result.comp_enable){
 		remove(outpathbuff);
 	}
 	return return_result;
@@ -462,7 +328,7 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
    allocated for processing, Z_STREAM_ERROR if an invalid compression
    level is supplied, Z_VERSION_ERROR if the version of zlib.h and the
    version of the library linked do not match, or Z_ERRNO if there is
-   an error reading or writing the files. 
+   an error reading or writing the files.
 static int def(FILE* source, FILE* dest, int level)
 {
     int ret, flush;
