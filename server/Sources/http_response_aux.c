@@ -14,7 +14,7 @@
 char* chunkedHeaderComp= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
 			  //"Origin: localhost\r\n"
-			  "Cross-Origin-Opener-Policy: same-origin\r\n"
+			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: "*/
 			  //EMBEDDER_POLICY "\r\n"
                           "content-encoding: %s\r\n"
@@ -23,8 +23,8 @@ char* chunkedHeaderComp= "HTTP/1.1 200 OK\r\n"
 char* chunkedHeader= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
 			  //"Origin: localhost\r\n"
-			  "Cross-Origin-Opener-Policy: same-origin\r\n"
-                          "Cross-Origin-Embedder-Policy: require-corp\r\n"
+			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
+                          /*"Cross-Origin-Embedder-Policy: require-corp\r\n"*/
 			  /*"Cross-Origin-Embedder-Policy: "*/
 			  //EMBEDDER_POLICY  "\r\n"
 			  "Transfer-Encoding: chunked\r\n"
@@ -32,7 +32,7 @@ char* chunkedHeader= "HTTP/1.1 200 OK\r\n"
 char* normalHeader= "HTTP/1.1 200 OK\r\n"
                           "Content-Type: %s\r\n"
 			  //"Origin: localhost\r\n"
-			  "Cross-Origin-Opener-Policy: same-origin\r\n"
+			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: "*/
 			  //EMBEDDER_POLICY  "\r\n"
 			   "Content-Length: %lu\r\n"
@@ -42,7 +42,7 @@ char* normalHeaderComp= "HTTP/1.1 200 OK\r\n"
 			  //"Origin: localhost\r\n"
 			  "Content-encoding: %s\r\n"
 			  "Content-Length: %lu\r\n"
-			  "Cross-Origin-Opener-Policy: same-origin\r\n"
+			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: "*/
 			  //EMBEDDER_POLICY "\r\n"
 			   "\r\n";
@@ -51,7 +51,7 @@ char* redirectHeader= "HTTP/1.1 301 See Other\r\n"
 				"Location: %s\r\n"
 			  	//"Origin: localhost\r\n"
 			  	"Content-Length: 0\r\n"
-			  	"Cross-Origin-Opener-Policy: same-origin\r\n"
+			  	/*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           	/*"Cross-Origin-Embedder-Policy: "*/
 			  	//EMBEDDER_POLICY "\r\n"
 			   	"\r\n";
@@ -62,7 +62,7 @@ char* notFoundHeader= "HTTP/1.1 404 Not Found\r\n"
 			  	"Content-Length: %lu\r\n"
 			  	/*"Cross-Origin-Embedder-Policy: "*/
 			  	//EMBEDDER_POLICY "\r\n"
-			   	"Cross-Origin-Opener-Policy: same-origin\r\n"
+			   	/*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           	"\r\n";
 char* notFoundHeaderComp= "HTTP/1.1 404 Not Found\r\n"
                                 "Content-Type: %s\r\n"
@@ -71,7 +71,7 @@ char* notFoundHeaderComp= "HTTP/1.1 404 Not Found\r\n"
 			        "content-encoding: %s\r\n"
                           	/*"Cross-Origin-Embedder-Policy: "*/
 			  	//EMBEDDER_POLICY "\r\n"
-				"Cross-Origin-Opener-Policy: same-origin\r\n"
+				/*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           	"\r\n";
 
 void fillUpRedirectHeader(char headerBuff[PATHSIZE],char* path){

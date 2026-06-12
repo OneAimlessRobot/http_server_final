@@ -99,6 +99,7 @@ void generatePHPResultPrimitive(char* target){
 			setenv("REQUEST_METHOD", "GET", 1);
 			setenv("SCRIPT_FILENAME", currFetchedPHP, 1);
 			setenv("REDIRECT_STATUS", "200", 1);
+			setenv("HTTP_X_REQUESTED_WITH", "XMLHttpRequest", 1);
 			setenv("REQUEST_URI", full_php_target, 1);
 			setenv("APP_ROOT_PATH", full_php_root, 1);
 			setenv("BASE_DIR_PATH_ABSOLUTE", currDir, 1);
@@ -156,8 +157,18 @@ char* generatePHPResult(char* request){
         remove(tmpDir);
 
 	char currListing[PATHSIZE*2]={0};
+	int seen_blank = 0;
 	while(fgets(currListing,PATHSIZE,fstream)){
-		dprintf(fd,"%s\n",currListing);
+		if (!seen_blank) {
+			if (
+				strcmp(currListing, "\n") == 0 ||
+				strcmp(currListing, "\r\n") == 0
+			) {
+				seen_blank = 1;
+			}
+			continue;
+		}
+		dprintf(fd, "%s", currListing);
 	}
 	fclose(fstream);
 	close(fd);
