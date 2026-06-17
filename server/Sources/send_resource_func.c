@@ -55,6 +55,7 @@ MimeEntry mime_types[] = {
     {".gif", "image/gif"},
     {".jfif", "image/jpeg"},
     {".avif", "image/avif"},
+    {".java", "text/x-java-source"},
     {".ico", "image/x-icon"},
     {".icon", "image/x-icon"},
     {".json", "application/json"},
