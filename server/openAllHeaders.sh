@@ -1,4 +1,5 @@
 #!/bin/bash
 
-nano I*/*.h -l
+#nano I*/*.h -l
+geany I*/*.h&
 

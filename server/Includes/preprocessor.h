@@ -22,6 +22,11 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
+#include <openssl/opensslv.h>
+#include <openssl/ssl.h>
+#include <openssl/bio.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
 #include "buffSizes.h"
 #include "client.h"
 #include "server_vars.h"
@@ -32,4 +37,11 @@
 #include "http_response_aux.h"
 #include "filePaths.h"
 #include "io_ops.h"
+
+
+
+typedef typeof(void (void)) *exit_func_t;
+
+
+
 #endif

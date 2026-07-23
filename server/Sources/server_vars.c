@@ -31,6 +31,7 @@ int use_fd;
 
 int use_chunked;
 
+int use_tls;
 
 char currDir[PATHSIZE];
 int serverOn=0;

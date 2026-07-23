@@ -8,6 +8,7 @@
 #include "../Includes/client.h"
 #include "../Includes/load_logins.h"
 #include "../Includes/load_html.h"
+#include "../Includes/ssl_stuff.h"
 #include "../Includes/load_rss.h"
 #include "../Includes/php_proxy.h"
 #include "../Includes/rcon_proxy.h"
@@ -31,6 +32,7 @@ static int clientOn;
 static void initEmptyClient(client* result){
 		FD_ZERO(&result->readfd);
 		result->socket=0;
+		result->ctx_if_ssl=NULL;
 		memset(result->username,0,FIELDSIZE);
 		memset(&result->client_addr,0,sizeof(struct sockaddr_in));
 		
@@ -149,10 +151,6 @@ void handleConnection(client* c){
 				free(req.data);
 			}
 			}
-			else{
-			raise(SIGINT);
-		
-			}
 			
 }
 
@@ -168,13 +166,16 @@ static void sigint_handler(int signal){
 	clientOn=signal=0;
 }
 
-void runClientConnection(int sock){
+void runClientConnection(int is_tls, int sock){
 
-	signal(SIGPIPE,sigpipe_handler);
-	signal(SIGINT,sigint_handler);
 	client*c=spawnEmptyClient();
 	socklenpointer=sizeof(c->client_addr);
 	c->socket=sock;
+	if(is_tls){
+			printf("Its tls we do eht!\n");
+			InitializeSSL();
+			init_openssl_libs_server_side();
+	}
 	//clientOn=1;
 	c->peerbuff=malloc(PAGE_DATA_SIZE);
 	memset(c->peerbuff,0,PAGE_DATA_SIZE);
@@ -182,13 +183,18 @@ void runClientConnection(int sock){
 	handleConnection(c);
 
 	getpeername(c->socket , (struct sockaddr*)&c->client_addr , (socklen_t*)&socklenpointer);
-       	if(logging>0){
-			fprintf(logstream,"Host disconnected. Cliente com socket %d ip %s , port %d \n" ,c->socket,inet_ntoa(c->client_addr.sin_addr) , ntohs(c->client_addr.sin_port));
-                   
-                 }
+	if(logging>0){
+		fprintf(logstream,"Host disconnected. Cliente com socket %d ip %s , port %d \n" ,c->socket,inet_ntoa(c->client_addr.sin_addr) , ntohs(c->client_addr.sin_port));
+			   
+			 }
+
+if(is_tls){
+
+	DestroySSL();
+	end_openssl_libs_server_side();
+}
 close(c->socket);
 free(c->peerbuff);
 free(c);
-raise(SIGINT);
 
 }

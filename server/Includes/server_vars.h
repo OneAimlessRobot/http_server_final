@@ -18,7 +18,8 @@ extern int logging
 ,send_socket_size,
 	recv_socket_size,
 	session_time_usecs,
-	serverOn;
+	serverOn,
+	use_tls;
 
 extern char currDir[PATHSIZE];
 extern FILE* logstream;

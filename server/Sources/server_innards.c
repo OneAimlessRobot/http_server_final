@@ -9,6 +9,7 @@
 #include "../Includes/send_resource_func.h"
 #include "../Includes/load_logins.h"
 #include "../Includes/server_innards.h"
+#include "../Includes/ssl_stuff.h"
 #include "../Includes/sock_ops.h"
 #include "../Includes/session_ops.h"
 #include <sys/wait.h>
@@ -119,6 +120,12 @@ static void handleIncommingConnections(void){
                 if(logging){
 		fprintf(logstream,"Client connected , ip %s , port %d \n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
         	}
+		char buff_sock[128]={0};
+		char buff_tls[128]={0};
+		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",sock);
+		char buff_tls[128]={0};
+		snprintf(buff_tls,sizeof(buff_tls)-1,"%d",is_tls);
+		char* args_module_cmd[]={"./server.exe","1",buff_tls,buff_sock,NULL};	
 		int pid=fork();
 		switch(pid){
 			case -1:
@@ -128,10 +135,9 @@ static void handleIncommingConnections(void){
 				}
 				exit(-1);
 			case 0:
-				
-				runClientConnection(client_socket);
-				serverOn=0;
-				return;
+				execvp(args_module_cmd[0],args_module_cmd);
+				perror("execvp");
+				break;
 			default:
 				close(client_socket);
 				if(logging){
@@ -208,6 +214,8 @@ void initializeConstants(void){
 	use_chunked=atoi(find_value_in_cfg_arr("use_chunked",cfgs));
 	
 	logging=atoi(find_value_in_cfg_arr("logging",cfgs));
+	
+	use_tls=atoi(find_value_in_cfg_arr("use_tls",cfgs));
 	if(quota<=0){
 
 		quota=500;
@@ -288,8 +296,10 @@ void initializeServer(void){
 	}
 	socklenpointer=sizeof(clientAddress);
 	loadLogins();
-	servComp=br;
+	servComp=deflateM;
+	InitializeSSL();
 	mainLoop();
+	DestroySSL();
 	cleanup();
 }
 

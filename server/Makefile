@@ -7,7 +7,7 @@ CURRDIR=echo `pwd`
 
 #CC= clang
 CC= gcc
-LDLIBS := -pthread -lz
+LDLIBS := -pthread -lz -lssl -lcrypto
 
 DEPFLAGS= -MP -MD
 
