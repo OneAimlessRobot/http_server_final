@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <sys/select.h>
 #include <sys/time.h>
+#include "../Includes/filePaths.h"
 #include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
@@ -22,15 +23,16 @@
 #include "../Includes/http_response_aux.h"
 #define SEND_FUNC_TO_USE sendsome
 
+exit_func_t  exit_func_for_this_module=NULL;
 
-int sendsome_ssl(SSL* ssl, const char* buf, size_t len, int_pair times) {
+int sendsome_ssl(SSL* ssl, const char* buf, size_t len) {
 
 	int sd= SSL_get_fd(ssl);
 	size_t send_total = 0;
 	while (send_total < len) {
 	struct timeval tv;
-	tv.tv_sec=times[0];
-	tv.tv_usec=times[1];
+	tv.tv_sec=bigtimeoutsecs;
+	tv.tv_usec=bigtimeoutusecs;
 	fd_set wrfds;
 	FD_ZERO(&wrfds);
 	FD_SET(sd, &wrfds);
@@ -47,8 +49,8 @@ int sendsome_ssl(SSL* ssl, const char* buf, size_t len, int_pair times) {
 		int ssl_err = SSL_get_error(ssl, ret);
 		if (ssl_err == SSL_ERROR_WANT_READ) {
 			struct timeval mtv;
-			mtv.tv_sec=times[0];
-			mtv.tv_usec=times[1];
+			mtv.tv_sec=bigtimeoutsecs;
+			mtv.tv_usec=bigtimeoutusecs;
 			fd_set mrfds;
 			FD_ZERO(&mrfds);
 			FD_SET(sd, &mrfds);
@@ -57,8 +59,8 @@ int sendsome_ssl(SSL* ssl, const char* buf, size_t len, int_pair times) {
 		}
 		else if (ssl_err == SSL_ERROR_WANT_WRITE) {
 			struct timeval mtv;
-			mtv.tv_sec=times[0];
-			mtv.tv_usec=times[1];
+			mtv.tv_sec=bigtimeoutsecs;
+			mtv.tv_usec=bigtimeoutusecs;
 			fd_set mwfds;
 			FD_ZERO(&mwfds);
 			FD_SET(sd, &mwfds);
@@ -131,13 +133,13 @@ return send_total;
 
 }
 
-int readsome_ssl(SSL* ssl, char* buf, size_t len, int_pair times) {
+int readsome_ssl(SSL* ssl, char* buf, size_t len) {
 	int sd= SSL_get_fd(ssl);
 	size_t read_total = 0;
 	while (read_total < len) {
 	struct timeval tv;
-	tv.tv_sec=times[0];
-	tv.tv_usec=times[1];
+	tv.tv_sec=bigtimeoutsecs;
+	tv.tv_usec=bigtimeoutusecs;
 	fd_set rfds;
 	FD_ZERO(&rfds);
 	FD_SET(sd, &rfds);
@@ -154,8 +156,8 @@ int readsome_ssl(SSL* ssl, char* buf, size_t len, int_pair times) {
 		int ssl_err = SSL_get_error(ssl, ret);
 		if (ssl_err == SSL_ERROR_WANT_READ) {
 			struct timeval mtv;
-			mtv.tv_sec=times[0];
-			mtv.tv_usec=times[1];
+			mtv.tv_sec=bigtimeoutsecs;
+			mtv.tv_usec=bigtimeoutusecs;
 			fd_set mrfds;
 			FD_ZERO(&mrfds);
 			FD_SET(sd, &mrfds);
@@ -164,8 +166,8 @@ int readsome_ssl(SSL* ssl, char* buf, size_t len, int_pair times) {
 		}
 		else if (ssl_err == SSL_ERROR_WANT_WRITE) {
 			struct timeval mtv;
-			mtv.tv_sec=times[0];
-			mtv.tv_usec=times[1];
+			mtv.tv_sec=bigtimeoutsecs;
+			mtv.tv_usec=bigtimeoutusecs;
 			fd_set wfds;
 			FD_ZERO(&wfds);
 			FD_SET(sd, &wfds);
@@ -237,7 +239,7 @@ return read_total;
 
 }
 
-int readsome(int sd,char buff[],u_int64_t size){
+int readsome(int sd,char buff[],u_int64_t size,int flags){
 		int iResult;
                 struct timeval tv;
                 fd_set rfds;
@@ -248,7 +250,7 @@ int readsome(int sd,char buff[],u_int64_t size){
                 iResult=select(sd+1,&rfds,(fd_set*)0,(fd_set*)0,&tv);
                 if(iResult>0){
 
-                return recv(sd,buff,size,0);
+                return recv(sd,buff,size,flags);
 
                 }
 		else if(!iResult){
@@ -264,27 +266,17 @@ int readsome(int sd,char buff[],u_int64_t size){
 }
 int timedreadall(client* c,char* buff,u_int64_t size){
 		int iResult;
-                struct timeval tv;
-                fd_set rfds;
-                FD_ZERO(&rfds);
-                FD_SET(c->socket,&rfds);
-                tv.tv_sec=bigtimeoutsecs;
-                tv.tv_usec=bigtimeoutusecs;
-                iResult=select(c->socket+1,&rfds,(fd_set*)0,(fd_set*)0,&tv);
-                if(iResult>0){
-			char peek_byte;
-			recv(c->socket, &peek_byte, 1, MSG_PEEK);
+		struct timeval tv;
+		fd_set rfds;
+		FD_ZERO(&rfds);
+		FD_SET(c->socket,&rfds);
+		tv.tv_sec=bigtimeoutsecs;
+		tv.tv_usec=bigtimeoutusecs;
+		iResult=select(c->socket+1,&rfds,(fd_set*)0,(fd_set*)0,&tv);
+		if(iResult>0){
+			return readall(c,buff,size);
 
-			if ((unsigned char)peek_byte == 0x16) {
-				// It's probably HTTPS – drop the connection
-				send(c->socket,notFoundHeader,strlen(notFoundHeader),0);
-				fprintf(logstream,"Recebemos https!!!\nNOT Dropping!!!\n");
-				raise(SIGINT);
-				return -1;
-			}
-                return readall(c,buff,size);
-
-                }
+		}
 		else if(!iResult){
                	return -2;
 		}
@@ -298,7 +290,7 @@ int timedreadall(client* c,char* buff,u_int64_t size){
 		}
 }
 
-int sendsome(int sd,char buff[],u_int64_t size){
+int sendsome(int sd,char buff[],u_int64_t size, int flags){
                 int iResult;
                 struct timeval tv;
                 fd_set rfds;
@@ -309,7 +301,7 @@ int sendsome(int sd,char buff[],u_int64_t size){
                 iResult=select(sd+1,(fd_set*)0,&rfds,(fd_set*)0,&tv);
                 if(iResult>0){
 
-                return send(sd,buff,size,0);
+                return send(sd,buff,size,flags);
                 }
 		else if(!iResult){
                	return -2;
@@ -328,7 +320,7 @@ int readall(client*c,char* buff,int64_t size){
         int64_t len=0,
 		 total=0;
 while(total<size){
-        len=readsome(c->socket,buff+total,size-total);
+        len=c->is_tls?readsome_ssl(c->ctx_if_ssl,buff+total,size-total):readsome(c->socket,buff+total,size-total ,0);
 	if(len<=0){
                 break;
 	}
@@ -376,7 +368,7 @@ while(total<size){
 int sendallchunkedfd(client*c,int fd){
 
 char buff[BUFFSIZE];
-char chunkbuff[2 * BUFFSIZE + 10];  // Additional space for size header and CRLF
+char chunkbuff[2 * BUFFSIZE + 10];
 int numread;
 int sent=0;
 while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
@@ -387,12 +379,8 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < truesize + numread + 2) {
         errno=0;
-	sent = SEND_FUNC_TO_USE(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent);
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, chunkbuff + totalsent, truesize + numread + 2 - totalsent):SEND_FUNC_TO_USE(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
 	if(sent==-2){
-
-		if(logging){
-		fprintf(logstream,"Timeout no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
-                }
 		continue;
 	}
 	if(sent<0){
@@ -427,19 +415,17 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
 	}
 	}
 	totalsent += sent;
-    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
     	}
 }
 
-// Send final zero-sized chunk
-send(c->socket, "0\r\n\r\n", 5, 0);
+c->is_tls?SSL_write(c->ctx_if_ssl, "0\r\n\r\n", 5):send(c->socket, "0\r\n\r\n", 5, 0);
 return 0;
 }
 
 int sendallchunkedstream(client*c,FILE* stream){
 
 char buff[BUFFSIZE];
-char chunkbuff[2 * BUFFSIZE + 10];  // Additional space for size header and CRLF
+char chunkbuff[2 * BUFFSIZE + 10];
 int numread;
 int sent=0;
 while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
@@ -450,12 +436,9 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < truesize + numread + 2) {
         errno=0;
-	sent = SEND_FUNC_TO_USE(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent);
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, chunkbuff + totalsent, truesize + numread + 2 - totalsent):SEND_FUNC_TO_USE(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
 	if(sent==-2){
 
-		if(logging){
-		fprintf(logstream,"Timeout no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
-                }
 		continue;
 	}
 	if(sent<0){
@@ -491,12 +474,10 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 	}
 	}
 	totalsent += sent;
-    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
 	}
 }
 
-// Send final zero-sized chunk
-send(c->socket, "0\r\n\r\n", 5, 0);
+c->is_tls?SSL_write(c->ctx_if_ssl, "0\r\n\r\n", 5):send(c->socket, "0\r\n\r\n", 5, 0);
 return 0;
 }
 
@@ -509,12 +490,9 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;
-	sent = SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent);
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, buff + totalsent,  numread - totalsent):SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent, 0);
 	if(sent==-2){
 
-		if(logging){
-		fprintf(logstream,"Timeout no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
-                }
 		continue;
 	}
 	if(sent<0){
@@ -549,7 +527,6 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 	}
 	}
 	totalsent += sent;
-    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
     	}
 }
 
@@ -566,12 +543,9 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;
-	sent = SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent);
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, buff + totalsent,  numread - totalsent):SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent, 0);
 	if(sent==-2){
 
-		if(logging){
-		fprintf(logstream,"Timeout no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
-                }
 		continue;
 	}
 	if(sent<0){
@@ -606,7 +580,6 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
 	}
 	}
 	totalsent += sent;
-    	//fprintf(logstream,"Send de %d bytes feito!!!\n",sent);
 	}
 }
 

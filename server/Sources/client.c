@@ -8,7 +8,7 @@
 #include "../Includes/client.h"
 #include "../Includes/load_logins.h"
 #include "../Includes/load_html.h"
-#include "../Includes/ssl_stuff.h"
+#include "../Includes/ssl_things.h"
 #include "../Includes/load_rss.h"
 #include "../Includes/php_proxy.h"
 #include "../Includes/rcon_proxy.h"
@@ -24,14 +24,14 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/types.h>
-//#define READ_FUNC_TO_USE readall
 #define READ_FUNC_TO_USE timedreadall
-
+client* curr_client= NULL;
+	
 static socklen_t socklenpointer;
-static int clientOn;
 static void initEmptyClient(client* result){
 		FD_ZERO(&result->readfd);
 		result->socket=0;
+		result->is_tls=use_tls;
 		result->ctx_if_ssl=NULL;
 		memset(result->username,0,FIELDSIZE);
 		memset(&result->client_addr,0,sizeof(struct sockaddr_in));
@@ -100,7 +100,7 @@ static void handleCurrentActivity(client*c,http_request req){
 				int is_rcon_result=isRconRequest(header.target);
 				if(is_rcon_result){
 					handleCustomPostReq(c,header.target,req.data,targetinout);
-					sendMediaData(c,generateRconResult(header.target,targetinout),compress,is_directory);
+					sendMediaData(c,generateRconResult(targetinout),compress,is_directory);
 					deleteRconResult();
 					return;
 				}
@@ -153,28 +153,52 @@ void handleConnection(client* c){
 			}
 			
 }
-
-static void sigpipe_handler(int signal){
+void exit_function_client(void){
 	
-	if(logging>10){
-	fprintf(logstream,"SIGPIPE!!!!!\n");
+	if(curr_client->is_tls){
+		ShutdownSSL(&curr_client->ctx_if_ssl);
+		end_openssl_libs_server_side();
+		DestroySSL();
 	}
-	clientOn=signal=0;
+	close(curr_client->socket);
+	free(curr_client->peerbuff);
+	free(curr_client);
+	
+	exit(-1);
 }
-static void sigint_handler(int signal){
-	fprintf(logstream,"SIGINT!!!!!\n");
-	clientOn=signal=0;
+int is_tls_connection(int client_fd) {
+    unsigned char packet_buff[6];
+    ssize_t n = readsome(client_fd, (char*)packet_buff, sizeof(packet_buff), MSG_PEEK);
+    
+    if( n< 6){
+			return 0;
+	}
+    //https://stackoverflow.com/questions/16194050/tls-protocol-detection-by-using-client-hello-message
+	//Check 22 and version info 0300 0301 or 0302
+	if (packet_buff[0] == 0x16 && packet_buff[1] == 0x03
+	  && (packet_buff[2] == 0x00 || packet_buff[2] == 0x01 || packet_buff[2] == 0x02)){
+		if (packet_buff[5] == 1){
+			return 1;
+		}
+	}
+    
+    return 0;
 }
 
 void runClientConnection(int is_tls, int sock){
-
+	
+	exit_func_for_this_module = exit_function_client;
+	use_tls=is_tls;
 	client*c=spawnEmptyClient();
+	curr_client= c;
 	socklenpointer=sizeof(c->client_addr);
 	c->socket=sock;
-	if(is_tls){
+	c->is_tls=is_tls_connection(c->socket);
+	if(c->is_tls){
 			printf("Its tls we do eht!\n");
 			InitializeSSL();
 			init_openssl_libs_server_side();
+			convert_server_con_to_ssl(&c->ctx_if_ssl,c->socket);
 	}
 	//clientOn=1;
 	c->peerbuff=malloc(PAGE_DATA_SIZE);
@@ -187,14 +211,7 @@ void runClientConnection(int is_tls, int sock){
 		fprintf(logstream,"Host disconnected. Cliente com socket %d ip %s , port %d \n" ,c->socket,inet_ntoa(c->client_addr.sin_addr) , ntohs(c->client_addr.sin_port));
 			   
 			 }
-
-if(is_tls){
-
-	DestroySSL();
-	end_openssl_libs_server_side();
-}
-close(c->socket);
-free(c->peerbuff);
-free(c);
+			 
+exit_function_client();
 
 }

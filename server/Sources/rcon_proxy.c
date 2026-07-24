@@ -18,7 +18,7 @@ typedef enum {ADDR=0,PORT,PASS,CMD,MAX_NUM_RCON_ARGS}rcon_args;
 
 typedef struct rcon_arg_line{
 
-	const char* default_value;
+	char* default_value;
 	char* the_actual_value;
 
 }rcon_arg_line;
@@ -145,7 +145,7 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
         close(outfd);
 
 }
-char* generateRconResult(char* dir,char* the_request_parameters){
+char* generateRconResult(char* the_request_parameters){
 
 	logging=1;
         logstream=stderr;

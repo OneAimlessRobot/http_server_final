@@ -9,7 +9,7 @@
 #include "../Includes/send_resource_func.h"
 #include "../Includes/load_logins.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/ssl_stuff.h"
+#include "../Includes/ssl_things.h"
 #include "../Includes/sock_ops.h"
 #include "../Includes/session_ops.h"
 #include <sys/wait.h>
@@ -121,10 +121,9 @@ static void handleIncommingConnections(void){
 		fprintf(logstream,"Client connected , ip %s , port %d \n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
         	}
 		char buff_sock[128]={0};
+		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",client_socket);
 		char buff_tls[128]={0};
-		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",sock);
-		char buff_tls[128]={0};
-		snprintf(buff_tls,sizeof(buff_tls)-1,"%d",is_tls);
+		snprintf(buff_tls,sizeof(buff_tls)-1,"%d",use_tls);
 		char* args_module_cmd[]={"./server.exe","1",buff_tls,buff_sock,NULL};	
 		int pid=fork();
 		switch(pid){
@@ -147,12 +146,6 @@ static void handleIncommingConnections(void){
 			}
 		
 		}
-           else{
-		if(logging){
-			fprintf(logstream,"No new connections\n");
-		}
-		
-		}
 	
 
 }
@@ -167,7 +160,6 @@ static void mainLoop(void){
 		fprintf(logstream,"Connection thread out!\n");
 	}
 }
-
 void initializeConstants(void){
 
 	strncpy(incorrectLoginTarget,find_value_in_cfg_arr("incorrectLoginTarget",cfgs),FIELDSIZE-1);
@@ -251,12 +243,31 @@ void initializeConstants(void){
 		raise(SIGINT);
 	}
 }
+void the_exit_func(void){
+	raise(SIGINT);
+}
+void clientBootstrap(void){
+	
+	memset(currDir,0,PATHSIZE);
+	getcwd(currDir,PATHSIZE);
+	printf("Currdir: %s\n",currDir);
+	loadCfg();
+	initializeConstants();
+
+	logstream=stdout;
+	serverOn=1;
+	currNumOfClients=0;
+	socklenpointer=sizeof(clientAddress);
+	servComp=deflateM;
+	
+}
 void initializeServer(void){
 
 	sa.sa_handler=sigact_sigint_handler;
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags=SA_RESTART|SA_NOCLDWAIT;
-
+	
+	exit_func_for_this_module = the_exit_func;
 	sigaction(SIGCHLD, &sa, NULL);
 	signal(SIGINT,sigint_handler);
 	memset(currDir,0,PATHSIZE);
@@ -295,7 +306,6 @@ void initializeServer(void){
 	fprintf(logstream,"Server spawnado @ %s\n",inet_ntoa(server_address.sin_addr));
 	}
 	socklenpointer=sizeof(clientAddress);
-	loadLogins();
 	servComp=deflateM;
 	InitializeSSL();
 	mainLoop();

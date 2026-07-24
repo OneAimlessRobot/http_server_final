@@ -27,6 +27,8 @@ int compression;
 
 int compression_level;
 
+int use_exit_func;
+
 int use_fd;
 
 int use_chunked;

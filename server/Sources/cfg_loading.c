@@ -76,8 +76,7 @@ void loadCfg(void)
 
 	}
 	cfgs[i]=NULL;
-		printf("\nCFGs carregadas:\n");
-		print_cfg_arr(stdout,cfgs);
+	printf("\nCFGs carregadas:\n");
 	fclose(CFGStream);
 	free(buff);
 	return;

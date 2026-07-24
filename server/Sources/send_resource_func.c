@@ -286,7 +286,7 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 		return_result=-1;
 	}
 	int header_size=strlen(headerBuff);
-	if(send(c->socket,headerBuff,header_size,0)!=(header_size)){
+	if((c->is_tls?SSL_write(c->ctx_if_ssl,headerBuff,header_size):send(c->socket,headerBuff,header_size,0))!=(header_size)){
 		if(logging){
 		fprintf(logstream,"ERRO NO SEND!!!! O GET TEM UM ARGUMENTO!!!!:\n%s\n",strerror(errno));
 		}

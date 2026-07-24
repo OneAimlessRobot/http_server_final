@@ -85,16 +85,10 @@ int isDirectory(char* resourceTarget){
 	DIR* directory=opendir(path);
 	if(directory){
 		closedir(directory);
-		if(logging){
-			fprintf(logstream,"Diretoria encontrada!!: %s\n",path);
-		}
 	errno=0;
 		return 1;
 	}
 	else{
-		if(logging){
-			fprintf(logstream,"Not a directory!!!: %s\n%s\n",path,strerror(errno));
-		}
 	errno=0;
 		return 0;
 	}

@@ -19,7 +19,8 @@ extern int logging
 	recv_socket_size,
 	session_time_usecs,
 	serverOn,
-	use_tls;
+	use_tls,
+	use_exit_func;
 
 extern char currDir[PATHSIZE];
 extern FILE* logstream;

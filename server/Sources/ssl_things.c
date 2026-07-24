@@ -17,11 +17,9 @@ uint8_t SERVER_SSL_initted_in_process=0;
 
 uint8_t SSL_on_in_process=0;
 
-uint8_t CLIENT_SSL_initted_in_process=0;
 
 
-SSL_CTX *global_server_ctx=NULL,
-        *global_client_ctx=NULL;
+SSL_CTX *global_server_ctx=NULL;
         
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     if (!ok) {
@@ -33,7 +31,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 }
 
 void InitializeSSL(void){
-     if(will_use_tls){
+     if(use_tls){
 	if(SSL_on_in_process){
 		if(logging){
 			fprintf(logstream,"SSL já ativo! Ignorando!\n");
@@ -55,7 +53,7 @@ void InitializeSSL(void){
 }
 
 void DestroySSL(void){
-	if(will_use_tls){
+	if(use_tls){
 		if(!SSL_on_in_process){
 			if(logging){
 				fprintf(logstream,"SSL já desativado! Ignorando!\n");
@@ -81,11 +79,10 @@ void ShutdownSSL(SSL** cSSL){
 		*cSSL=NULL;
 	}
 }
-void convert_server_con_to_ssl(SSL** cSSL, int sd,int_pair times){
+void convert_server_con_to_ssl(SSL** cSSL, int sd){
 
 	(*cSSL)=SSL_new(global_server_ctx);
 	SSL_set_fd(*cSSL, sd);
-	//Here is the SSL Accept portion.  Now all reads and writes must use SSL
 	int ssl_ret=0,ssl_err=0;
 	while(1) {
 		ssl_ret  = SSL_accept(*cSSL);
@@ -98,8 +95,8 @@ void convert_server_con_to_ssl(SSL** cSSL, int sd,int_pair times){
 
 		if (ssl_err == SSL_ERROR_WANT_READ) {
 			struct timeval tv;
-			tv.tv_sec=times[0];
-			tv.tv_usec=times[1];
+			tv.tv_sec=bigtimeoutsecs;
+			tv.tv_usec=bigtimeoutusecs;
 			fd_set rfds;
 			FD_ZERO(&rfds);
 			FD_SET(sd, &rfds);
@@ -107,8 +104,8 @@ void convert_server_con_to_ssl(SSL** cSSL, int sd,int_pair times){
 		}
 		else if (ssl_err == SSL_ERROR_WANT_WRITE) {
 			struct timeval tv;
-			tv.tv_sec=times[0];
-			tv.tv_usec=times[1];
+			tv.tv_sec=bigtimeoutsecs;
+			tv.tv_usec=bigtimeoutusecs;
 			fd_set wfds;
 			FD_ZERO(&wfds);
 			FD_SET(sd, &wfds);
@@ -127,51 +124,89 @@ void convert_server_con_to_ssl(SSL** cSSL, int sd,int_pair times){
 		}
 	}
 }
-void convert_client_con_to_ssl(SSL** cSSL, int sd,int_pair times){
+void init_openssl_libs_server_side(void){
+        if(logging){
+                if(use_tls){
 
-	(*cSSL)=SSL_new(global_client_ctx);
-	SSL_set_fd(*cSSL, sd);
-	//Here is the SSL Accept portion.  Now all reads and writes must use SSL
-	int ssl_ret=0,ssl_err=0;
-	while(1) {
-		ssl_ret  = SSL_connect(*cSSL);
+                        fprintf(logstream,"Server's SSL Ativado? inicializando Server's SSL!...\n");
+                }
+                else{
 
-		if (ssl_ret == 1) {
-			// Handshake complete
-			break;
-		}
+                        fprintf(logstream,"Server's SSL não ativado. Returning...\n");
+                        return;
+                }
+        }
 
-		ssl_err = SSL_get_error(*cSSL, ssl_ret);
+        if(use_tls){
+                if(SERVER_SSL_initted_in_process){
+                        if(logging){
+                                fprintf(logstream,"SERVER SSL já ativo! Ignorando!\n");
+                        }
+                        return;
+                }
+                else{
+                        if(logging){
+                                fprintf(logstream,"SERVER SSL ativo! SERVER_SSL_initted_in_process: 0 -> 1 !\n");
+                        }
+                        SERVER_SSL_initted_in_process=1;
+                }
+                global_server_ctx = SSL_CTX_new(TLS_server_method());
+                SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_PEER , verify_callback);
 
-		if (ssl_err == SSL_ERROR_WANT_READ) {
-			struct timeval tv;
-			tv.tv_sec=times[0];
-			tv.tv_usec=times[1];
-			fd_set rfds;
-			FD_ZERO(&rfds);
-			FD_SET(sd, &rfds);
-			select(sd + 1, &rfds, (fd_set*)0, (fd_set*)0, &tv);
-		}
-		else if (ssl_err == SSL_ERROR_WANT_WRITE) {
-			struct timeval tv;
-			tv.tv_sec=times[0];
-			tv.tv_usec=times[1];
-			fd_set wfds;
-			FD_ZERO(&wfds);
-			FD_SET(sd, &wfds);
-			select(sd + 1, (fd_set*)0, &wfds, (fd_set*)0, &tv);
-		}
-		else {
-		// Real failure
-			if(logging){
-				fprintf(logstream, "SSL handshake failed:\n");
-				ERR_print_errors_fp(logstream);
-			}
-			ShutdownSSL(cSSL);
-			break;
-		}
-		if(logging){
-			fprintf(logstream,"Waiting...\n");
-		}
-	}
+
+                /* Load client certificate */
+                if (!SSL_CTX_use_certificate_chain_file(global_server_ctx, host_cert_file_path)) {
+                    ERR_print_errors_fp(stderr);
+                }
+
+                /* Load client private key */
+                if (!SSL_CTX_use_PrivateKey_file(global_server_ctx, host_pkey_file_path, SSL_FILETYPE_PEM)) {
+                    ERR_print_errors_fp(stderr);
+                }
+
+                /* Make sure key matches cert */
+                if (!SSL_CTX_check_private_key(global_server_ctx)) {
+                    fprintf(stderr, "Client key does not match certificate\n");
+                }
+        }
+
 }
+
+
+void end_openssl_libs_server_side(void){
+
+        if(logging){
+
+                fprintf(logstream,"Closing server's global ssl context?\n");
+        }
+        if(use_tls){
+                if(!SERVER_SSL_initted_in_process){
+                        if(logging){
+                                fprintf(logstream,"SERVER SSL já desativado! Ignorando!\n");
+                        }
+                        return;
+                }
+                else{
+                        if(logging){
+                                fprintf(logstream,"SERVER SSL desativado! SERVER_SSL_initted_in_process: 1 -> 0 !\n");
+                        }
+                        SERVER_SSL_initted_in_process=0;
+                }
+                if(logging){
+
+                        fprintf(logstream,"Yes!\n");
+                }
+                SSL_CTX_free(global_server_ctx);
+                if(logging){
+
+                        fprintf(logstream,"Server's global ssl context closed!!\n");
+                }
+        }
+        else if(logging){
+
+                fprintf(logstream,"Nooooo... (Server's global ctx is null so there is nothing to close)\n");
+        }
+
+
+}
+

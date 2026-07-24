@@ -1,9 +1,11 @@
 #ifndef IO_OPS_H
 #define IO_OPS_H
 
-int sendsome_ssl(SSL* ssl, const char* buf, size_t len, int_pair times);
+int sendsome_ssl(SSL* ssl, const char* buf, size_t len);
 
-int readsome_ssl(SSL* ssl, char* buf, size_t len, int_pair times);
+int readsome_ssl(SSL* ssl, char* buf, size_t len);
+
+int readsome(int sd,char buff[],u_int64_t size,int flags);
 
 int readall(client* c,char* buff,int64_t size);
 

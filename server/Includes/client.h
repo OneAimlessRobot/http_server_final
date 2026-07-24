@@ -5,7 +5,7 @@ typedef struct client{
 	pthread_t threadid;
 	fd_set readfd;
 	char* peerbuff;
-	int socket;
+	int socket, is_tls;
 	SSL* ctx_if_ssl;
 	char username[FIELDSIZE];
 	struct sockaddr_in client_addr;
