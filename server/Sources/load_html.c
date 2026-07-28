@@ -52,6 +52,7 @@ static char* excluded_xtensions[]={
 		"boundary",
 		"dll",
 		"so",
+		"o",
 		"exe",
 		"bin",
 		"iso",
@@ -137,6 +138,19 @@ static void print_header(int fd){
 	dprintf(fd,"\n<h2 class='%s'><span>%s|</span></h2>\n",DIR_LISTING_HEADER_CLASS,header_buff);
 
 }
+static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv, char* dir){
+	
+	
+	dprintf(fd,"\n| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|<br>\n",
+			is_directory_this_one?"directory!":curr_listing_argv[SIZE],
+			curr_listing_argv[DATE],
+			curr_listing_argv[TIME],
+			is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,
+			dir,
+			curr_listing_argv[FILE_NAME],
+			curr_listing_argv[FILE_NAME]
+			);
+}
 static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir){
 
 
@@ -148,21 +162,27 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 		char full_path_buff_to_test[PATH_MAX*4]={0};
 		snprintf(full_path_buff_to_test,PATH_MAX*3-1,"%s/%s",dir,curr_listing_argv[FILE_NAME]);
 		int is_directory_this_one=isDirectory(full_path_buff_to_test);
-		char* extension= get_file_extension(curr_listing_argv[FILE_NAME]);
-		if(is_directory_this_one||(findInStringArrN(excluded_xtensions,extension,100)<0)){
-			
-			dprintf(fd,"\n| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|<br>\n",
-						is_directory_this_one?"directory!":curr_listing_argv[SIZE],
-						curr_listing_argv[DATE],
-						curr_listing_argv[TIME],
-						is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,
-						dir,
-						curr_listing_argv[FILE_NAME],
-						curr_listing_argv[FILE_NAME]
-						);
-			memset(curr_listing_buff,0,PATHSIZE);
-			memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
+		if(is_directory_this_one){
+			print_dir_entry(fd, is_directory_this_one,curr_listing_argv, dir);
 		}
+		else
+		{
+			char* extension= get_file_extension(curr_listing_argv[FILE_NAME]);
+			if(extension){
+				if(findInStringArr(excluded_xtensions,extension)<0){
+					print_dir_entry(fd, 0,curr_listing_argv, dir);
+					
+				}
+				else{
+					printf("%s was filtered out!\n",curr_listing_argv[FILE_NAME]);
+				}
+			}
+			else{
+				printf("%s was filtered out!\n",curr_listing_argv[FILE_NAME]);
+			}
+		}
+		memset(curr_listing_buff,0,PATHSIZE);
+		memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
 	}
 
 }
