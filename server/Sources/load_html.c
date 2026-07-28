@@ -173,12 +173,6 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 					print_dir_entry(fd, 0,curr_listing_argv, dir);
 					
 				}
-				else{
-					printf("%s was filtered out!\n",curr_listing_argv[FILE_NAME]);
-				}
-			}
-			else{
-				printf("%s was filtered out!\n",curr_listing_argv[FILE_NAME]);
 			}
 		}
 		memset(curr_listing_buff,0,PATHSIZE);
