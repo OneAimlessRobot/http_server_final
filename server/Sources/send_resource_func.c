@@ -98,19 +98,19 @@ MimeEntry mime_types[] = {
     {".rss","application/rss+xml"},
     {".rcon","text/html"},
     {".xml","application/xml"},
-    {NULL, "application/octet-stream"} // Default fallback
+    {NULL, "application/octet-stream"}
 };
 
 const char* get_mime_type(const char *filename) {
-    const char *dot = strrchr(filename, '.'); // Find last dot (file extension)
-    if (!dot) return "application/octet-stream"; // No extension? Default type.
+    const char *dot = strrchr(filename, '.');
+    if (!dot) return "application/octet-stream";
 
     for (int i = 0; mime_types[i].extension != NULL; i++) {
         if (strcmp(dot, mime_types[i].extension) == 0) {
             return mime_types[i].mime_type;
         }
     }
-    return "application/octet-stream"; // If no match, return generic type
+    return "application/octet-stream";
 }
 
 static int file_exists(const char *filename)

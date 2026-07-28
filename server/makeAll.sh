@@ -1,3 +1,3 @@
 #!/bin/bash
 
-make clean && make -j 2
+make clean && make -j 4

@@ -29,13 +29,9 @@
 
 #define FILE_REF_CLASS "ref_for_file"
 
+#define NUM_OF_FIELDS_TO_PRINT 4
 
-
-#define DIR_LISTING_FORMAT ("\n<a class='%s' href='%s/%s'>%s</a> <h1>%d<h1>\n",get_file_extension(curr_listing_buff)?"ref_for_file":"ref_for_dir")
-
-#define NUM_OF_FIELDS_TO_PRINT 2
-
-typedef enum {PERMISSIONS,NUM_LINKS,OWNER_NAME,OWNER_GROUP,SIZE,DATE_MONTH,DATE_DAY,DATE_DAY_TIME,FILE_NAME,CATEGORY_ID_MAX}category_id;
+typedef enum {PERMISSIONS,NUM_LINKS,OWNER_NAME,OWNER_GROUP,SIZE, DATE, TIME,FILE_NAME,CATEGORY_ID_MAX}category_id;
 
 
 
@@ -45,16 +41,27 @@ static char* category_names[CATEGORY_ID_MAX]={
 			"Owner_name",
 			"Owner_group",
 			"Size",
-			"Date_month",
-			"Date_day",
-			"Date_day_time",
+			"Date",
+			"time",
 			"Actual_file_name"
 
 };
 
+
+static char* excluded_xtensions[]={
+		"boundary",
+		"dll",
+		"so",
+		"exe",
+		"bin",
+		"iso",
+		NULL
+};
 static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
+	SIZE,
+	DATE,
+	TIME,
 	FILE_NAME,
-	SIZE
 };
 
 static uint16_t category_max_sizes[CATEGORY_ID_MAX]={0};
@@ -141,9 +148,21 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 		char full_path_buff_to_test[PATH_MAX*4]={0};
 		snprintf(full_path_buff_to_test,PATH_MAX*3-1,"%s/%s",dir,curr_listing_argv[FILE_NAME]);
 		int is_directory_this_one=isDirectory(full_path_buff_to_test);
-		dprintf(fd,"\n| <a class='%s' href='%s/%s'>%s</a> %s |<br>\n",is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,dir,curr_listing_argv[FILE_NAME],curr_listing_argv[FILE_NAME],is_directory_this_one?"directory!":curr_listing_argv[SIZE]);
-		memset(curr_listing_buff,0,PATHSIZE);
-		memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
+		char* extension= get_file_extension(curr_listing_argv[FILE_NAME]);
+		if(is_directory_this_one||(findInStringArrN(excluded_xtensions,extension,100)<0)){
+			
+			dprintf(fd,"\n| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|<br>\n",
+						is_directory_this_one?"directory!":curr_listing_argv[SIZE],
+						curr_listing_argv[DATE],
+						curr_listing_argv[TIME],
+						is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,
+						dir,
+						curr_listing_argv[FILE_NAME],
+						curr_listing_argv[FILE_NAME]
+						);
+			memset(curr_listing_buff,0,PATHSIZE);
+			memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
+		}
 	}
 
 }
@@ -184,8 +203,8 @@ static void generateDirListingPrimitive(char* path){
         snprintf(currSearchedDir,PATHSIZE*2-1,"%s%s",currDir,path);
 
 	resolve_canonical_path(currSearchedDir,resolved_abs_path);
-
-        char* args_cmd[]={"ls","-lhu", "--group-directories-first",resolved_abs_path,NULL};
+	
+        char* args_cmd[]={"ls","-lhu","--sort=time", "--time=mtime", "--time-style=long-iso", "--group-directories-first",resolved_abs_path,NULL};
         pid_t pid_fork_find_cmd=fork();
         switch(pid_fork_find_cmd){
 
