@@ -31,8 +31,8 @@ int sendsome_ssl(SSL* ssl, const char* buf, size_t len) {
 	size_t send_total = 0;
 	while (send_total < len) {
 	struct timeval tv;
-	tv.tv_sec=bigtimeoutsecs;
-	tv.tv_usec=bigtimeoutusecs;
+	tv.tv_sec=tls_data_timeout_secs;
+	tv.tv_usec=tls_data_timeout_usecs;
 	fd_set wrfds;
 	FD_ZERO(&wrfds);
 	FD_SET(sd, &wrfds);
@@ -49,8 +49,8 @@ int sendsome_ssl(SSL* ssl, const char* buf, size_t len) {
 		int ssl_err = SSL_get_error(ssl, ret);
 		if (ssl_err == SSL_ERROR_WANT_READ) {
 			struct timeval mtv;
-			mtv.tv_sec=bigtimeoutsecs;
-			mtv.tv_usec=bigtimeoutusecs;
+			mtv.tv_sec=tls_data_timeout_secs;
+			mtv.tv_usec=tls_data_timeout_usecs;
 			fd_set mrfds;
 			FD_ZERO(&mrfds);
 			FD_SET(sd, &mrfds);
@@ -59,8 +59,8 @@ int sendsome_ssl(SSL* ssl, const char* buf, size_t len) {
 		}
 		else if (ssl_err == SSL_ERROR_WANT_WRITE) {
 			struct timeval mtv;
-			mtv.tv_sec=bigtimeoutsecs;
-			mtv.tv_usec=bigtimeoutusecs;
+			mtv.tv_sec=tls_data_timeout_secs;
+			mtv.tv_usec=tls_data_timeout_usecs;
 			fd_set mwfds;
 			FD_ZERO(&mwfds);
 			FD_SET(sd, &mwfds);
@@ -138,8 +138,8 @@ int readsome_ssl(SSL* ssl, char* buf, size_t len) {
 	size_t read_total = 0;
 	while (read_total < len) {
 	struct timeval tv;
-	tv.tv_sec=bigtimeoutsecs;
-	tv.tv_usec=bigtimeoutusecs;
+	tv.tv_sec=tls_data_timeout_secs;
+	tv.tv_usec=tls_data_timeout_usecs;
 	fd_set rfds;
 	FD_ZERO(&rfds);
 	FD_SET(sd, &rfds);
@@ -156,8 +156,8 @@ int readsome_ssl(SSL* ssl, char* buf, size_t len) {
 		int ssl_err = SSL_get_error(ssl, ret);
 		if (ssl_err == SSL_ERROR_WANT_READ) {
 			struct timeval mtv;
-			mtv.tv_sec=bigtimeoutsecs;
-			mtv.tv_usec=bigtimeoutusecs;
+			mtv.tv_sec=tls_data_timeout_secs;
+			mtv.tv_usec=tls_data_timeout_usecs;
 			fd_set mrfds;
 			FD_ZERO(&mrfds);
 			FD_SET(sd, &mrfds);
@@ -166,8 +166,8 @@ int readsome_ssl(SSL* ssl, char* buf, size_t len) {
 		}
 		else if (ssl_err == SSL_ERROR_WANT_WRITE) {
 			struct timeval mtv;
-			mtv.tv_sec=bigtimeoutsecs;
-			mtv.tv_usec=bigtimeoutusecs;
+			mtv.tv_sec=tls_data_timeout_secs;
+			mtv.tv_usec=tls_data_timeout_usecs;
 			fd_set wfds;
 			FD_ZERO(&wfds);
 			FD_SET(sd, &wfds);

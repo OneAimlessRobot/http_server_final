@@ -200,7 +200,6 @@ void runClientConnection(int is_tls, int sock){
 			init_openssl_libs_server_side();
 			convert_server_con_to_ssl(&c->ctx_if_ssl,c->socket);
 	}
-	//clientOn=1;
 	c->peerbuff=malloc(PAGE_DATA_SIZE);
 	memset(c->peerbuff,0,PAGE_DATA_SIZE);
 

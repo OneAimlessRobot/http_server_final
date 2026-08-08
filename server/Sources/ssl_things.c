@@ -95,8 +95,8 @@ void convert_server_con_to_ssl(SSL** cSSL, int sd){
 
 		if (ssl_err == SSL_ERROR_WANT_READ) {
 			struct timeval tv;
-			tv.tv_sec=bigtimeoutsecs;
-			tv.tv_usec=bigtimeoutusecs;
+			tv.tv_sec=tls_shake_timeout_secs;
+			tv.tv_usec=tls_shake_timeout_usecs;
 			fd_set rfds;
 			FD_ZERO(&rfds);
 			FD_SET(sd, &rfds);
@@ -104,8 +104,8 @@ void convert_server_con_to_ssl(SSL** cSSL, int sd){
 		}
 		else if (ssl_err == SSL_ERROR_WANT_WRITE) {
 			struct timeval tv;
-			tv.tv_sec=bigtimeoutsecs;
-			tv.tv_usec=bigtimeoutusecs;
+			tv.tv_sec=tls_shake_timeout_secs;
+			tv.tv_usec=tls_shake_timeout_usecs;
 			fd_set wfds;
 			FD_ZERO(&wfds);
 			FD_SET(sd, &wfds);

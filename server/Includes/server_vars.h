@@ -9,6 +9,8 @@ extern int logging
 ,beeping
 ,smalltimeoutsecs,smalltimeoutusecs
 ,bigtimeoutsecs,bigtimeoutusecs
+,tls_shake_timeout_secs,tls_shake_timeout_usecs
+,tls_data_timeout_secs,tls_data_timeout_usecs
 ,port
 ,compression
 ,compression_level

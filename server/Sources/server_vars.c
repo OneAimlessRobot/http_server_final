@@ -13,6 +13,10 @@ int smalltimeoutsecs,smalltimeoutusecs;
 
 int bigtimeoutsecs,bigtimeoutusecs;
 
+int tls_shake_timeout_secs,tls_shake_timeout_usecs;
+
+int tls_data_timeout_secs,tls_data_timeout_usecs;
+
 int port;
 
 int quota;

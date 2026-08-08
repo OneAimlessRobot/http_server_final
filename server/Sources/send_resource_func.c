@@ -98,6 +98,7 @@ MimeEntry mime_types[] = {
     {".rss","application/rss+xml"},
     {".rcon","text/html"},
     {".xml","application/xml"},
+    {".3gp","video/3gpp"},
     {NULL, "application/octet-stream"}
 };
 

@@ -191,6 +191,14 @@ void initializeConstants(void){
 	
 	bigtimeoutsecs=atoi(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
 	
+	tls_shake_timeout_usecs=atoi(find_value_in_cfg_arr("tls_shake_timeout_usecs",cfgs));
+	
+	tls_shake_timeout_secs=atoi(find_value_in_cfg_arr("tls_shake_timeout_secs",cfgs));
+	
+	tls_data_timeout_usecs=atoi(find_value_in_cfg_arr("tls_data_timeout_usecs",cfgs));
+	
+	tls_data_timeout_secs=atoi(find_value_in_cfg_arr("tls_data_timeout_secs",cfgs));
+	
 	bigtimeoutusecs=atoi(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
 	
 	port=atoi(find_value_in_cfg_arr("port",cfgs));
@@ -234,6 +242,16 @@ void initializeConstants(void){
 		raise(SIGINT);
 	}
 	if(bigtimeoutusecs<0){
+
+		printf("Config error: timeout must be a non negative 32 bit integer!\n");
+		raise(SIGINT);
+	}
+	if(tls_shake_timeout_secs<0){
+
+		printf("Config error: timeout must be a non negative 32 bit integer!\n");
+		raise(SIGINT);
+	}
+	if(tls_shake_timeout_usecs<0){
 
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
 		raise(SIGINT);
