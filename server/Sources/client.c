@@ -45,9 +45,9 @@ static client* spawnEmptyClient(void){
 
 }
 
-static int sendMediaData(client*c,char* buff,int compress,int is_directory){
+static int sendMediaData(client*c,char* buff,int compress,int is_directory,int is_partial, int range_number){
 
-	return sendResource(c,buff,compress,is_directory);
+	return sendResource(c,buff,compress,is_directory,is_partial,range_number);
 }
 
 
@@ -67,19 +67,19 @@ static void handleCurrentActivity(client*c,http_request req){
 	}
 	int is_directory=isDirectory(header.target);
 	if(is_directory){
-		sendMediaData(c,generateDirListing(header.target),compress,is_directory);
+		sendMediaData(c,generateDirListing(header.target),compress,is_directory,header.is_partial,header.range_number);
 		deleteDirListingHTML();
 		return;
 	}
 	int is_rss_feed=isRssFeed(header.target);
 	if(is_rss_feed){
-		sendMediaData(c,generateRss(header.target),compress,is_directory);
+		sendMediaData(c,generateRss(header.target),compress,is_directory,header.is_partial,header.range_number);
 		deleteRssXML();
 		return;
 	}
 	int is_php_result=isPHPRequest(header.target);
 	if(is_php_result){
-		sendMediaData(c,generatePHPResult(header.target),compress,is_directory);
+		sendMediaData(c,generatePHPResult(header.target),compress,is_directory,header.is_partial,header.range_number);
 		deletePHPResult();
 		return;
 	}
@@ -89,10 +89,10 @@ static void handleCurrentActivity(client*c,http_request req){
 
 
 				handleCustomGetReq(c,header.target,req.data,targetinout);
-				sendMediaData(c,targetinout,compress,is_directory);
+				sendMediaData(c,targetinout,compress,is_directory,header.is_partial,header.range_number);
 			}
 			else{
-				sendMediaData(c,header.target,compress,is_directory);
+				sendMediaData(c,header.target,compress,is_directory,header.is_partial,header.range_number);
 			}
 	break;
 	case POST:
@@ -100,31 +100,31 @@ static void handleCurrentActivity(client*c,http_request req){
 				int is_rcon_result=isRconRequest(header.target);
 				if(is_rcon_result){
 					handleCustomPostReq(c,header.target,req.data,targetinout);
-					sendMediaData(c,generateRconResult(targetinout),compress,is_directory);
+					sendMediaData(c,generateRconResult(targetinout),compress,is_directory,header.is_partial,header.range_number);
 					deleteRconResult();
 					return;
 				}
-				sendMediaData(c,targetinout,compress,is_directory);
+				sendMediaData(c,targetinout,compress,is_directory,header.is_partial,header.range_number);
 			}
 			else{
-				sendMediaData(c,header.target,compress,is_directory);
+				sendMediaData(c,header.target,compress,is_directory,header.is_partial,header.range_number);
 			}
 	break;
 	default:
 		
-		sendMediaData(c,header.target,compress,is_directory);
+		sendMediaData(c,header.target,compress,is_directory,header.is_partial,header.range_number);
 	break;
 	}
 	
 }
 
 void handleConnection(client* c){
- 			memset(c->peerbuff,0,PAGE_DATA_SIZE);
+ 			memset(c->peerbuff,0,BUFFSIZE);
 			http_request req;
 			memset(&req,0,sizeof(http_request));
 			http_header header;
 			memset(&header,0,sizeof(http_header));
-			if(READ_FUNC_TO_USE(c,c->peerbuff,PAGE_DATA_SIZE-1)!=-2){
+			if(READ_FUNC_TO_USE(c,c->peerbuff)!=-2){
                   	if(errno == ECONNRESET){
 				raise(SIGINT);
 			}
@@ -135,11 +135,11 @@ void handleConnection(client* c){
 				
 				print_http_req(logstream,req);
 				}
-				if(!strlen(req.data)&&(req.header->content_length>0)){
+				if(!strlen(req.data)){
 				free(req.data);
-				req.data=malloc(req.header->content_length+1);
-				memset(req.data,0,req.header->content_length+1);
-				if(READ_FUNC_TO_USE(c,req.data,req.header->content_length)!=-2){
+				req.data=malloc(BUFFSIZE);
+				memset(req.data,0,BUFFSIZE);
+				if(READ_FUNC_TO_USE(c,req.data)!=-2){
 
 				
 					if(logging>0){
@@ -200,8 +200,8 @@ void runClientConnection(int is_tls, int sock){
 			init_openssl_libs_server_side();
 			convert_server_con_to_ssl(&c->ctx_if_ssl,c->socket);
 	}
-	c->peerbuff=malloc(PAGE_DATA_SIZE);
-	memset(c->peerbuff,0,PAGE_DATA_SIZE);
+	c->peerbuff=malloc(BUFFSIZE);
+	memset(c->peerbuff,0,BUFFSIZE);
 
 	handleConnection(c);
 

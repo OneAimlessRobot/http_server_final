@@ -16,6 +16,7 @@ extern int logging
 ,compression_level
 ,use_fd
 ,use_chunked
+,ignore_partial
 ,quota
 ,send_socket_size,
 	recv_socket_size,
@@ -26,7 +27,7 @@ extern int logging
 
 extern char currDir[PATHSIZE];
 extern FILE* logstream;
-extern compMethod br,gzip,deflateM,bzip2,servComp;
+extern compMethod br,gzip,bzip2,servComp;
 
 /*
 extern char* logfpath,* defaultTarget,

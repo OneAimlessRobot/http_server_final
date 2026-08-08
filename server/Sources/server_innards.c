@@ -213,6 +213,8 @@ void initializeConstants(void){
 	
 	use_chunked=atoi(find_value_in_cfg_arr("use_chunked",cfgs));
 	
+	ignore_partial=atoi(find_value_in_cfg_arr("ignore_partial",cfgs));
+	
 	logging=atoi(find_value_in_cfg_arr("logging",cfgs));
 	
 	use_tls=atoi(find_value_in_cfg_arr("use_tls",cfgs));
@@ -276,7 +278,7 @@ void clientBootstrap(void){
 	serverOn=1;
 	currNumOfClients=0;
 	socklenpointer=sizeof(clientAddress);
-	servComp=deflateM;
+	servComp=br;
 	
 }
 void initializeServer(void){
@@ -324,7 +326,7 @@ void initializeServer(void){
 	fprintf(logstream,"Server spawnado @ %s\n",inet_ntoa(server_address.sin_addr));
 	}
 	socklenpointer=sizeof(clientAddress);
-	servComp=deflateM;
+	servComp=br;
 	InitializeSSL();
 	mainLoop();
 	DestroySSL();

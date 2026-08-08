@@ -181,7 +181,7 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 }
 
 
-int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
+int sendResource(client* c,char* resourceTarget,int compress,int is_directory,int is_partial, int start_point){
 	char path[PATHSIZE]={0},
 		path2[PATHSIZE]={0};
 	char* ptr= path;
@@ -256,22 +256,41 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 		fseek(result.stream,0,SEEK_SET);
 
 	}
-	//if(the_func!=phpFileProcess){
 	if(!notfound){
 		if(result.comp_enable){
 			if(use_chunked_here){
-				fillUpChunkedHeaderComp(headerBuff,chunkedHeaderComp,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
+				if(!is_partial){
+					fillUpChunkedHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
+				}
+				else{
+					fillUpChunkedPartialHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt,start_point,fileSize);
+				}
 			}
 			else{
-				fillUpNormalHeaderComp(headerBuff,normalHeaderComp,fileSize,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
+				if(!is_partial){
+					fillUpNormalHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt, fileSize);
+				}
+				else{
+					fillUpNormalPartialHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt,start_point,fileSize);
+				}
 			}
 		}
 		else{
 			if(use_chunked_here){
-				fillUpChunkedHeader(headerBuff,chunkedHeader,(const char*)get_mime_type(resourceTarget));
+				if(!is_partial){
+					fillUpChunkedHeader(headerBuff,(const char*)get_mime_type(resourceTarget));			
+				}
+				else{
+					fillUpChunkedPartialHeader(headerBuff,(const char*)get_mime_type(resourceTarget),start_point,fileSize);
+				}
 			}
 			else{
-				fillUpNormalHeader(headerBuff,normalHeader,fileSize,(const char*)get_mime_type(resourceTarget));
+				if(!is_partial){
+					fillUpNormalHeader(headerBuff,(const char*)get_mime_type(resourceTarget),fileSize);			
+				}
+				else{
+					fillUpNormalPartialHeader(headerBuff,(const char*)get_mime_type(resourceTarget),start_point,fileSize);
+				}
 			}
 		}
 	}
@@ -287,27 +306,27 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory){
 		return_result=-1;
 	}
 	int header_size=strlen(headerBuff);
+	print_response_header(headerBuff,1);
 	if((c->is_tls?SSL_write(c->ctx_if_ssl,headerBuff,header_size):send(c->socket,headerBuff,header_size,0))!=(header_size)){
 		if(logging){
 		fprintf(logstream,"ERRO NO SEND!!!! O GET TEM UM ARGUMENTO!!!!:\n%s\n",strerror(errno));
 		}
 	}
-	//}
 	if(use_fd){
 		if(use_chunked_here){
-			sendallchunkedfd(c,result.fd);
+			sendallchunkedfd(c,result.fd,is_partial?start_point:0);
 		}
 		else{
-			sendallfd(c,result.fd);
+			sendallfd(c,result.fd,is_partial?start_point:0);
 		}
 	}
 	else{
 		if(use_chunked_here){
-			sendallchunkedstream(c,result.stream);
+			sendallchunkedstream(c,result.stream,is_partial?start_point:0);
 
 		}
 		else{
-			sendallstream(c,result.stream);
+			sendallstream(c,result.stream,is_partial?start_point:0);
 		}
 	}
 	close(result.fd);

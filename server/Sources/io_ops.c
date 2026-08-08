@@ -264,7 +264,7 @@ int readsome(int sd,char buff[],u_int64_t size,int flags){
 		return -1;
 		}
 }
-int timedreadall(client* c,char* buff,u_int64_t size){
+int timedreadall(client* c,char* buff){
 		int iResult;
 		struct timeval tv;
 		fd_set rfds;
@@ -274,7 +274,7 @@ int timedreadall(client* c,char* buff,u_int64_t size){
 		tv.tv_usec=bigtimeoutusecs;
 		iResult=select(c->socket+1,&rfds,(fd_set*)0,(fd_set*)0,&tv);
 		if(iResult>0){
-			return readall(c,buff,size);
+			return readall(c,buff);
 
 		}
 		else if(!iResult){
@@ -316,18 +316,18 @@ int sendsome(int sd,char buff[],u_int64_t size, int flags){
 		}
 }
 
-int readall(client*c,char* buff,int64_t size){
+int readall(client*c,char* buff){
         int64_t len=0,
 		 total=0;
-while(total<size){
-        len=c->is_tls?readsome_ssl(c->ctx_if_ssl,buff+total,size-total):readsome(c->socket,buff+total,size-total ,0);
+while(total<BUFFSIZE){
+        len=c->is_tls?readsome_ssl(c->ctx_if_ssl,buff+total,BUFFSIZE-total):readsome(c->socket,buff+total,BUFFSIZE-total ,0);
 	if(len<=0){
                 break;
 	}
 	else{
 	total+=len;
 	}
-	if(total==size){
+	if(total==BUFFSIZE){
 	break;
 	}
 }
@@ -365,12 +365,15 @@ while(total<size){
 }
 
 
-int sendallchunkedfd(client*c,int fd){
+int sendallchunkedfd(client*c,int fd, u_int64_t start_point){
 
 char buff[BUFFSIZE];
 char chunkbuff[2 * BUFFSIZE + 10];
 int numread;
 int sent=0;
+int num_bytes_sent=0;
+lseek(fd,start_point,SEEK_SET);
+dprintf(1,"Beginning to send from %lu\n",start_point);
 while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
     int64_t truesize = snprintf(chunkbuff, sizeof(chunkbuff), "%x\r\n", numread);
     memcpy(chunkbuff + truesize, buff, numread);
@@ -416,18 +419,23 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
 	}
 	totalsent += sent;
     	}
+	num_bytes_sent += totalsent;
 }
 
+dprintf(1,"A total of %u bytes was sent!\n",num_bytes_sent);
 c->is_tls?SSL_write(c->ctx_if_ssl, "0\r\n\r\n", 5):send(c->socket, "0\r\n\r\n", 5, 0);
 return 0;
 }
 
-int sendallchunkedstream(client*c,FILE* stream){
+int sendallchunkedstream(client*c,FILE* stream, u_int64_t start_point){
 
 char buff[BUFFSIZE];
 char chunkbuff[2 * BUFFSIZE + 10];
 int numread;
 int sent=0;
+int num_bytes_sent=0;
+fseek(stream,start_point,SEEK_SET);
+dprintf(1,"Beginning to send from %lu\n",start_point);
 while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
     int64_t truesize = snprintf(chunkbuff, sizeof(chunkbuff), "%x\r\n", numread);
     memcpy(chunkbuff + truesize, buff, numread);
@@ -475,18 +483,23 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 	}
 	totalsent += sent;
 	}
+	num_bytes_sent += totalsent;
 }
 
+dprintf(1,"A total of %u bytes was sent!\n",num_bytes_sent);
 c->is_tls?SSL_write(c->ctx_if_ssl, "0\r\n\r\n", 5):send(c->socket, "0\r\n\r\n", 5, 0);
 return 0;
 }
 
-int sendallstream(client*c,FILE* stream){
+int sendallstream(client*c,FILE* stream, u_int64_t start_point){
 
 char buff[BUFFSIZE];
 int numread;
 int sent=0;
-while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
+int num_bytes_sent=0;
+fseek(stream,start_point,SEEK_SET);
+dprintf(1,"Beginning to send from %lu\n",start_point);
+while (((numread = fread(buff,1,BUFFSIZE,stream)) > 0)) {
     int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;
@@ -528,17 +541,23 @@ while ((numread = fread(buff,1,BUFFSIZE,stream)) > 0) {
 	}
 	totalsent += sent;
     	}
+	num_bytes_sent += totalsent;
 }
 
+dprintf(1,"A total of %u bytes was sent!\n",num_bytes_sent);
 return 0;
 }
 
 
-int sendallfd(client*c,int fd){
+int sendallfd(client*c,int fd, u_int64_t start_point){
 
 char buff[BUFFSIZE];
 int numread;
 int sent=0;
+int num_bytes_sent=0;
+
+lseek(fd,start_point,SEEK_SET);
+dprintf(1,"Beginning to send from %lu\n",start_point);
 while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < numread) {
@@ -581,8 +600,10 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
 	}
 	totalsent += sent;
 	}
+	num_bytes_sent += totalsent;
 }
 
+dprintf(1,"A total of %u bytes was sent!\n",num_bytes_sent);
 return 0;
 }
 

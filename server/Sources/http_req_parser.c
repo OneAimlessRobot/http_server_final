@@ -24,6 +24,10 @@ static http_req_type getREQtypeFromString(char* str){
 
 		return INFO;
 	}
+	if(!strcmp(str,"HEAD")){
+
+		return HEAD;
+	}
 	return INVALID;
 }
 static char* getREQStringFromType(http_req_type type){
@@ -35,6 +39,8 @@ static char* getREQStringFromType(http_req_type type){
 	return "POST";
 	case INFO:
 	return "INFO";
+	case HEAD:
+	return "HEAD";
 	default:
 	return NULL;
 
@@ -53,7 +59,7 @@ void print_field_arr(FILE* fstream,http_header_field* fields){
 }
 void print_http_req_header(FILE* fstream,http_header header){
 
-		fprintf(fstream,"HTTP REQUEST HEADER:\n\nType: %s\nOrigin: %s\nTarget: %s\nVersion: %s\nHost: %s\nmimetype: %s\nOS: %s\nContent-Length: %d\nAccepted-encoding: %s\nAccepted-encoding (split): \n",getREQStringFromType(header.type),header.origin,header.target,header.version,header.host,header.mimetype,header.os,header.content_length,header.encodingcopy);
+		fprintf(fstream,"HTTP REQUEST HEADER:\n\nType: %s\nOrigin: %s\nTarget: %s\nVersion: %s\nHost: %s\nmimetype: %s\nOS: %s\nRange (string): |%s|\nRange: bytes=%s-\nAccepted-encoding: %s\nAccepted-encoding (split): \n",getREQStringFromType(header.type),header.origin,header.target,header.version,header.host,header.mimetype,header.os,header.range_string,header.is_partial?header.range:"NO_RANGE_SPECIFIED",header.encodingcopy);
 		print_string_arr(fstream,header.split_encoding);
 		fprintf(fstream,"\nContent-Type (raw): %s\nContent-Type (actual): %s\nForm-boundary: %s\nContent-Type (split):\n",header.content_type_copy,header.content_type,header.form_boundary);
 		print_string_arr(fstream,header.content_type_split);
@@ -92,6 +98,8 @@ static void spawnHTTPHeader(char* buff,http_header*result){
 	memset(result->mimetype,0,FIELDSIZE);
 	memset(result->version,0,FIELDSIZE);
 	memset(result->os,0,FIELDSIZE);
+	memset(result->range,0,FIELDSIZE);
+	memset(result->range_string,0,FIELDSIZE);
 	char* headerArr[ARGVMAX];
 	memset(headerArr,0,ARGVMAX*sizeof(char*));
 	char test[strlen(buff)+1];
@@ -117,13 +125,14 @@ static void spawnHTTPHeader(char* buff,http_header*result){
 	strcpy(result->version,firstHeaderArr[2]);
 	strcpy(result->host,find_field_value_in_field_arr("Host",fieldarr));
 	strcpy(result->origin,find_field_value_in_field_arr("Origin",fieldarr));
-	//strcpy(result.mimetype,find_field_value_in_field_arr("Accept",fieldarr));
 	strcpy(result->mimetype,defaultMimetype);
 	strcpy(result->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));
 	strcpy(result->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
 	strcpy(result->encodingcopy,result->encoding);
 	make_str_arr(result->encoding,",",result->split_encoding,ARGVMAX);
 	strcpy(result->content_type_raw,find_field_value_in_field_arr("Content-Type",fieldarr));
+	
+	
 	if(strlen(result->content_type_raw)){
 	strcpy(result->content_type_copy,result->content_type_raw);
 	make_str_arr(result->content_type_raw,"; ",result->content_type_split,ARGVMAX);
@@ -138,6 +147,7 @@ static void spawnHTTPHeader(char* buff,http_header*result){
 	
 	}
 	}
+	
 	else{
 	result->content_type_split[0]=NULL;
 	result->form_boundary_split[0]=NULL;
@@ -145,8 +155,17 @@ static void spawnHTTPHeader(char* buff,http_header*result){
 	memset(result->content_type_copy,0,FIELDSIZE);
 	memset(result->content_type,0,FIELDSIZE);
 	}
-	result->content_length=atoi(find_field_value_in_field_arr("Content-Length",fieldarr));
 	}
+	result->range_number= 0;
+	if((result->is_partial=(!ignore_partial))){
+		strcpy(result->range_string,find_field_value_in_field_arr("Range",fieldarr));
+		result->range_number= 0;
+		if((result->is_partial=(strlen(result->range_string)>0))){
+			sscanf(result->range_string," bytes=%ld-",&result->range_number);
+			
+		}
+	}
+	snprintf(result->range,FIELDSIZE-1,"%ld",result->is_partial?result->range_number:-1);
 	free(fieldarr);
 	
 }
