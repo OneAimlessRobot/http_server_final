@@ -151,7 +151,8 @@ void init_openssl_libs_server_side(void){
                         SERVER_SSL_initted_in_process=1;
                 }
                 global_server_ctx = SSL_CTX_new(TLS_server_method());
-                SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_PEER , verify_callback);
+                //SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_PEER , verify_callback);
+		SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_NONE , NULL);
 
 
                 /* Load client certificate */
