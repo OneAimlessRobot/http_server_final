@@ -4,15 +4,14 @@
 #include "../Includes/http_req_parser.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/load_logins.h"
 #include "../Includes/load_html.h"
 #include "../Includes/load_rss.h"
 #include "../Includes/php_proxy.h"
 #include "../Includes/rcon_proxy.h"
 #include "../Includes/send_resource_func.h"
 #include "../Includes/server_innards.h"
+#include "../Includes/template_funcs.h"
 #include <sys/socket.h>
-#include <zlib.h>
 #include <errno.h>
 #include <unistd.h>
 #include <assert.h>
@@ -23,96 +22,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
-#define CHUNK 16384
-static char* compressionCmd = "%s -c -%d %s";
-static char inpathbuff[PATHSIZE*6];
-static char outpathbuff[PATHSIZE*6+10];
-static char cmd[PATHSIZE*30];
-typedef struct comp_result{
-	int comp_enable,fd;
-	FILE* stream;
 
-}comp_result;
-
-typedef struct {
-    const char *extension;
-    const char *mime_type;
-} MimeEntry;
-
-MimeEntry mime_types[] = {
-    {".html", "text/html"},
-    {".css", "text/css"},
-    {".js", "application/javascript"},
-    {".png", "image/png"},
-    {".PNG", "image/png"},
-    {".jpg", "image/jpeg"},
-    {".jpeg", "image/jpeg"},
-    {".webp", "image/webp"},
-    {".mp4", "video/mp4"},
-    {".mp3", "audio/mp3"},
-    {".wasm", "application/wasm"},
-    {".webmanifest", "application/manifest+json"},
-    {".gif", "image/gif"},
-    {".jfif", "image/jpeg"},
-    {".avif", "image/avif"},
-    {".java", "text/x-java-source"},
-    {".ico", "image/x-icon"},
-    {".icon", "image/x-icon"},
-    {".json", "application/json"},
-    {".svg", "image/svg+xml"},
-    {".txt", "text/plain"},
-    {".webm", "audio/webm"},
-    {".wav", "audio/wav"},
-    {".m4a", "audio/mp4"},
-    {".sp", "text/x-sourcepawn"},
-    {".sma", "text/x-sourcepawn"},
-    {".inc", "text/x-sourcepawn"},
-    {".cpp", "text/x-c++"},
-    {".c", "text/x-c++"},
-    {".h", "text/x-c++"},
-    {".hpp", "text/x-cpp"},
-    {".cfg", "text/x-config"},
-    {".php", "text/html"},
-    {".vdf", "text/plain"},
-    {".gam", "text/plain"},
-    {".py", "text/x-python"},
-    {".bmp", "image/bmp"},
-    {".log", "text/plain"},
-    {".tga", "image/x-targa"},
-    {".tga", "image/x-targa"},
-    {".dds","image/x-dds"},
-    {".vtf","image/x-vtf"},
-    {".vmt","text/x-vmt"},
-    {".ogg","audio/ogg"},
-    {".flv","video/x-flv"},
-    {".flac","audio/flac"},
-    {".avi","video/x-msvideo"},
-    {".wad","application/x-doom-wad"},
-    {".lst","text/plain"},
-    {".db","text/plain"},
-    {".md","text/plain"},
-    {".php","application/x-httpd-php"},
-    {".php2","application/json"},
-    {".pdf","application/pdf"},
-    {".sh","application/x-sh"},
-    {".rss","application/rss+xml"},
-    {".rcon","text/html"},
-    {".xml","application/xml"},
-    {".3gp","video/3gpp"},
-    {NULL, "application/octet-stream"}
-};
-
-const char* get_mime_type(const char *filename) {
-    const char *dot = strrchr(filename, '.');
-    if (!dot) return "application/octet-stream";
-
-    for (int i = 0; mime_types[i].extension != NULL; i++) {
-        if (strcmp(dot, mime_types[i].extension) == 0) {
-            return mime_types[i].mime_type;
-        }
-    }
-    return "application/octet-stream";
-}
+#include "../Includes/send_resource_wrappers_for_file_exts.h"
 
 static int file_exists(const char *filename)
 {
@@ -146,7 +57,7 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 	snprintf(cmd,sizeof(cmd)-1,compressionCmd,servComp.cmdTool,compression_level,inpathbuff);
 	printf("%s\n",cmd);
 	char* argv[ARGVMAX]={0};
-	makeargv(cmd,argv);
+	makeargv(cmd,argv, -1);
 	int pid=fork();
 	switch(pid){
 		case -1:
@@ -180,14 +91,68 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 	return 0;
 }
 
+static void send_header(client* c, comp_result* result, int notfound,  int start_point, int is_partial, char* resourceTarget){
 
-int sendResource(client* c,char* resourceTarget,int compress,int is_directory,int is_partial, int start_point){
+	u_int64_t fileSize=0;
+	char headerBuff[PATHSIZE]={0};
+	const char* the_mime_type= get_mime_type(notfound?notFoundDefaultTarget:resourceTarget);
+	if(use_fd){
+		lseek(result->fd,0,SEEK_END);
+		fileSize=lseek(result->fd,0,SEEK_CUR);
+		lseek(result->fd,0,SEEK_SET);
+	}
+	else{
+		fseek(result->stream,0,SEEK_END);
+		fileSize=ftell(result->stream);
+		fseek(result->stream,0,SEEK_SET);
+
+	}
+	(!notfound)?
+		((result->comp_enable)?
+			((use_chunked)?
+				((!is_partial)?
+					fillUpChunkedHeaderComp(headerBuff,the_mime_type,servComp.fileExt)
+					:
+					fillUpChunkedPartialHeaderComp(headerBuff,the_mime_type,servComp.fileExt,start_point,fileSize)
+				)
+				:
+				((!is_partial)?
+					fillUpNormalHeaderComp(headerBuff,the_mime_type,servComp.fileExt, fileSize)
+					:
+					fillUpNormalPartialHeaderComp(headerBuff,the_mime_type,servComp.fileExt,start_point,fileSize)
+				)
+			)
+			:
+			((use_chunked)?
+				((!is_partial)?
+					fillUpChunkedHeader(headerBuff,the_mime_type)		
+					:
+					fillUpChunkedPartialHeader(headerBuff,the_mime_type,start_point,fileSize)
+				)
+				:
+				((!is_partial)?
+					fillUpNormalHeader(headerBuff,the_mime_type,fileSize)		
+					:
+					fillUpNormalPartialHeader(headerBuff,the_mime_type,start_point,fileSize)
+				)
+			)
+		)
+		:
+		(
+		(result->comp_enable)?
+		fillUpFileNotFoundHeaderComp(headerBuff,fileSize,the_mime_type,servComp.fileExt)
+		:
+		fillUpFileNotFoundHeader(headerBuff,fileSize,the_mime_type)
+		);
+	int header_size=strlen(headerBuff);
+	print_response_header(headerBuff);
+	send_wrapper(c,headerBuff,header_size);
+
+}
+void sendResource(client* c,char* resourceTarget,int compress,int is_directory,int is_partial, int start_point){
 	char path[PATHSIZE]={0},
 		path2[PATHSIZE]={0};
 	char* ptr= path;
-	int use_chunked_here=use_chunked;
-	u_int64_t fileSize=0;
-	int return_result=0;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 
 	int we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
@@ -234,167 +199,16 @@ int sendResource(client* c,char* resourceTarget,int compress,int is_directory,in
 		}
 		else{
 			notfound=1;
-			use_chunked_here=0;
+			use_chunked=0;
 			fprintf(logstream,"Enviando resposta 404...\n");
 			printf("Trying to delete %s...\n",outpathbuff);
 			remove(outpathbuff);
-			return_result=-1;
 		}
 	}
 	if(logging){
 		fprintf(logstream,"Done!\n");
 	}
-	char headerBuff[PATHSIZE]={0};
-	if(use_fd){
-		lseek(result.fd,0,SEEK_END);
-		fileSize=lseek(result.fd,0,SEEK_CUR);
-		lseek(result.fd,0,SEEK_SET);
-	}
-	else{
-		fseek(result.stream,0,SEEK_END);
-		fileSize=ftell(result.stream);
-		fseek(result.stream,0,SEEK_SET);
-
-	}
-	if(!notfound){
-		if(result.comp_enable){
-			if(use_chunked_here){
-				if(!is_partial){
-					fillUpChunkedHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt);
-				}
-				else{
-					fillUpChunkedPartialHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt,start_point,fileSize);
-				}
-			}
-			else{
-				if(!is_partial){
-					fillUpNormalHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt, fileSize);
-				}
-				else{
-					fillUpNormalPartialHeaderComp(headerBuff,(const char*)get_mime_type(resourceTarget),servComp.fileExt,start_point,fileSize);
-				}
-			}
-		}
-		else{
-			if(use_chunked_here){
-				if(!is_partial){
-					fillUpChunkedHeader(headerBuff,(const char*)get_mime_type(resourceTarget));			
-				}
-				else{
-					fillUpChunkedPartialHeader(headerBuff,(const char*)get_mime_type(resourceTarget),start_point,fileSize);
-				}
-			}
-			else{
-				if(!is_partial){
-					fillUpNormalHeader(headerBuff,(const char*)get_mime_type(resourceTarget),fileSize);			
-				}
-				else{
-					fillUpNormalPartialHeader(headerBuff,(const char*)get_mime_type(resourceTarget),start_point,fileSize);
-				}
-			}
-		}
-	}
-	else{
-
-		if(result.comp_enable){
-			fillUpFileNotFoundHeaderComp(headerBuff,fileSize,(const char*)get_mime_type(notFoundDefaultTarget),servComp.fileExt);
-		}
-		else{
-			fillUpFileNotFoundHeader(headerBuff,fileSize,(const char*)get_mime_type(notFoundDefaultTarget));
-
-		}
-		return_result=-1;
-	}
-	int header_size=strlen(headerBuff);
-	print_response_header(headerBuff,1);
-	if((c->is_tls?SSL_write(c->ctx_if_ssl,headerBuff,header_size):send(c->socket,headerBuff,header_size,0))!=(header_size)){
-		if(logging){
-		fprintf(logstream,"ERRO NO SEND!!!! O GET TEM UM ARGUMENTO!!!!:\n%s\n",strerror(errno));
-		}
-	}
-	if(use_fd){
-		if(use_chunked_here){
-			sendallchunkedfd(c,result.fd,is_partial?start_point:0);
-		}
-		else{
-			sendallfd(c,result.fd,is_partial?start_point:0);
-		}
-	}
-	else{
-		if(use_chunked_here){
-			sendallchunkedstream(c,result.stream,is_partial?start_point:0);
-
-		}
-		else{
-			sendallstream(c,result.stream,is_partial?start_point:0);
-		}
-	}
-	close(result.fd);
-	if(result.stream!=NULL){
-		fclose(result.stream);
-	}
-
-	printf("Trying to delete %s...\n",outpathbuff);
-	if(result.comp_enable){
-		remove(outpathbuff);
-	}
-	return return_result;
+	send_header(c, &result, notfound, start_point, is_partial, resourceTarget);
+	push_bytes(c, &result, is_partial,start_point);
+	final_cleanup(&result);
 }
-
-/**
-
-
- Compress from file source to file dest until EOF on source.
-   def() returns Z_OK on success, Z_MEM_ERROR if memory could not be
-   allocated for processing, Z_STREAM_ERROR if an invalid compression
-   level is supplied, Z_VERSION_ERROR if the version of zlib.h and the
-   version of the library linked do not match, or Z_ERRNO if there is
-   an error reading or writing the files.
-static int def(FILE* source, FILE* dest, int level)
-{
-    int ret, flush;
-    unsigned have;
-    z_stream strm;
-    unsigned char in[CHUNK];
-    unsigned char out[CHUNK];
-
-    //allocate deflate state
-    strm.zalloc = Z_NULL;
-    strm.zfree = Z_NULL;
-    strm.opaque = Z_NULL;
-    ret = deflateInit(&strm, level);
-    if (ret != Z_OK)
-        return ret;
-    // compress until end of file
-    do {
-        strm.avail_in = fread(in, 1, CHUNK, source);
-        if (ferror(source)) {
-            (void)deflateEnd(&strm);
-            return Z_ERRNO;
-        }
-        flush = feof(source) ? Z_FINISH : Z_NO_FLUSH;
-        strm.next_in = in;
-	//run deflate() on input until output buffer not full, finish
-        //  compression if all of source has been read in
-        do {
-
-            strm.avail_out = CHUNK;
-            strm.next_out = out;
-            ret = deflate(&strm, flush);    //no bad return value
-            assert(ret != Z_STREAM_ERROR);  // state not clobbered
-            have = CHUNK - strm.avail_out;
-            if (fwrite(out,1,have,dest) != have|| ferror(dest)) {
-                (void)deflateEnd(&strm);
-                return Z_ERRNO;
-            }
-
-        } while (strm.avail_out == 0);
-        assert(strm.avail_in == 0);     //all input will be used
-        //done when last data in file processed
-    } while (flush != Z_FINISH);
-    assert(ret == Z_STREAM_END);        //stream will be complete
-    //clean up and return 
-    (void)deflateEnd(&strm);
-    return Z_OK;
-}
-*/

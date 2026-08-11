@@ -7,78 +7,42 @@
 #include "../Includes/cfg_loading.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/send_resource_func.h"
-#include "../Includes/load_logins.h"
 #include "../Includes/server_innards.h"
 #include "../Includes/ssl_things.h"
 #include "../Includes/sock_ops.h"
-#include "../Includes/session_ops.h"
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <errno.h>
 #include <string.h>
 #include <dirent.h>
 #include <sys/types.h>
-#define SEND_SOCK_BUFF_SIZE 10000000
+
 struct sigaction sa;
 
 static socklen_t socklenpointer;
-static int server_socket,currNumOfClients;
+static int server_socket = -1;
 
 static struct sockaddr_in server_address, clientAddress;
 
 static fd_set readfds;
-static char addressContainer[INET_ADDRSTRLEN];
-
-void freeClientArr(client*** arr){
-	if(*arr){
-	for(int i=0;i<quota;i++){
-		if((*arr)[i]){
-		client* c=(*arr)[i];
-		free(c);
-		(*arr)[i]=NULL;
-		}
-	}
-	free(*arr);
-	*arr=NULL;
-	}
-}
-
-int getCurrNumOfClients(void){
-	
-	return currNumOfClients;
 
 
-}
-int getMaxNumOfClients(void){
-	
-	return quota;
-
-
-}
 void cleanup(void){
-close(server_socket);
+	if(serverOn && (server_socket>=0)){
+		close(server_socket);
+		
+	}
+	if(logstream!=stdout && logstream!= stderr){
+		fclose(logstream);
+	}
+	fprintf(stdout,serverOn?"Adeus! Server out...\n":"Cliente out...\n");
 	
-	if(logging){
-	fprintf(logstream,"Adeus clientes...\n");
-	}
-	if(logging){
-	fprintf(logstream,"Adeus! Server out...\n");
-	}
-	if(currLogins){
-	
-	freeLogins(&currLogins);
-
-
-	}
 	if(cfgs){
 	
-	freeCFGs(&cfgs);
+		freeCFGs(&cfgs);
 
 
 	}
-	printf("Adeus! Server out...\n");
-	fclose(logstream);
-	
 }
 static void sigact_sigint_handler(int arg){
 	serverOn+=(arg*0);
@@ -98,10 +62,10 @@ static void handleIncommingConnections(void){
                 tv.tv_usec=bigtimeoutusecs;
  
 	int activity = select( server_socket + 1 , &readfds , NULL , NULL , &tv);
-        if ((activity < 0) && (errno!=EINTR))
-        {
-            printf("select error");
-            return;
+	if ((activity < 0) && (errno!=EINTR))
+	{
+		printf("select error");
+		return;
 	}
 	else if(activity>0){
 
@@ -114,16 +78,16 @@ static void handleIncommingConnections(void){
 			serverOn=0;
 			return;
 		}
-		currNumOfClients++;
 		setNonBlocking(client_socket);
 		getpeername(client_socket , (struct sockaddr*)&clientAddress , (socklen_t*)&socklenpointer);
-                if(logging){
-		fprintf(logstream,"Client connected , ip %s , port %d \n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
-        	}
+        if(logging){
+			fprintf(logstream,"Client connected , ip %s , port %d \n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
+        }
 		char buff_sock[128]={0};
 		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",client_socket);
 		char buff_tls[128]={0};
 		snprintf(buff_tls,sizeof(buff_tls)-1,"%d",use_tls);
+		//char* args_module_cmd[]={"valgrind","--leak-check=full", "--show-leak-kinds=all", "--track-fds=yes", "./server.exe","1",buff_tls,buff_sock,NULL};	
 		char* args_module_cmd[]={"./server.exe","1",buff_tls,buff_sock,NULL};	
 		int pid=fork();
 		switch(pid){
@@ -139,9 +103,6 @@ static void handleIncommingConnections(void){
 				break;
 			default:
 				close(client_socket);
-				if(logging){
-		    		fprintf(logstream,"Adding to list of sockets as socket no: %d\n" , client_socket);
-                    		}
 				break;
 			}
 		
@@ -153,36 +114,24 @@ static void handleIncommingConnections(void){
 static void mainLoop(void){
 	while(serverOn){
 	
-	handleIncommingConnections();
+		handleIncommingConnections();
 	
-	}
-	if(logging){
-		fprintf(logstream,"Connection thread out!\n");
 	}
 }
 void initializeConstants(void){
 
-	strncpy(incorrectLoginTarget,find_value_in_cfg_arr("incorrectLoginTarget",cfgs),FIELDSIZE-1);
-	strncpy(defaultLoginTarget,find_value_in_cfg_arr("defaultLoginTarget",cfgs),FIELDSIZE-1);
-	strncpy(doubleSessionTarget,find_value_in_cfg_arr("defaultSessionTarget",cfgs),FIELDSIZE-1);
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(mainRssFeed,find_value_in_cfg_arr("mainRssFeed",cfgs),FIELDSIZE-1);
-	int invalid_string_confs=!((stringsAreEqual(incorrectLoginTarget,NO_SUCH_SETTING)||
-				stringsAreEqual(incorrectLoginTarget,NO_SETTINGS_LOADED))&&
-				(stringsAreEqual(defaultTarget,NO_SUCH_SETTING)||
+	int invalid_string_confs=!((stringsAreEqual(defaultTarget,NO_SUCH_SETTING)||
 				stringsAreEqual(defaultTarget,NO_SETTINGS_LOADED))&&
-				(stringsAreEqual(doubleSessionTarget,NO_SUCH_SETTING)||
-				stringsAreEqual(doubleSessionTarget,NO_SETTINGS_LOADED))&&
-				(stringsAreEqual(defaultLoginTarget,NO_SUCH_SETTING)||
-				stringsAreEqual(defaultLoginTarget,NO_SETTINGS_LOADED))&&
 				(stringsAreEqual(notFoundDefaultTarget,NO_SUCH_SETTING)||
 				stringsAreEqual(notFoundDefaultTarget,NO_SETTINGS_LOADED)));
 	
 	if(!invalid_string_confs){
 
 		printf("Config error: invalid string-type field set!!!!\n");
-		raise(SIGINT);
+		cleanup();
 
 	}
 	smalltimeoutsecs=atoi(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
@@ -203,8 +152,6 @@ void initializeConstants(void){
 	
 	port=atoi(find_value_in_cfg_arr("port",cfgs));
 	
-	quota=atoi(find_value_in_cfg_arr("quota",cfgs));
-	
 	use_fd=atoi(find_value_in_cfg_arr("use_fd",cfgs));
 	
 	compression=atoi(find_value_in_cfg_arr("compression",cfgs));
@@ -218,67 +165,60 @@ void initializeConstants(void){
 	logging=atoi(find_value_in_cfg_arr("logging",cfgs));
 	
 	use_tls=atoi(find_value_in_cfg_arr("use_tls",cfgs));
-	if(quota<=0){
-
-		quota=500;
-
-	}
+	
 	if(logging<0){
 
 		printf("Config error: logging level must be a non negative 32 bit integer!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 	if(smalltimeoutsecs<0){
 
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 	if(smalltimeoutusecs<0){
 
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 	if(bigtimeoutsecs<0){
 
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 	if(bigtimeoutusecs<0){
 
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 	if(tls_shake_timeout_secs<0){
 
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 	if(tls_shake_timeout_usecs<0){
 
 		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 	if(compression_level<0 || compression_level > 9){
 		printf("Config error: compression level must be an integer between 0 and 9!\n");
-		raise(SIGINT);
+		cleanup();
 	}
 }
 void the_exit_func(void){
-	raise(SIGINT);
+	cleanup();
 }
 void clientBootstrap(void){
 	
 	memset(currDir,0,PATHSIZE);
 	getcwd(currDir,PATHSIZE);
-	printf("Currdir: %s\n",currDir);
+	logstream=stdout;
 	loadCfg();
 	initializeConstants();
-
-	logstream=stdout;
-	serverOn=1;
-	currNumOfClients=0;
 	socklenpointer=sizeof(clientAddress);
 	servComp=br;
+	cleanup();
 	
 }
 void initializeServer(void){
@@ -292,44 +232,42 @@ void initializeServer(void){
 	signal(SIGINT,sigint_handler);
 	memset(currDir,0,PATHSIZE);
 	getcwd(currDir,PATHSIZE);
-	printf("Currdir: %s\n",currDir);
+	logstream=stdout;
 	loadCfg();
 	initializeConstants();
+	print_loaded_cfgs(logstream);
 
-	logstream=stdout;
 	serverOn=1;
-	currNumOfClients=0;
 	server_socket= socket(AF_INET,SOCK_STREAM,0);
-        int ptr=1;
-        setsockopt(server_socket,SOL_SOCKET,SO_REUSEADDR,(char*)&ptr,sizeof(ptr));
-        if(server_socket==-1){
-                raise(SIGINT);
-
-        }
-
+	
+	if(server_socket<0){
+		cleanup();
+		generic_error_print("Server listen socket error!");
+		return;
+	}
+	int ptr=1;
+	setsockopt(server_socket,SOL_SOCKET,SO_REUSEADDR,(char*)&ptr,sizeof(ptr));
 	
 
-        server_address.sin_family=AF_INET;
-        server_address.sin_port= htons(port);
-        server_address.sin_addr.s_addr = INADDR_ANY;
-        socklen_t socklength=sizeof(server_address);
-        
-	bind(server_socket,(struct sockaddr*)(&server_address),socklength);
 
-        listen(server_socket,MAX_CLIENTS_HARD_LIMIT);
-	
-        struct sockaddr_in* pV4Addr = (struct sockaddr_in*)&server_address;
-        struct in_addr ipAddr = pV4Addr->sin_addr;
+
+	server_address.sin_family=AF_INET;
+	server_address.sin_port= htons(port);
+	server_address.sin_addr.s_addr = INADDR_ANY;
+	socklen_t socklength=sizeof(server_address);
         
-	inet_ntop( AF_INET, &ipAddr, addressContainer, INET_ADDRSTRLEN );
+	int bind_result = bind(server_socket,(struct sockaddr*)(&server_address),socklength);
+	if(bind_result<0){
+		cleanup();
+		generic_error_print("Bind error!");
+		return;
+	}
+	listen(server_socket,MAX_CLIENTS_HARD_LIMIT);
+
 	if(logging){
-	fprintf(logstream,"Server spawnado @ %s\n",inet_ntoa(server_address.sin_addr));
+		fprintf(logstream,"Server spawnado @ %s\n",inet_ntoa(server_address.sin_addr));
 	}
 	socklenpointer=sizeof(clientAddress);
-	servComp=br;
-	InitializeSSL();
 	mainLoop();
-	DestroySSL();
-	cleanup();
 }
 

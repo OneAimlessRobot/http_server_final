@@ -4,14 +4,12 @@
 #include "Includes/handlecustom.h"
 #include "Includes/http_req_parser.h"
 #include "Includes/server_innards.h"
-#include "Includes/load_logins.h"
 
 int main(int argc, char** argv){
 	
 	int init_mode=0,
 	sock_num=0,
 	is_tls=0;
-	printf("argc = %d\n",argc);
 	switch(argc){
 		case 1:
 			initializeServer();
@@ -28,7 +26,6 @@ int main(int argc, char** argv){
 					case 1:
 						is_tls=atoi(argv[2]);
 						sock_num=atoi(argv[3]);
-						printf("Is tls? %d\n\nSock num: %d\n",is_tls,sock_num);
 						clientBootstrap();
 						runClientConnection(is_tls,sock_num);
 					break;

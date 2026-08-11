@@ -72,6 +72,6 @@ void fillUpFileNotFoundHeaderComp(char headerBuff[PATHSIZE],u_int64_t size,const
 -----------------------------------------------------------------------------------
 */
 
-void print_response_header(char* headerBuff, int fd);
+void print_response_header(char* headerBuff);
 
 #endif

@@ -16,12 +16,11 @@ int url_decode(char *src, char *dst) {
     int counter_src=0;
     int counter_dst=0;
     while (strnlen(&src[counter_src],PATHSIZE-1)) {
-        //printf("print!\n");
 	if (src[counter_src] == '%' && isxdigit(src[counter_src+1]) && isxdigit(src[counter_src+2])) {
-            //printf("print0!\n");
+        
 	    sscanf(&src[counter_src],"%%%2hhx",&dst[counter_dst]);
 	    if(dst[counter_dst]>126){
-	        //printf("print1!\n");
+			
 		dst[counter_dst] = '\0';
 	    	return 0;
 	    }
@@ -29,12 +28,12 @@ int url_decode(char *src, char *dst) {
 	    counter_src += 3;
         }
 	else if(findInStringArrN(reserved_characters,&src[counter_src],1)>=0){
-		//printf("print2!\n");
+		
 		dst[counter_dst] = '\0';
     		return 0;
 	}
 	 else {
-            //printf("print3!\n");
+		 
 	    dst[counter_dst] = src[counter_src];
 	    counter_dst++;
 	    counter_src++;
@@ -51,10 +50,8 @@ double genRanddouble(double min, double max){
         return 0.0f;
     }
 
-    // Generate a random double between 0 and 1
     double random = ((double)rand() / RAND_MAX);
 
-    // Scale and shift the random value to fit within the desired range
     return (random * (max - min)) + min;
 
 }
@@ -65,7 +62,6 @@ int genRandInt(int min, int max) {
         return 0;
         }
 
-    // Generate a random integer between min and max
     return (rand() % (max - min + 1)) + min;
 }
 
@@ -167,25 +163,47 @@ char *get_file_extension(const char *path) {
     char *extension = strrchr(path, '.');
 
     if (extension != NULL) {
-        // Move the pointer to the character after the dot
+
         return extension + 1;
     }
 
-    // No file extension found
     return NULL;
 }
 
-int makeargv(char *s, char *argv[ARGVMAX]) {
-    int ntokens = 0;
+void generic_error_print(char* prefix_string){
+	
+	fprintf(stderr,"Error!\nError description: %s\nError string: %s\n",
+															prefix_string?prefix_string:"No string given",
+															strerror(errno));
 
-    if (s == NULL || argv == NULL || ARGVMAX == 0)
+}
+
+int makeargv(char *s, char *argv[ARGVMAX], int n_max) {
+	int use_nmax= (n_max>0);
+	int ntokens = 0;
+
+    if (s == NULL || argv == NULL || ARGVMAX == 0){
         return -1;
+    }
     argv[ntokens] = strtok(s, " \t\n");
+	//use_nmax?(printf("The arg%d/%d: |%s| ",ntokens,n_max,argv[ntokens])):(1+1);
     while ((argv[ntokens] != NULL) && (ntokens < ARGVMAX)) {
-        ntokens++;
+        
+		if(use_nmax && (ntokens >=  (n_max-1))){
+			break;
+		}
+		ntokens++;
         argv[ntokens] = strtok(NULL, " \t\n");
     }
-    argv[ntokens] = NULL; // it must terminate with NULL
+    if(use_nmax && (ntokens < n_max)){
+		ntokens++;
+		char* pair[2];
+        argv[ntokens] = strtok(NULL, "\n");
+		splitString(argv[ntokens], " -> ", pair);
+		argv[ntokens]= pair[0];
+	}
+	ntokens++;
+    argv[ntokens] = NULL;
     return ntokens;
 }
 
@@ -233,22 +251,17 @@ void print_string_arr(FILE* fstream,char * args[]){
 
 
 void splitString(char *input, char *delimiter, char *pair[2]) {
-    // Find the first occurrence of the delimiter in the input string
     char *delimiterPos = strstr(input, delimiter);
 
     if (delimiterPos != NULL) {
-        // Calculate the length of the first part
         size_t firstPartLength = delimiterPos - input;
 
-        // Allocate memory for the first part and copy the substring
         pair[0] = input;
 
-	pair[0][firstPartLength] = '\0';
+		pair[0][firstPartLength] = '\0';
 
-        // Allocate memory for the second part and copy the remaining string
         pair[1] = delimiterPos+strlen(delimiter);
 	} else {
-        // If the delimiter is not found, set the second part to NULL
         pair[0] = input;
         pair[1] = NULL;
     }
@@ -286,7 +299,7 @@ int make_str_arr(char *s,char* delim, char *argv[ARGVMAX],int maxlen) {
     	}
     }
     nheaders++;
-    argv[nheaders] = NULL; // it must terminate with NULL
+    argv[nheaders] = NULL;
     return nheaders;
 }
 
@@ -300,7 +313,7 @@ int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX],int maxlen) {
         ntokens++;
         argv[ntokens] = strtok(NULL, delim);
     }
-    argv[ntokens] = NULL; // it must terminate with NULL
+    argv[ntokens] = NULL;
     return ntokens;
 }
 
@@ -370,19 +383,7 @@ void skip_comments(FILE* fp){
 	ungetc(curr_char,fp);
 
 	if(curr_char==';'){
-	//
-	 /*result=fgets(buff,strlen(COMMENT_STRING)+1,fp);
-	 buff[strlen(COMMENT_STRING)]=0;
-	 if(!feof(fp)&&strings_are_equal(buff,COMMENT_STRING)){
-	         printf("\nComment string: %s\nString lida: '%s'\n",COMMENT_STRING,buff);
-	         //printf("\nComment string: %s\n",COMMENT_STRING);
-	         for(size_t i=strlen(COMMENT_STRING);i>0;i--){
-	                 ungetc(buff[i-1],fp);
-	         }
-	         while(((curr_char=fgetc(fp))!='\n')&&curr_char!=EOF);
-	         ungetc(curr_char,fp);
-
-	 }*/
+	
 	 if((curr_char=fgetc(fp))!=EOF){
 	         ungetc(curr_char,fp);
 	         while(((curr_char=fgetc(fp))!='\n')&&curr_char!=EOF);

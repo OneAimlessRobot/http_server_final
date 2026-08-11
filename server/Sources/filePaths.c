@@ -3,6 +3,6 @@
 
 
 
-char host_cert_file_path[PATHSIZE]="/etc/letsencrypt/live/lenasattic.ddns.net/fullchain.pem";
-char host_pkey_file_path[PATHSIZE]="/etc/letsencrypt/live/lenasattic.ddns.net/privkey.pem";
+char host_cert_file_path[PATHSIZE]=".cert_stuff/fullchain.pem";
+char host_pkey_file_path[PATHSIZE]=".cert_stuff/privkey.pem";
 

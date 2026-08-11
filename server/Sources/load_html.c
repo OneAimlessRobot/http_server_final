@@ -7,12 +7,11 @@
 #include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/load_logins.h"
 #include "../Includes/send_resource_func.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/sock_ops.h"
-#include "../Includes/session_ops.h"
 #include "../Includes/load_html.h"
+#include "../Includes/template_funcs.h"
 #include <dirent.h>
 #include <limits.h>
 #include <sys/wait.h>
@@ -32,8 +31,6 @@
 #define NUM_OF_FIELDS_TO_PRINT 4
 
 typedef enum {PERMISSIONS,NUM_LINKS,OWNER_NAME,OWNER_GROUP,SIZE, DATE, TIME,FILE_NAME,CATEGORY_ID_MAX}category_id;
-
-
 
 static char* category_names[CATEGORY_ID_MAX]={
 			"Permissions",
@@ -68,7 +65,6 @@ static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
 static uint16_t category_max_sizes[CATEGORY_ID_MAX]={0};
 static uint16_t category_curr_sizes[CATEGORY_ID_MAX]={0};
 
-static char* FREE_ALL_APPS_COUNTDOWN = "<script src=\"/webcrookedstuff/.keep_android_open_please.js\"></script>";
 
 static char* tmpOne="/.tmp.html",* tmpTwo="/.tmp1.html";
 
@@ -78,6 +74,12 @@ static char tmpDir[PATHSIZE*2]={0};
 static char tmpDir2[PATHSIZE*2]={0};
 static char currSearchedDir[PATHSIZE*2]={0};
 static char resolved_abs_path[PATH_MAX]={0};
+
+//ls -lhu --sort=time --time=mtime --time-style=long-iso --group-directories-first 
+
+static char* the_command[]={"ls","-lhu","--sort=time", "--time=mtime", "--time-style=long-iso", "--group-directories-first",resolved_abs_path,NULL};
+
+
 static char resolved_rel_path[PATH_MAX]={0};
 static char resolved_default_path[PATH_MAX]={0};
 static char header_buff[4+(PATHSIZE+4)*CATEGORY_ID_MAX]={0};
@@ -93,7 +95,7 @@ int isDirectory(char* resourceTarget){
 	DIR* directory=opendir(path);
 	if(directory){
 		closedir(directory);
-	errno=0;
+		errno=0;
 		return 1;
 	}
 	else{
@@ -111,7 +113,7 @@ static void generate_header_sizes_data(FILE* fstream){
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
 		memset(header_argv,0,ARGVMAX*sizeof(char*));
-		makeargv(curr_listing_buff, header_argv);
+		makeargv(curr_listing_buff, header_argv, -1);
 		for(uint32_t j=0;j<NUM_OF_FIELDS_TO_PRINT;j++){
 			uint32_t i=print_order[j];
 			category_curr_sizes[i]=header_argv[i]?strnlen(header_argv[i],PATHSIZE-1):0;
@@ -158,8 +160,10 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 	memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
-		makeargv(curr_listing_buff, curr_listing_argv);
+		makeargv(curr_listing_buff, curr_listing_argv, FILE_NAME);
+		
 		char full_path_buff_to_test[PATH_MAX*4]={0};
+		
 		snprintf(full_path_buff_to_test,PATH_MAX*3-1,"%s/%s",dir,curr_listing_argv[FILE_NAME]);
 		int is_directory_this_one=isDirectory(full_path_buff_to_test);
 		if(is_directory_this_one){
@@ -184,13 +188,15 @@ static void resolve_canonical_path(char raw_path[PATH_MAX],char dst_for_resolved
 
 	if (realpath(raw_path, dst_for_resolved_path))
 	{
-		printf("Canonical path: de %s:\n%s\n",raw_path, dst_for_resolved_path);
+		if(logging){
+			fprintf(logstream,"Canonical path: de %s:\n%s\n",raw_path, dst_for_resolved_path);
+		}
 	}
 	else
 	{
-                if(logging){
-	                fprintf(logstream,"Canonical path (relative) de %s?\nErro: %s\n",raw_path,strerror(errno));
-                }
+		if(logging){
+			fprintf(logstream,"Canonical path (relative) de %s?\nErro: %s\n",raw_path,strerror(errno));
+		}
 	}
 }
 static void resolve_canonical_path_relative(char raw_path[PATH_MAX],char dst_for_resolved_path[PATH_MAX]){
@@ -199,13 +205,15 @@ static void resolve_canonical_path_relative(char raw_path[PATH_MAX],char dst_for
 
 	if (realpath(new_raw_path, dst_for_resolved_path))
 	{
-		printf("Canonical path (relative): de %s:\n%s\n",new_raw_path, dst_for_resolved_path);
+		if(logging){
+			fprintf(logstream,"Canonical path (relative): de %s:\n%s\n",new_raw_path, dst_for_resolved_path);
+		}
 	}
 	else
 	{
-                if(logging){
-	                fprintf(logstream,"Canonical path (relative) de %s?\nErro: %s\n",new_raw_path,strerror(errno));
-                }
+		if(logging){
+			fprintf(logstream,"Canonical path (relative) de %s?\nErro: %s\n",new_raw_path,strerror(errno));
+		}
 	}
 }
 
@@ -218,7 +226,7 @@ static void generateDirListingPrimitive(char* path){
 
 	resolve_canonical_path(currSearchedDir,resolved_abs_path);
 	
-        char* args_cmd[]={"ls","-lhu","--sort=time", "--time=mtime", "--time-style=long-iso", "--group-directories-first",resolved_abs_path,NULL};
+        
         pid_t pid_fork_find_cmd=fork();
         switch(pid_fork_find_cmd){
 
@@ -229,7 +237,7 @@ static void generateDirListingPrimitive(char* path){
                 case 0:
                         dup2(outfd,STDOUT_FILENO);
                         close(outfd);
-                        execvp(args_cmd[0],args_cmd);
+                        execvp(the_command[0],the_command);
                 break;
                 default:
                         wait(NULL);
@@ -264,7 +272,7 @@ char* generateDirListing(char* dir){
 		pathsize2=pathsize3;
 	}
         int atRoot=(pathsize2==pathsize3);
-	snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
+		snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
 
         snprintf(tmpDir2,PATHSIZE*2-1,"%s%s",currDir,tmpTwo);
 
@@ -285,13 +293,7 @@ char* generateDirListing(char* dir){
                 return NULL;
         }
         remove(tmpDir);
-	dprintf(fd,"<!DOCTYPE html>"
-			"\n<html>"
-			"\n<head>"
-			"\n<base href=''>"
-			"\n<link rel='stylesheet' type='text/css' href='%s'>"
-			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-			"\n</head>"
+	dprintf(fd,STYLESHEET_FORMAT
 			"\n<body class='%s'>\n<br>%s\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN);
 	if(atRoot){
 

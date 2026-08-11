@@ -14,8 +14,8 @@ typedef struct cfg_field{
 
 extern cfg_field** cfgs;
 
-
 char* find_value_in_cfg_arr(char* setting,cfg_field** cfgs);
 void loadCfg(void);
+void print_loaded_cfgs(FILE* fstream);
 void freeCFGs(cfg_field*** cfgs);
 #endif

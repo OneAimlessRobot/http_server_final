@@ -217,8 +217,9 @@ void fillUpFileNotFoundHeaderComp(char headerBuff[PATHSIZE],u_int64_t size,const
 -----------------------------------------------------------------------------------
 */
 
-void print_response_header(char* headerBuff, int fd){
+void print_response_header(char* headerBuff){
 	
-	dprintf(fd,"This is the header:\n\n%s",headerBuff);
-	
+	if(logging>10){
+		fprintf(logstream,"This is the header:\n\n%s",headerBuff);
+	}
 }

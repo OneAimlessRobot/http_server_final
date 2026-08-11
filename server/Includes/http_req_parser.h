@@ -11,6 +11,8 @@ typedef struct http_header{
 
 	http_req_type type;
 	char target[FIELDSIZE],
+		target_processed[FIELDSIZE],
+		target_quoted[FIELDSIZE],
 		version[FIELDSIZE],
 		host[FIELDSIZE],
 		*split_encoding[ARGVMAX],

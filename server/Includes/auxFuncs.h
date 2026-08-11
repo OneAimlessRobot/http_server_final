@@ -15,7 +15,8 @@ int64_t min(int64_t arg1, int64_t arg2);
 int64_t max(int64_t arg1, int64_t arg2);
 char *get_file_extension(const char *path);
 
-int makeargv(char *s, char *argv[ARGVMAX]);
+int makeargv(char *s, char *argv[ARGVMAX], int n_max);
+
 void replaceStringCharacter(char *s,char dirty,char wantthisoneinstead);
 
 int findInStringArr(char* arr[],char* nullTermStr);
@@ -25,6 +26,8 @@ int get_string_arr_size(char*args[]);
 void print_string_arr(FILE* fstream,char * args[]);
 
 void splitString(char *input, char *delimiter, char *pair[2]);
+
+void generic_error_print(char* prefix_string);
 
 int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX], int maxlen);
 

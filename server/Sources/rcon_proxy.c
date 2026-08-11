@@ -7,10 +7,8 @@
 #include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/load_logins.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/sock_ops.h"
-#include "../Includes/session_ops.h"
 #include "../Includes/rcon_proxy.h"
 #include <sys/wait.h>
 

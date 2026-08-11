@@ -4,7 +4,6 @@
 #include "../Includes/http_req_parser.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/load_logins.h"
 #include "../Includes/load_html.h"
 #include "../Includes/load_rss.h"
 #include "../Includes/php_proxy.h"
@@ -24,8 +23,10 @@ SSL_CTX *global_server_ctx=NULL;
 int verify_callback(int ok, X509_STORE_CTX *ctx) {
     if (!ok) {
         int err = X509_STORE_CTX_get_error(ctx);
-        printf("Verify error: %s\n",
+		if(logging>10){
+			fprintf(logstream,"Verify error: %s\n",
                X509_verify_cert_error_string(err));
+        }
     }
     return ok;
 }
@@ -33,19 +34,17 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 void InitializeSSL(void){
      if(use_tls){
 	if(SSL_on_in_process){
-		if(logging){
+		if(logging>10){
 			fprintf(logstream,"SSL já ativo! Ignorando!\n");
 		}
 		return;
 	}
 	else{
-		if(logging){
+		if(logging>10){
 			fprintf(logstream,"SSL ativo! SSL_on_in_process: 0 -> 1 !\n");
 		}
 		SSL_on_in_process=1;
 	}
-    printf("OpenSSL version: %s\n", OPENSSL_VERSION_TEXT);
-    printf("OpenSSL version text func: %s\n", OpenSSL_version(OPENSSL_VERSION));
     SSL_load_error_strings();
     SSL_library_init();
     OpenSSL_add_all_algorithms();
@@ -55,13 +54,13 @@ void InitializeSSL(void){
 void DestroySSL(void){
 	if(use_tls){
 		if(!SSL_on_in_process){
-			if(logging){
+			if(logging>10){
 				fprintf(logstream,"SSL já desativado! Ignorando!\n");
 			}
 			return;
 		}
 		else{
-			if(logging){
+			if(logging>10){
 				fprintf(logstream,"SSL desativado! SSL_on_in_process: 1 -> 0 !\n");
 			}
 			SSL_on_in_process=0;
@@ -112,20 +111,20 @@ void convert_server_con_to_ssl(SSL** cSSL, int sd){
 			select(sd + 1, (fd_set*)0, &wfds, (fd_set*)0, &tv);
 		}
 		else {
-			if(logging){
+			if(logging>10){
 				fprintf(logstream, "SSL handshake failed:\n");
 				ERR_print_errors_fp(logstream);
 			}
 			ShutdownSSL(cSSL);
 			break;
 		}
-		if(logging){
+		if(logging>10){
 			fprintf(logstream,"Waiting...\n");
 		}
 	}
 }
 void init_openssl_libs_server_side(void){
-        if(logging){
+		if(logging>10){
                 if(use_tls){
 
                         fprintf(logstream,"Server's SSL Ativado? inicializando Server's SSL!...\n");
@@ -139,20 +138,20 @@ void init_openssl_libs_server_side(void){
 
         if(use_tls){
                 if(SERVER_SSL_initted_in_process){
-                        if(logging){
+                        if(logging>10){
                                 fprintf(logstream,"SERVER SSL já ativo! Ignorando!\n");
                         }
                         return;
                 }
                 else{
-                        if(logging){
+                        if(logging>10){
                                 fprintf(logstream,"SERVER SSL ativo! SERVER_SSL_initted_in_process: 0 -> 1 !\n");
                         }
                         SERVER_SSL_initted_in_process=1;
                 }
                 global_server_ctx = SSL_CTX_new(TLS_server_method());
                 //SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_PEER , verify_callback);
-		SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_NONE , NULL);
+				SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_NONE , NULL);
 
 
                 /* Load client certificate */
@@ -176,34 +175,34 @@ void init_openssl_libs_server_side(void){
 
 void end_openssl_libs_server_side(void){
 
-        if(logging){
+        if(logging>10){
 
                 fprintf(logstream,"Closing server's global ssl context?\n");
         }
         if(use_tls){
                 if(!SERVER_SSL_initted_in_process){
-                        if(logging){
+                        if(logging>10){
                                 fprintf(logstream,"SERVER SSL já desativado! Ignorando!\n");
                         }
                         return;
                 }
                 else{
-                        if(logging){
+                        if(logging>10){
                                 fprintf(logstream,"SERVER SSL desativado! SERVER_SSL_initted_in_process: 1 -> 0 !\n");
                         }
                         SERVER_SSL_initted_in_process=0;
                 }
-                if(logging){
+                if(logging>10){
 
                         fprintf(logstream,"Yes!\n");
                 }
                 SSL_CTX_free(global_server_ctx);
-                if(logging){
+                if(logging>10){
 
                         fprintf(logstream,"Server's global ssl context closed!!\n");
                 }
         }
-        else if(logging){
+        else if(logging>10){
 
                 fprintf(logstream,"Nooooo... (Server's global ctx is null so there is nothing to close)\n");
         }

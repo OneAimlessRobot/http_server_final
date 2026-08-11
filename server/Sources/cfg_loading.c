@@ -20,6 +20,13 @@ static void print_cfg_arr(FILE* fstream,cfg_field** cfgs){
 	}
 
 }
+void print_loaded_cfgs(FILE* fstream){
+	
+	if(logging){
+		fprintf(fstream,"\nCFGs carregadas:\n");
+		print_cfg_arr(fstream,cfgs);
+	}
+}
 char* find_value_in_cfg_arr(char* setting,cfg_field** cfgs){
 	if(cfgs){
 	for (int i=0;cfgs[i];i++){
@@ -76,7 +83,6 @@ void loadCfg(void)
 
 	}
 	cfgs[i]=NULL;
-	printf("\nCFGs carregadas:\n");
 	fclose(CFGStream);
 	free(buff);
 	return;

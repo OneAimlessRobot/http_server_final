@@ -93,6 +93,7 @@ return arr;
 static void spawnHTTPHeader(char* buff,http_header*result){
 	result->type=INVALID;
 	memset(result->target,0,FIELDSIZE);
+	memset(result->target_processed,0,FIELDSIZE);
 	memset(result->origin,0,FIELDSIZE);
 	memset(result->host,0,FIELDSIZE);
 	memset(result->mimetype,0,FIELDSIZE);

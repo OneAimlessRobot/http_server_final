@@ -37,9 +37,11 @@
 #include "http_response_aux.h"
 #include "filePaths.h"
 
-
+#define FREE_ALL_APPS_COUNTDOWN "<script src=\"/webcrookedstuff/.keep_android_open_please.js\"></script>"
 
 typedef typeof(void (void)) *exit_func_t;
+
+
 #include "io_ops.h"
 
 

@@ -17,10 +17,8 @@ extern int logging
 ,use_fd
 ,use_chunked
 ,ignore_partial
-,quota
 ,send_socket_size,
 	recv_socket_size,
-	session_time_usecs,
 	serverOn,
 	use_tls,
 	use_exit_func;
@@ -29,22 +27,9 @@ extern char currDir[PATHSIZE];
 extern FILE* logstream;
 extern compMethod br,gzip,bzip2,servComp;
 
-/*
-extern char* logfpath,* defaultTarget,
-*notFoundTarget,
-*testScriptTarget,
-*defaultTargetAdmin,
-*defaultLoginTarget,
-*doubleSessionTarget,
-*timeoutTarget,
-*incorrectLoginTarget;
-*/
 
 extern char
 defaultTarget[FIELDSIZE],
-defaultLoginTarget[FIELDSIZE],
-doubleSessionTarget[FIELDSIZE],
-incorrectLoginTarget[FIELDSIZE],
 notFoundDefaultTarget[FIELDSIZE],
 mainRssFeed[FIELDSIZE],
 * defaultVersion,

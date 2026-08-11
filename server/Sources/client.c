@@ -6,7 +6,6 @@
 #include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/client.h"
-#include "../Includes/load_logins.h"
 #include "../Includes/load_html.h"
 #include "../Includes/ssl_things.h"
 #include "../Includes/load_rss.h"
@@ -15,7 +14,6 @@
 #include "../Includes/send_resource_func.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/sock_ops.h"
-#include "../Includes/session_ops.h"
 #include <time.h>
 #include <sys/time.h>
 #include <sys/socket.h>
@@ -45,61 +43,63 @@ static client* spawnEmptyClient(void){
 
 }
 
-static int sendMediaData(client*c,char* buff,int compress,int is_directory,int is_partial, int range_number){
+static void sendMediaData(client*c,char* buff,int compress,int is_directory,int is_partial, int range_number){
 
-	return sendResource(c,buff,compress,is_directory,is_partial,range_number);
+	sendResource(c,buff,compress,is_directory,is_partial,range_number);
 }
 
-
+static void process_header_target(http_header* the_header){
+	
+	if(logging>10){
+		fprintf(logstream,"Non processed header target:\n%s\n",the_header->target);
+	}
+	url_decode(the_header->target, the_header->target_processed);
+	
+	if(logging>10){
+		fprintf(logstream,"Processed header target_processed!:\n%s\n",the_header->target_processed);
+	}
+}
 static void handleCurrentActivity(client*c,http_request req){
 	int compress=0;
 	char targetinout[PATHSIZE]={0};
 	http_header header=*(req.header);
 	if(!strcmp(header.target,"/")){
 
-		strcpy(header.target,defaultLoginTarget);
+		strcpy(header.target,defaultTarget);
 	}
-	if(logging){
-		fprintf(logstream,"%s\n",header.target);
-	}
+	
+	process_header_target(&header);
+	
 	if(findInStringArr(header.split_encoding,servComp.encodingExt)>=0){
 		compress=compression;
 	}
-	int is_directory=isDirectory(header.target);
+	int is_directory=isDirectory(header.target_processed);
 	if(is_directory){
-		sendMediaData(c,generateDirListing(header.target),compress,is_directory,header.is_partial,header.range_number);
+		sendMediaData(c,generateDirListing(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
 		deleteDirListingHTML();
 		return;
 	}
-	int is_rss_feed=isRssFeed(header.target);
+	int is_rss_feed=isRssFeed(header.target_processed);
 	if(is_rss_feed){
-		sendMediaData(c,generateRss(header.target),compress,is_directory,header.is_partial,header.range_number);
+		sendMediaData(c,generateRss(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
 		deleteRssXML();
 		return;
 	}
-	int is_php_result=isPHPRequest(header.target);
+	int is_php_result=isPHPRequest(header.target_processed);
 	if(is_php_result){
-		sendMediaData(c,generatePHPResult(header.target),compress,is_directory,header.is_partial,header.range_number);
+		sendMediaData(c,generatePHPResult(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
 		deletePHPResult();
 		return;
 	}
 	switch(header.type){
 	case GET:
-			if(isCustomGetReq(header.target)){
-
-
-				handleCustomGetReq(c,header.target,req.data,targetinout);
-				sendMediaData(c,targetinout,compress,is_directory,header.is_partial,header.range_number);
-			}
-			else{
-				sendMediaData(c,header.target,compress,is_directory,header.is_partial,header.range_number);
-			}
+		sendMediaData(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number);
 	break;
 	case POST:
-			if(isCustomPostReq(header.target)){
-				int is_rcon_result=isRconRequest(header.target);
+			if(isCustomPostReq(header.target_processed)){
+				int is_rcon_result=isRconRequest(header.target_processed);
 				if(is_rcon_result){
-					handleCustomPostReq(c,header.target,req.data,targetinout);
+					handleCustomPostReq(header.target_processed,req.data,targetinout);
 					sendMediaData(c,generateRconResult(targetinout),compress,is_directory,header.is_partial,header.range_number);
 					deleteRconResult();
 					return;
@@ -107,12 +107,12 @@ static void handleCurrentActivity(client*c,http_request req){
 				sendMediaData(c,targetinout,compress,is_directory,header.is_partial,header.range_number);
 			}
 			else{
-				sendMediaData(c,header.target,compress,is_directory,header.is_partial,header.range_number);
+				sendMediaData(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number);
 			}
 	break;
 	default:
 		
-		sendMediaData(c,header.target,compress,is_directory,header.is_partial,header.range_number);
+		sendMediaData(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number);
 	break;
 	}
 	
@@ -125,31 +125,30 @@ void handleConnection(client* c){
 			http_header header;
 			memset(&header,0,sizeof(http_header));
 			if(READ_FUNC_TO_USE(c,c->peerbuff)!=-2){
-                  	if(errno == ECONNRESET){
-				raise(SIGINT);
-			}
-			else if(strlen(c->peerbuff)){
-				spawnHTTPRequest(c->peerbuff,&header,&req);
-				if(logging>0){
-				fprintf(logstream,"Recebemos request!!!:\n");
-				
-				print_http_req(logstream,req);
+				if(errno == ECONNRESET){
+					raise(SIGINT);
 				}
-				if(!strlen(req.data)){
-				free(req.data);
-				req.data=malloc(BUFFSIZE);
-				memset(req.data,0,BUFFSIZE);
-				if(READ_FUNC_TO_USE(c,req.data)!=-2){
-
-				
+				else if(strlen(c->peerbuff)){
+					spawnHTTPRequest(c->peerbuff,&header,&req);
 					if(logging>0){
-					fprintf(logstream,"Recebemos dados!!!: %s\n",req.data);
+						fprintf(logstream,"Recebemos request!!!:\n");
+						
+						print_http_req(logstream,req);
 					}
+					if(!strlen(req.data)){
+					free(req.data);
+					req.data=malloc(BUFFSIZE);
+					memset(req.data,0,BUFFSIZE);
+					if(READ_FUNC_TO_USE(c,req.data)!=-2){
+
+						if(logging>0){
+							fprintf(logstream,"Recebemos dados!!!: %s\n",req.data);
+						}
+					}
+					}
+					handleCurrentActivity(c,req);
+					free(req.data);
 				}
-				}
-				handleCurrentActivity(c,req);
-				free(req.data);
-			}
 			}
 			
 }
@@ -195,7 +194,9 @@ void runClientConnection(int is_tls, int sock){
 	c->socket=sock;
 	c->is_tls=is_tls_connection(c->socket);
 	if(c->is_tls){
-			printf("Its tls we do eht!\n");
+			if(logging>0){
+				fprintf(logstream,"Its tls we do eht!\n");
+			}
 			InitializeSSL();
 			init_openssl_libs_server_side();
 			convert_server_con_to_ssl(&c->ctx_if_ssl,c->socket);
@@ -207,10 +208,10 @@ void runClientConnection(int is_tls, int sock){
 
 	getpeername(c->socket , (struct sockaddr*)&c->client_addr , (socklen_t*)&socklenpointer);
 	if(logging>0){
-		fprintf(logstream,"Host disconnected. Cliente com socket %d ip %s , port %d \n" ,c->socket,inet_ntoa(c->client_addr.sin_addr) , ntohs(c->client_addr.sin_port));
+		fprintf(logstream,"Disconnexao cliente de:\n%s:%d\n" ,inet_ntoa(c->client_addr.sin_addr) , ntohs(c->client_addr.sin_port));
 			   
-			 }
+	}
 			 
-exit_function_client();
+	exit_function_client();
 
 }

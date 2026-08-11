@@ -7,14 +7,11 @@
 #include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/load_logins.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/sock_ops.h"
-#include "../Includes/session_ops.h"
 #include "../Includes/load_rss.h"
 #include <sys/wait.h>
 
-static char* FREE_ALL_APPS_COUNTDOWN = "/webcrookedstuff/.keep_android_open_please.js";
 static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss";
 static char* tmpOne="/.tmp.rss",* tmpTwo="/.tmp1.rss";
 static char channel_string_buff[PATHSIZE*2]={0};

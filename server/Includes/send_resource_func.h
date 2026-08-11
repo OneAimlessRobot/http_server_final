@@ -2,6 +2,6 @@
 #define SEND_RESOURCE_FUNC_H
 #define USEFD 1
 
-int sendResource(client*c,char* resourceTarget,int compress,int is_directory,int is_partial, int start_point);
+void sendResource(client*c,char* resourceTarget,int compress,int is_directory,int is_partial, int start_point);
 
 #endif
