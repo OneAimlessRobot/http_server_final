@@ -9,6 +9,7 @@ static char* reserved_characters[]={
 	"\\",
 	"\""
 	":",
+	"&",
 	NULL
 };
 int url_decode(char *src, char *dst) {
