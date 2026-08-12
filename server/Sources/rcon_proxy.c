@@ -31,8 +31,8 @@ typedef struct rcon_arg_line{
 #define DEF_RCON_CMD "stats"
 
 
-#define tmpOne "%s.tmp.rcon"
-#define tmpTwo "%s.tmp1.rcon"
+#define tmpOne "/.tmp.rcon"
+#define tmpTwo "/.tmp1.rcon"
 
 static char tmpFile[PATHSIZE*3]={0};
 static char tmpFile2[PATHSIZE*3]={0};
@@ -152,8 +152,8 @@ char* generateRconResult(char* the_request_parameters){
 	logging=1;
         logstream=stderr;
 
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,the_request_parameters);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,the_request_parameters);
+	snprintf(tmpFile,PATHSIZE*3-1,"%s",tmpOne);
+	snprintf(tmpFile2,PATHSIZE*3-1,"%s",tmpTwo);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
 	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
@@ -193,9 +193,9 @@ char* generateRconResult(char* the_request_parameters){
 
 }
 
-void deleteRconResult(char* the_request_parameters){
+void deleteRconResult(void){
 char buff[PATHSIZE*3]={0};
-snprintf(buff,PATHSIZE*3-1,tmpTwo,the_request_parameters);
+snprintf(buff,PATHSIZE*3-1,"%s",tmpTwo);
 snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
 remove(tmpDir2);
 

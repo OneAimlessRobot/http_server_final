@@ -108,7 +108,7 @@ static void handleCurrentActivity(client*c,http_request req){
 				if(is_rcon_result){
 					handleCustomPostReq(header.target_processed,req.data,targetinout);
 					sendMediaData(c,generateRconResult(targetinout),compress,is_directory,header.is_partial,header.range_number);
-					deleteRconResult(header.target_processed);
+					deleteRconResult();
 					return;
 				}
 				sendMediaData(c,targetinout,compress,is_directory,header.is_partial,header.range_number);
