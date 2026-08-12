@@ -14,6 +14,8 @@
 #include <sys/wait.h>
 
 #define TXT_PRETTIFY_BODY_CLASS "txt_prettify_body"
+#define TXT_PRETTIFY_PRE_CLASS TXT_PRETTIFY_BODY_CLASS
+#define TXT_PRETTIFY_DIV_CLASS TXT_PRETTIFY_BODY_CLASS
 
 #define tmpOne "%s.tmp.txt"
 #define tmpTwo "%s.tmp1.txt"
@@ -124,14 +126,14 @@ char* generateText(char* dir){
 	
 	
 	dprintf(fd,TXT_HTML_PREFIX
-		"\n<body class='%s'>\n<br>%s\n<br>\n\n<br>\n<br><div class=\"markdown\">\n\n",marked_js_lib_path,txt_prettify_css_file_path,TXT_PRETTIFY_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN);
+		"\n<body class='%s'>\n<br>\n<br>\n\n<br>\n<br><div class='%s'>\n<pre class='%s'>\n\n",marked_js_lib_path,txt_prettify_css_file_path,TXT_PRETTIFY_BODY_CLASS,TXT_PRETTIFY_DIV_CLASS,TXT_PRETTIFY_PRE_CLASS);
 	
 
 	char currLine[PATHSIZE*2]={0};
 	while(fgets(currLine,PATHSIZE,fstream)){
 		dprintf(fd,"%s",currLine);
 	}
-	dprintf(fd,"\n</div>\n\n<br>\n<br>\n"
+	dprintf(fd,"\n</pre>\n</div>\n\n<br>\n<br>\n"
 				"</body>\n</html>\n");
 	fclose(fstream);
 	close(fd);
