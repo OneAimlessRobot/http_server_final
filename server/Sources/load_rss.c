@@ -13,7 +13,14 @@
 #include <sys/wait.h>
 
 static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss";
-static char* tmpOne="/.tmp.rss",* tmpTwo="/.tmp1.rss";
+
+#define tmpOne "%s.tmp.rss"
+#define tmpTwo "%s.tmp1.rss"
+
+static char tmpFile[PATHSIZE*3]={0};
+static char tmpFile2[PATHSIZE*3]={0};
+
+
 static char channel_string_buff[PATHSIZE*2]={0};
 
 static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currFetchedRSS[PATHSIZE*2]={0};
@@ -151,8 +158,12 @@ char* generateRss(char* dir){
 
 	logging=1;
         logstream=stderr;
-        snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
-        snprintf(tmpDir2,PATHSIZE*2-1,"%s%s",currDir,tmpTwo);
+	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir);
+	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir);
+	
+	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
+	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	
         int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
         if(fd<0){
                 if(logging){
@@ -206,13 +217,14 @@ char* generateRss(char* dir){
 	end:
 		fclose(fstream);
 		close(fd);
-	return tmpTwo;
+	return tmpFile2;
 
 }
 
-void deleteRssXML(void){
-char buff[PATHSIZE*2]={0};
-snprintf(buff,PATHSIZE*2,"%s%s",currDir,tmpTwo);
-remove(buff);
+void deleteRssXML(char* path){
+char buff[PATHSIZE*3]={0};
+snprintf(buff,PATHSIZE*3-1,tmpTwo,path);
+snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
+remove(tmpDir2);
 
 }

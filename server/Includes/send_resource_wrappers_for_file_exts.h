@@ -46,7 +46,7 @@ static MimeEntry mime_types[] = {
     {".icon", "image/x-icon"},
     {".json", "application/json"},
     {".svg", "image/svg+xml"},
-    {".txt", "text/markdown"},
+    {".txt", "text/html"},
     {".webm", "audio/webm"},
     {".wav", "audio/wav"},
     {".m4a", "audio/mp4"},

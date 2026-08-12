@@ -31,7 +31,11 @@ typedef struct rcon_arg_line{
 #define DEF_RCON_CMD "stats"
 
 
-static char* tmpOne="/.tmp.rcon",* tmpTwo="/.tmp1.rcon";
+#define tmpOne "%s.tmp.rcon"
+#define tmpTwo "%s.tmp1.rcon"
+
+static char tmpFile[PATHSIZE*3]={0};
+static char tmpFile2[PATHSIZE*3]={0};
 
 static char* the_rcon_script="/webcrookedstuff/cstrike_folder/scripts/.send_command.sh";
 
@@ -115,7 +119,7 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 
 	int outfd= open(tmpDir,O_TRUNC|O_WRONLY|O_CREAT,0777);
 
-        snprintf(currFetchedRCON,PATHSIZE*2-1,"%s%s",currDir,the_rcon_script);
+        snprintf(currFetchedRCON,PATHSIZE*2-1,"%s%s", currDir,the_rcon_script);
 
         char* args_cmd[]={"bash",currFetchedRCON,
 						parameters_arr[ADDR].the_actual_value,
@@ -148,9 +152,11 @@ char* generateRconResult(char* the_request_parameters){
 	logging=1;
         logstream=stderr;
 
-	snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
-
-        snprintf(tmpDir2,PATHSIZE*2-1,"%s%s",currDir,tmpTwo);
+	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,the_request_parameters);
+	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,the_request_parameters);
+	
+	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
+	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
 
         int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
         if(fd<0){
@@ -183,13 +189,14 @@ char* generateRconResult(char* the_request_parameters){
 	dprintf(fd,"</pre>\n</body>\n</html>\n");
 	fclose(fstream);
 	close(fd);
-	return tmpTwo;
+	return tmpFile2;
 
 }
 
-void deleteRconResult(void){
-char buff[PATHSIZE*2]={0};
-snprintf(buff,PATHSIZE*2,"%s%s",currDir,tmpTwo);
-remove(buff);
+void deleteRconResult(char* the_request_parameters){
+char buff[PATHSIZE*3]={0};
+snprintf(buff,PATHSIZE*3-1,tmpTwo,the_request_parameters);
+snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
+remove(tmpDir2);
 
 }

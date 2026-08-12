@@ -65,14 +65,17 @@ static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
 static uint16_t category_max_sizes[CATEGORY_ID_MAX]={0};
 static uint16_t category_curr_sizes[CATEGORY_ID_MAX]={0};
 
+#define tmpOne "%s.tmp.html"
+#define tmpTwo "%s.tmp1.html"
 
-static char* tmpOne="/.tmp.html",* tmpTwo="/.tmp1.html";
+static char tmpFile[PATHSIZE*3]={0};
+static char tmpFile2[PATHSIZE*3]={0};
 
 static const char* dir_listing_css_file_path= "/webcrookedstuff/.dir_listing_style.css";
 
-static char tmpDir[PATHSIZE*2]={0};
-static char tmpDir2[PATHSIZE*2]={0};
-static char currSearchedDir[PATHSIZE*2]={0};
+static char tmpDir[PATHSIZE*4]={0};
+static char tmpDir2[PATHSIZE*4]={0};
+static char currSearchedDir[PATHSIZE*3]={0};
 static char resolved_abs_path[PATH_MAX]={0};
 
 //ls -lhu --sort=time --time=mtime --time-style=long-iso --group-directories-first 
@@ -89,7 +92,9 @@ static char curr_listing_buff[4+(PATHSIZE+8)*CATEGORY_ID_MAX]={0};
 
 
 int isDirectory(char* resourceTarget){
-        char path[PATHSIZE]={0};
+       
+    
+    char path[PATHSIZE]={0};
 	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	DIR* directory=opendir(path);
@@ -271,30 +276,40 @@ char* generateDirListing(char* dir){
 		dir=defaultTarget;
 		pathsize2=pathsize3;
 	}
-        int atRoot=(pathsize2==pathsize3);
-		snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
+	int atRoot=(pathsize2==pathsize3);
 
-        snprintf(tmpDir2,PATHSIZE*2-1,"%s%s",currDir,tmpTwo);
+	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir);
+	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir);
+	
+	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
+	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	
 
-        int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
-        if(fd<0){
-                if(logging){
-                fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",tmpDir2,strerror(errno));
-                }
-                return NULL;
-        }
-        generateDirListingPrimitive(dir);
-        FILE* fstream;
-        if(!(fstream=fopen(tmpDir,"r"))){
-                if(logging){
-                fprintf(logstream,"ERRO NAS DIRETORIAS %s\n",tmpDir);
-                }
-                close(fd);
-                return NULL;
-        }
-        remove(tmpDir);
+	int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
+	if(fd<0){
+			if(logging){
+			fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",tmpDir2,strerror(errno));
+			}
+			return NULL;
+	}
+	else{
+	
+		if(logging){
+			fprintf(logstream,"Ficheiro criado!\n%s\n",tmpDir2);
+		}
+	}
+	generateDirListingPrimitive(dir);
+	FILE* fstream;
+	if(!(fstream=fopen(tmpDir,"r"))){
+			if(logging){
+			fprintf(logstream,"ERRO NAS DIRETORIAS %s\n",tmpDir);
+			}
+			close(fd);
+			return NULL;
+	}
+	remove(tmpDir);
 	dprintf(fd,STYLESHEET_FORMAT
-			"\n<body class='%s'>\n<br>%s\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN);
+		"\n<body class='%s'>\n<br>%s\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN);
 	if(atRoot){
 
 		dprintf(fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>",SITE_PATH_HEADER_CLASS);
@@ -321,13 +336,14 @@ char* generateDirListing(char* dir){
 	dprintf(fd,"</body>\n</html>\n");
 	fclose(fstream);
 	close(fd);
-	return tmpTwo;
+	return tmpFile2;
 
 }
 
-void deleteDirListingHTML(void){
-char buff[PATHSIZE*2]={0};
-snprintf(buff,PATHSIZE*2,"%s%s",currDir,tmpTwo);
-remove(buff);
+void deleteDirListingHTML(char* path){
+char buff[PATHSIZE*3]={0};
+snprintf(buff,PATHSIZE*3-1,tmpTwo,path);
+snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
+remove(tmpDir2);
 
 }

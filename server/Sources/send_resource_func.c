@@ -41,13 +41,13 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 	int fd=result->fd=open(outpathbuff,O_RDWR|O_CREAT|O_TRUNC,0777);
 	if(result->fd<0){
 			if(logging){
-			fprintf(logstream,"Invalid filepath: %s\n%s\n",outpathbuff,strerror(errno));
+				fprintf(logstream,"Invalid filepath: %s\n%s\n",outpathbuff,strerror(errno));
 			}
 			return -1;
 	}
 	if(!file_exists(inpathbuff)){
 			if(logging){
-			fprintf(logstream,"Invalid filepath: %s\n%s\n",inpathbuff,strerror(errno));
+				fprintf(logstream,"Invalid filepath: %s\n%s\n",inpathbuff,strerror(errno));
 			}
 			close(result->fd);
 			result->fd=-1;
@@ -55,7 +55,13 @@ static int compressFile(char* target,int enable,struct comp_result* result){
 			return -1;
 	}
 	snprintf(cmd,sizeof(cmd)-1,compressionCmd,servComp.cmdTool,compression_level,inpathbuff);
-	printf("%s\n",cmd);
+	
+	if(logging){
+	
+		printf("%s\n",cmd);
+	
+	}
+	
 	char* argv[ARGVMAX]={0};
 	makeargv(cmd,argv, -1);
 	int pid=fork();
@@ -157,25 +163,13 @@ void sendResource(client* c,char* resourceTarget,int compress,int is_directory,i
 
 	int we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
 	if(we_in_csgo_mode&&!is_directory){
-		if(logging){
-			fprintf(logstream,"We in csgo mode!!!!\n");
-		}
 		path[strlen(path)-strlen(servComp.fileExt)-1]=0;
 		resourceTarget[strlen(resourceTarget)-strlen(servComp.fileExt)-1]=0;
-		if(logging){
-			fprintf(logstream,"And modified the resource target to: %s\n",resourceTarget);
-		}
-	}
-	else{
-
-		if(logging){
-			fprintf(logstream,"Brother we are NOT in csgo mode\n");
-		}
 	}
 	comp_result result={0,-1,NULL};
 	memcpy(path2,path,PATHSIZE);
-	if(logging){
-	fprintf(logstream,"Fetching %s...\n",path);
+	if(logging > 5){
+		fprintf(logstream,"Fetching %s...\n",path);
 	}
 	int notfound=0;
 	if(compressFile(resourceTarget,compress,&result)<0){
@@ -194,14 +188,17 @@ void sendResource(client* c,char* resourceTarget,int compress,int is_directory,i
 
 				fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 			}
-			printf("Trying to delete %s...\n",outpathbuff);
 			remove(outpathbuff);
 		}
 		else{
 			notfound=1;
 			use_chunked=0;
-			fprintf(logstream,"Enviando resposta 404...\n");
-			printf("Trying to delete %s...\n",outpathbuff);
+			
+			if(logging){
+			
+				fprintf(logstream,"Enviando resposta 404...\n");
+			
+			}
 			remove(outpathbuff);
 		}
 	}

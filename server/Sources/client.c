@@ -14,6 +14,7 @@
 #include "../Includes/send_resource_func.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/sock_ops.h"
+#include "../Includes/txt_sending.h"
 #include <time.h>
 #include <sys/time.h>
 #include <sys/socket.h>
@@ -76,19 +77,25 @@ static void handleCurrentActivity(client*c,http_request req){
 	int is_directory=isDirectory(header.target_processed);
 	if(is_directory){
 		sendMediaData(c,generateDirListing(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
-		deleteDirListingHTML();
+		deleteDirListingHTML(header.target_processed);
 		return;
 	}
 	int is_rss_feed=isRssFeed(header.target_processed);
 	if(is_rss_feed){
 		sendMediaData(c,generateRss(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
-		deleteRssXML();
+		deleteRssXML(header.target_processed);
 		return;
 	}
 	int is_php_result=isPHPRequest(header.target_processed);
 	if(is_php_result){
 		sendMediaData(c,generatePHPResult(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
-		deletePHPResult();
+		deletePHPResult(header.target_processed);
+		return;
+	}
+	int is_txt_file=isText(header.target_processed);
+	if(is_txt_file){
+		sendMediaData(c,generateText(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
+		deleteTextHtml(header.target_processed);
 		return;
 	}
 	switch(header.type){
@@ -101,7 +108,7 @@ static void handleCurrentActivity(client*c,http_request req){
 				if(is_rcon_result){
 					handleCustomPostReq(header.target_processed,req.data,targetinout);
 					sendMediaData(c,generateRconResult(targetinout),compress,is_directory,header.is_partial,header.range_number);
-					deleteRconResult();
+					deleteRconResult(header.target_processed);
 					return;
 				}
 				sendMediaData(c,targetinout,compress,is_directory,header.is_partial,header.range_number);

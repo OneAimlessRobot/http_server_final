@@ -18,7 +18,11 @@
 static char* phpCmd = "php-cgi8.3 -f %s";
 static char* query=NULL;
 
-static char* tmpOne="/.tmp.php",* tmpTwo="/.tmp1.php";
+#define tmpOne "%s.tmp.php"
+#define tmpTwo "%s.tmp1.php"
+
+static char tmpFile[PATHSIZE*3]={0};
+static char tmpFile2[PATHSIZE*3]={0};
 
 static char tmpDir[PATHSIZE*2]={0},
 		tmpDir2[PATHSIZE*2]={0},
@@ -134,8 +138,13 @@ char* generatePHPResult(char* request){
 
 	logging=1;
         logstream=stderr;
-        snprintf(tmpDir,PATHSIZE*2-1,"%s%s",currDir,tmpOne);
-        snprintf(tmpDir2,PATHSIZE*2-1,"%s%s",currDir,tmpTwo);
+        
+	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,request);
+	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,request);
+	
+	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
+	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	
         int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
         if(fd<0){
                 if(logging){
@@ -170,13 +179,14 @@ char* generatePHPResult(char* request){
 	}
 	fclose(fstream);
 	close(fd);
-	return tmpTwo;
+	return tmpFile2;
 
 }
 
-void deletePHPResult(void){
-char buff[PATHSIZE*2]={0};
-snprintf(buff,PATHSIZE*2,"%s%s",currDir,tmpTwo);
-remove(buff);
+void deletePHPResult(char* request){
+char buff[PATHSIZE*3]={0};
+snprintf(buff,PATHSIZE*3-1,tmpTwo,request);
+snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
+remove(tmpDir2);
 
 }

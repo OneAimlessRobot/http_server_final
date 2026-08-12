@@ -5,6 +5,6 @@ int isDirectory(char* resourceTarget);
 
 char* generateDirListing(char* dir);
 
-void deleteDirListingHTML(void);
+void deleteDirListingHTML(char* dir);
 
 #endif
