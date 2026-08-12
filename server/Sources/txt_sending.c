@@ -122,26 +122,8 @@ char* generateText(char* dir){
 		dir[pathsize-1]=0;
 	}
 	
-	/*
-	 * https://stackoverflow.com/questions/72263107/how-do-i-use-markdown-it-without-node-js
-	 *
-	*/
 	
 	dprintf(fd,TXT_HTML_PREFIX
-		"<br>\n<script>\n"
-		"window.onload = function() {"
-		"var md = window.markdownit();"
-		"var div = document.getElementsByClassName('markdown');"
-		
-		"for(var i = 0; i < div.length; i++) {"
-		
-		"	var content = div[i].innerHTML;"
-		"	document.getElementsByClassName('markdown')[i].innerHTML = md.render(content);"
-		
-		" }"
-		
-		"}"
-		"</script>"
 		"\n<body class='%s'>\n<br>%s\n<br>\n\n<br>\n<br><div class=\"markdown\">\n\n",marked_js_lib_path,txt_prettify_css_file_path,TXT_PRETTIFY_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN);
 	
 
