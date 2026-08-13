@@ -22,6 +22,8 @@
 
 #define PAGE_DEBUG_HEADER_CLASS "header_for_page_debug"
 
+#define DIR_LISTING_TABLE_LINE_CLASS "dir_listing_table"
+
 #define DIR_LISTING_BODY_CLASS "dir_listing"
 
 #define DIR_REF_CLASS "ref_for_dir"
@@ -148,7 +150,8 @@ static void print_header(int fd){
 static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv, char* dir){
 	
 	
-	dprintf(fd,"\n| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|<br>\n",
+	dprintf(fd,"\n<span class='%s'>| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|</span><br>\n",
+			DIR_LISTING_TABLE_LINE_CLASS,
 			is_directory_this_one?"directory!":curr_listing_argv[SIZE],
 			curr_listing_argv[DATE],
 			curr_listing_argv[TIME],
@@ -309,10 +312,10 @@ char* generateDirListing(char* dir){
 	}
 	remove(tmpDir);
 	dprintf(fd,STYLESHEET_FORMAT
-		"\n<body class='%s'>\n<br>%s\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN);
+		"\n<body class='%s'>\n<br>%s\n\n<div class='%s'>\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN,DIR_LISTING_BODY_CLASS);
 	if(atRoot){
 
-		dprintf(fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>",SITE_PATH_HEADER_CLASS);
+		dprintf(fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>\n<br>\n",SITE_PATH_HEADER_CLASS);
 	}
 	else{
 		char prev_dir_rel_path[PATHSIZE*2]={0};
@@ -333,7 +336,7 @@ char* generateDirListing(char* dir){
 	fseek(fstream,0,SEEK_SET);
 	print_header(fd);
 	process_lines_and_print_to_dest_file(fd,fstream,dir);
-	dprintf(fd,"</body>\n</html>\n");
+	dprintf(fd,"</div>\n</body>\n</html>\n");
 	fclose(fstream);
 	close(fd);
 	return tmpFile2;
