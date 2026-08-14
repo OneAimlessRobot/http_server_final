@@ -23,7 +23,17 @@
 #include <sys/wait.h>
 
 
+void send_wrapper(client* c,char* buff, int buff_size) {
+	if((c->is_tls?SSL_write(c->ctx_if_ssl,buff,buff_size):send(c->socket,buff,buff_size,0))!=(buff_size)){
+		if(logging>5){
+			fprintf(logstream,"ERRO NO SEND!!%s\n",strerror(errno));
+		}
+	}	
+}
+
 #include "../Includes/send_resource_wrappers_for_file_exts.h"
+
+
 
 static int file_exists(const char *filename)
 {
@@ -102,17 +112,13 @@ static void send_header(client* c, comp_result* result, int notfound,  int start
 	u_int64_t fileSize=0;
 	char headerBuff[PATHSIZE]={0};
 	const char* the_mime_type= get_mime_type(notfound?notFoundDefaultTarget:resourceTarget);
-	if(use_fd){
-		lseek(result->fd,0,SEEK_END);
-		fileSize=lseek(result->fd,0,SEEK_CUR);
-		lseek(result->fd,0,SEEK_SET);
-	}
-	else{
-		fseek(result->stream,0,SEEK_END);
-		fileSize=ftell(result->stream);
-		fseek(result->stream,0,SEEK_SET);
-
-	}
+	
+	(use_fd)?lseek(result->fd,0,SEEK_END):fseek(result->stream,0,SEEK_END);
+	
+	fileSize=(use_fd)?lseek(result->fd,0,SEEK_CUR):ftell(result->stream);
+	
+	(use_fd)?lseek(result->fd,0,SEEK_SET):fseek(result->stream,0,SEEK_SET);
+	
 	(!notfound)?
 		((result->comp_enable)?
 			((use_chunked)?
@@ -144,20 +150,17 @@ static void send_header(client* c, comp_result* result, int notfound,  int start
 			)
 		)
 		:
-		(
-		(result->comp_enable)?
-		fillUpFileNotFoundHeaderComp(headerBuff,fileSize,the_mime_type,servComp.fileExt)
-		:
-		fillUpFileNotFoundHeader(headerBuff,fileSize,the_mime_type)
-		);
+		fillUpFileNotFoundHeader(headerBuff,fileSize,the_mime_type);
 	int header_size=strlen(headerBuff);
 	print_response_header(headerBuff);
 	send_wrapper(c,headerBuff,header_size);
 
 }
-void sendResource(client* c,char* resourceTarget,int compress,int is_directory,int is_partial, int start_point){
-	char path[PATHSIZE]={0},
-		path2[PATHSIZE]={0};
+void sendResource(client* c,char* resourceTarget,int compress,int is_directory,int is_partial, int start_point, int is_head){
+	if(!resourceTarget){
+		return;
+	}
+	char path[PATHSIZE]={0};
 	char* ptr= path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 
@@ -167,7 +170,6 @@ void sendResource(client* c,char* resourceTarget,int compress,int is_directory,i
 		resourceTarget[strlen(resourceTarget)-strlen(servComp.fileExt)-1]=0;
 	}
 	comp_result result={0,-1,NULL};
-	memcpy(path2,path,PATHSIZE);
 	if(logging > 5){
 		fprintf(logstream,"Fetching %s...\n",path);
 	}
@@ -178,17 +180,12 @@ void sendResource(client* c,char* resourceTarget,int compress,int is_directory,i
 
 			fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 		}
-		char oldoutpathbuff[PATHSIZE]={0};
-		char errorbuff[PATHSIZE*10]={0};
-		snprintf(errorbuff, sizeof(errorbuff)-1,"%s%s",currDir,notFoundDefaultTarget);
-		memcpy(oldoutpathbuff,outpathbuff,PATHSIZE);
-		if(compressFile(notFoundDefaultTarget,compress,&result)<0){
+		if(compressFile(notFoundDefaultTarget,0,&result)<0){
 
 			if(logging){
 
 				fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 			}
-			remove(outpathbuff);
 		}
 		else{
 			notfound=1;
@@ -199,13 +196,14 @@ void sendResource(client* c,char* resourceTarget,int compress,int is_directory,i
 				fprintf(logstream,"Enviando resposta 404...\n");
 			
 			}
-			remove(outpathbuff);
 		}
 	}
 	if(logging){
 		fprintf(logstream,"Done!\n");
 	}
 	send_header(c, &result, notfound, start_point, is_partial, resourceTarget);
-	push_bytes(c, &result, is_partial,start_point);
-	final_cleanup(&result);
+	if(!is_head){
+		push_bytes(c, &result, is_partial,start_point);
+	}
+	final_cleanup(&result,notfound);
 }

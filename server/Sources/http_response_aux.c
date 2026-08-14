@@ -186,26 +186,6 @@ void fillUpFileNotFoundHeader(char headerBuff[PATHSIZE],u_int64_t size,const cha
 }
 
 
-char* notFoundHeaderComp= "HTTP/2 404 Not Found\r\n"
-						"Accept-Ranges: bytes\r\n"
-                                "Content-Type: %s\r\n"
-			  	//"Origin: localhost\r\n"
-			  	"Content-Length: %lu\r\n"
-			        "content-encoding: %s\r\n"
-                          	/*"Cross-Origin-Embedder-Policy: "*/
-			  	//EMBEDDER_POLICY "\r\n"
-				/*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          	"\r\n";
-
-
-void fillUpFileNotFoundHeaderComp(char headerBuff[PATHSIZE],u_int64_t size,const char* mimetype,char* method){
-
-	snprintf(headerBuff,PATHSIZE,notFoundHeaderComp,mimetype,size,method);
-
-
-}
-
-
 
 /*
 -----------------------------------------------------------------------------------

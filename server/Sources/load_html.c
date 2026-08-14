@@ -67,16 +67,12 @@ static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
 static uint16_t category_max_sizes[CATEGORY_ID_MAX]={0};
 static uint16_t category_curr_sizes[CATEGORY_ID_MAX]={0};
 
-#define tmpOne "%s.tmp.html"
-#define tmpTwo "%s.tmp1.html"
+#define tmpOne "%s.tmp%lx.html"
+#define tmpTwo "%s.tmp1%lx.html"
 
-static char tmpFile[PATHSIZE*3]={0};
-static char tmpFile2[PATHSIZE*3]={0};
 
 static const char* dir_listing_css_file_path= "/webcrookedstuff/.dir_listing_style.css";
 
-static char tmpDir[PATHSIZE*4]={0};
-static char tmpDir2[PATHSIZE*4]={0};
 static char currSearchedDir[PATHSIZE*3]={0};
 static char resolved_abs_path[PATH_MAX]={0};
 
@@ -281,8 +277,8 @@ char* generateDirListing(char* dir){
 	}
 	int atRoot=(pathsize2==pathsize3);
 
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir);
+	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir, request_id);
+	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
 	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
@@ -343,10 +339,3 @@ char* generateDirListing(char* dir){
 
 }
 
-void deleteDirListingHTML(char* path){
-char buff[PATHSIZE*3]={0};
-snprintf(buff,PATHSIZE*3-1,tmpTwo,path);
-snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
-remove(tmpDir2);
-
-}

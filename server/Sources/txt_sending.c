@@ -17,17 +17,14 @@
 #define TXT_PRETTIFY_PRE_CLASS TXT_PRETTIFY_BODY_CLASS
 #define TXT_PRETTIFY_DIV_CLASS TXT_PRETTIFY_BODY_CLASS
 
-#define tmpOne "%s.tmp.txt"
-#define tmpTwo "%s.tmp1.txt"
+#define tmpOne "%s.tmp%lx.txt"
+#define tmpTwo "%s.tmp1%lx.txt"
 
-static char tmpFile[PATHSIZE*3]={0};
-static char tmpFile2[PATHSIZE*3]={0};
 
-static const char* marked_js_lib_path= "/webcrookedstuff/js/markdown-it.js";
     
 static const char* txt_prettify_css_file_path= "/webcrookedstuff/.styles_file_exts/.stylesheet_txt_files.css";
 
-static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currFetchedText[PATHSIZE*2]={0};
+static char currFetchedText[PATHSIZE*2]={0};
 
 
 
@@ -96,8 +93,8 @@ char* generateText(char* dir){
 
 	logging=1;
 	logstream=stderr;
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir);
+	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir, request_id);
+	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
 	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
@@ -126,7 +123,7 @@ char* generateText(char* dir){
 	
 	
 	dprintf(fd,TXT_HTML_PREFIX
-		"\n<body class='%s'>\n<br>\n<br>\n\n<br>\n<br><div class='%s'>\n<pre class='%s'>\n\n",marked_js_lib_path,txt_prettify_css_file_path,TXT_PRETTIFY_BODY_CLASS,TXT_PRETTIFY_DIV_CLASS,TXT_PRETTIFY_PRE_CLASS);
+		"\n<body class='%s'>\n<br>\n<br>\n\n<br>\n<br><div class='%s'>\n<pre class='%s'>\n\n",txt_prettify_css_file_path,TXT_PRETTIFY_BODY_CLASS,TXT_PRETTIFY_DIV_CLASS,TXT_PRETTIFY_PRE_CLASS);
 	
 
 	char currLine[PATHSIZE*2]={0};
@@ -138,13 +135,5 @@ char* generateText(char* dir){
 	fclose(fstream);
 	close(fd);
 	return tmpFile2;
-
-}
-
-void deleteTextHtml(char* filename){
-char buff[PATHSIZE*3]={0};
-snprintf(buff,PATHSIZE*3-1,tmpTwo,filename);
-snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
-remove(tmpDir2);
 
 }

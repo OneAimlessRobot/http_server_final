@@ -14,16 +14,13 @@
 
 static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss";
 
-#define tmpOne "%s.tmp.rss"
-#define tmpTwo "%s.tmp1.rss"
-
-static char tmpFile[PATHSIZE*3]={0};
-static char tmpFile2[PATHSIZE*3]={0};
+#define tmpOne "%s.tmp%lx.rss"
+#define tmpTwo "%s.tmp1%lx.rss"
 
 
 static char channel_string_buff[PATHSIZE*2]={0};
 
-static char tmpDir[PATHSIZE*2]={0},tmpDir2[PATHSIZE*2]={0},currFetchedRSS[PATHSIZE*2]={0};
+static char currFetchedRSS[PATHSIZE*2]={0};
 
 typedef enum {ATOM=0,XHTML,MAX_NAMESPACE_URI_ID}namespace_uri_id;
 
@@ -158,8 +155,8 @@ char* generateRss(char* dir){
 
 	logging=1;
         logstream=stderr;
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir);
+	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir, request_id);
+	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
 	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
@@ -218,13 +215,5 @@ char* generateRss(char* dir){
 		fclose(fstream);
 		close(fd);
 	return tmpFile2;
-
-}
-
-void deleteRssXML(char* path){
-char buff[PATHSIZE*3]={0};
-snprintf(buff,PATHSIZE*3-1,tmpTwo,path);
-snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,buff);
-remove(tmpDir2);
 
 }

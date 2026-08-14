@@ -101,6 +101,7 @@ static void spawnHTTPHeader(char* buff,http_header*result){
 	memset(result->os,0,FIELDSIZE);
 	memset(result->range,0,FIELDSIZE);
 	memset(result->range_string,0,FIELDSIZE);
+	memset(result->cloudfare_ip,0, FIELDSIZE);
 	char* headerArr[ARGVMAX];
 	memset(headerArr,0,ARGVMAX*sizeof(char*));
 	char test[strlen(buff)+1];
@@ -129,6 +130,7 @@ static void spawnHTTPHeader(char* buff,http_header*result){
 	strcpy(result->mimetype,defaultMimetype);
 	strcpy(result->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));
 	strcpy(result->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
+	strcpy(result->cloudfare_ip,find_field_value_in_field_arr("CF-Connecting-IP",fieldarr));
 	strcpy(result->encodingcopy,result->encoding);
 	make_str_arr(result->encoding,",",result->split_encoding,ARGVMAX);
 	strcpy(result->content_type_raw,find_field_value_in_field_arr("Content-Type",fieldarr));

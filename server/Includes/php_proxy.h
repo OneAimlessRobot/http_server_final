@@ -6,7 +6,6 @@ int isPHPRequest(char* resourceTarget);
 
 char* generatePHPResult(char* dir);
 
-void deletePHPResult(char* request);
 
 
 #endif

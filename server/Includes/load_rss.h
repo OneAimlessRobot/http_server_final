@@ -5,7 +5,5 @@ int isRssFeed(char* resourceTarget);
 
 char* generateRss(char* dir);
 
-void deleteRssXML(char* path);
-
 
 #endif

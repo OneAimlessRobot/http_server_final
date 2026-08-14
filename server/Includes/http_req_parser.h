@@ -12,7 +12,7 @@ typedef struct http_header{
 	http_req_type type;
 	char target[FIELDSIZE],
 		target_processed[FIELDSIZE],
-		target_quoted[FIELDSIZE],
+		target_processed_copy[FIELDSIZE],
 		version[FIELDSIZE],
 		host[FIELDSIZE],
 		*split_encoding[ARGVMAX],
@@ -28,6 +28,7 @@ typedef struct http_header{
 		content_type[FIELDSIZE],
 		*form_boundary_split[2],
 		form_boundary[FIELDSIZE],
+		cloudfare_ip[FIELDSIZE],
 		os[FIELDSIZE];
 	u_int8_t is_partial;
 	int64_t range_number;

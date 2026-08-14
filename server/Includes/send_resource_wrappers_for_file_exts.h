@@ -101,14 +101,6 @@ static const char* get_mime_type(const char *filename) {
     }
     return "application/octet-stream";
 }
-void send_wrapper(client* c,char* buff, int buff_size) {
-	if((c->is_tls?SSL_write(c->ctx_if_ssl,buff,buff_size):send(c->socket,buff,buff_size,0))!=(buff_size)){
-		if(logging>5){
-			fprintf(logstream,"ERRO NO SEND!!%s\n",strerror(errno));
-		}
-	}	
-}
-
 static void push_bytes(client* c, comp_result* result, int is_partial, int start_point){
 	
 	(use_fd)?
@@ -126,7 +118,7 @@ static void push_bytes(client* c, comp_result* result, int is_partial, int start
 	
 }
 
-static void final_cleanup(comp_result* result){
+static void final_cleanup(comp_result* result, int notfound){
 	
 	close(result->fd);
 	if(result->stream!=NULL){
@@ -134,7 +126,7 @@ static void final_cleanup(comp_result* result){
 	}
 
 	printf("Trying to delete %s...\n",outpathbuff);
-	if(result->comp_enable){
+	if(result->comp_enable&&!notfound){
 		remove(outpathbuff);
 	}
 

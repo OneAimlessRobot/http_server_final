@@ -11,7 +11,13 @@ typedef struct client{
 	struct sockaddr_in client_addr;
 	
 }client;
+extern u_int64_t request_id;
 
+extern char tmpFile[PATHSIZE*3],
+	tmpFile2[PATHSIZE*3],
+	tmpDir[PATHSIZE*4],
+	tmpDir2[PATHSIZE*4];
+	
 void runClientConnection(int is_tls, int sock);
 
 #endif

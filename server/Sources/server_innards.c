@@ -17,6 +17,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 
+u_int64_t request_id_here =0;
 struct sigaction sa;
 
 static socklen_t socklenpointer;
@@ -83,12 +84,15 @@ static void handleIncommingConnections(void){
         if(logging){
 			fprintf(logstream,"Client connected , ip %s , port %d \n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
         }
+        request_id_here++;
 		char buff_sock[128]={0};
 		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",client_socket);
 		char buff_tls[128]={0};
 		snprintf(buff_tls,sizeof(buff_tls)-1,"%d",use_tls);
-		//char* args_module_cmd[]={"valgrind","--leak-check=full", "--show-leak-kinds=all", "--track-fds=yes", "./server.exe","1",buff_tls,buff_sock,NULL};	
-		char* args_module_cmd[]={"./server.exe","1",buff_tls,buff_sock,NULL};	
+		char buff_request_id[128]={0};
+		snprintf(buff_request_id,sizeof(buff_request_id)-1,"%lx",request_id_here);
+		//char* args_module_cmd[]={"valgrind","--leak-check=full", "--show-leak-kinds=all", "--track-fds=yes", "./server.exe","1",buff_tls,buff_sock,buff_request_id,NULL};	
+		char* args_module_cmd[]={"./server.exe","1",buff_tls,buff_sock,buff_request_id,NULL};	
 		int pid=fork();
 		switch(pid){
 			case -1:
@@ -217,6 +221,9 @@ void clientBootstrap(void){
 	loadCfg();
 	initializeConstants();
 	socklenpointer=sizeof(clientAddress);
+	if(logging){
+		fprintf(logstream,"Request id: %lu\n",request_id);
+	}
 	servComp=br;
 	cleanup();
 	

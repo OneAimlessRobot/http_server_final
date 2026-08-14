@@ -6,6 +6,4 @@ int isRconRequest(char* resourceTarget);
 
 char* generateRconResult(char* the_request_parameters);
 
-void deleteRconResult(void);
-
 #endif

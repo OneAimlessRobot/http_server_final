@@ -24,7 +24,13 @@
 #include <dirent.h>
 #include <sys/types.h>
 #define READ_FUNC_TO_USE timedreadall
-client* curr_client= NULL;
+
+client*	curr_client = NULL;
+
+char tmpFile[PATHSIZE*3]={0},
+	tmpFile2[PATHSIZE*3]={0},
+	tmpDir[PATHSIZE*4]={0},
+	tmpDir2[PATHSIZE*4]={0};
 	
 static socklen_t socklenpointer;
 static void initEmptyClient(client* result){
@@ -44,21 +50,9 @@ static client* spawnEmptyClient(void){
 
 }
 
-static void sendMediaData(client*c,char* buff,int compress,int is_directory,int is_partial, int range_number){
-
-	sendResource(c,buff,compress,is_directory,is_partial,range_number);
-}
-
 static void process_header_target(http_header* the_header){
 	
-	if(logging>10){
-		fprintf(logstream,"Non processed header target:\n%s\n",the_header->target);
-	}
 	url_decode(the_header->target, the_header->target_processed);
-	
-	if(logging>10){
-		fprintf(logstream,"Processed header target_processed!:\n%s\n",the_header->target_processed);
-	}
 }
 static void handleCurrentActivity(client*c,http_request req){
 	int compress=0;
@@ -74,52 +68,59 @@ static void handleCurrentActivity(client*c,http_request req){
 	if(findInStringArr(header.split_encoding,servComp.encodingExt)>=0){
 		compress=compression;
 	}
+	int is_head = (header.type==HEAD);
+	
+	char* (*generating_func)(char*) = NULL;
+	
+	char* string_of_custom = NULL;
 	int is_directory=isDirectory(header.target_processed);
+	
 	if(is_directory){
-		sendMediaData(c,generateDirListing(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
-		deleteDirListingHTML(header.target_processed);
-		return;
+		generating_func = generateDirListing;
 	}
 	int is_rss_feed=isRssFeed(header.target_processed);
 	if(is_rss_feed){
-		sendMediaData(c,generateRss(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
-		deleteRssXML(header.target_processed);
-		return;
+		generating_func = generateRss;
 	}
 	int is_php_result=isPHPRequest(header.target_processed);
 	if(is_php_result){
-		sendMediaData(c,generatePHPResult(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
-		deletePHPResult(header.target_processed);
-		return;
+		generating_func = generatePHPResult;
 	}
 	int is_txt_file=isText(header.target_processed);
 	if(is_txt_file){
-		sendMediaData(c,generateText(header.target_processed),compress,is_directory,header.is_partial,header.range_number);
-		deleteTextHtml(header.target_processed);
+		generating_func = generateText;
+	}
+	if(generating_func!=NULL){
+		string_of_custom = generating_func(header.target_processed);
+		sendResource(c,string_of_custom,compress,is_directory,header.is_partial,header.range_number,is_head);
+		remove(tmpDir2);
 		return;
+		
 	}
 	switch(header.type){
 	case GET:
-		sendMediaData(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number);
+		sendResource(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number,is_head);
 	break;
 	case POST:
 			if(isCustomPostReq(header.target_processed)){
 				int is_rcon_result=isRconRequest(header.target_processed);
 				if(is_rcon_result){
 					handleCustomPostReq(header.target_processed,req.data,targetinout);
-					sendMediaData(c,generateRconResult(targetinout),compress,is_directory,header.is_partial,header.range_number);
-					deleteRconResult();
+					sendResource(c,generateRconResult(targetinout),compress,is_directory,header.is_partial,header.range_number,0);
+					remove(tmpDir2);
 					return;
 				}
-				sendMediaData(c,targetinout,compress,is_directory,header.is_partial,header.range_number);
+				sendResource(c,targetinout,compress,is_directory,header.is_partial,header.range_number,0);
 			}
 			else{
-				sendMediaData(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number);
+				sendResource(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number,0);
 			}
 	break;
+	case HEAD:
+		sendResource(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number,1);
+	break;
 	default:
-		
-		sendMediaData(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number);
+		send_wrapper(c,(char*)HTTP_METHOD_ERR_HEADER,strlen(HTTP_METHOD_ERR_HEADER));
 	break;
 	}
 	

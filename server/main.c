@@ -5,6 +5,8 @@
 #include "Includes/http_req_parser.h"
 #include "Includes/server_innards.h"
 
+u_int64_t request_id;
+
 int main(int argc, char** argv){
 	
 	int init_mode=0,
@@ -26,6 +28,7 @@ int main(int argc, char** argv){
 					case 1:
 						is_tls=atoi(argv[2]);
 						sock_num=atoi(argv[3]);
+						request_id=strtoull(argv[4], NULL, 16);
 						clientBootstrap();
 						runClientConnection(is_tls,sock_num);
 					break;

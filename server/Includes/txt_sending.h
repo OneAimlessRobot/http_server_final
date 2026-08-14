@@ -5,5 +5,4 @@ int isText(char* resourceTarget);
 
 char* generateText(char* dir);
 
-void deleteTextHtml(char* filename);
 #endif
