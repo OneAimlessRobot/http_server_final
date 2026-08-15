@@ -250,7 +250,7 @@ void clientBootstrap(void){
 	if(logging){
 		fprintf(logstream,"Request id: %lu\n",request_id);
 	}
-	servComp=br;
+	servComp=gzip;
 	cleanup();
 	
 }

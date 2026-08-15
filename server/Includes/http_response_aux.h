@@ -7,7 +7,9 @@
 
 #define HTTP_METHOD_ERR_HEADER  "HTTP/1.1 405 Method Not Allowed\r\n" \
 								"Content-Length: 0\r\n" \
-								"Allow: GET, POST, HEAD\r\n" \
+								"Allow: " \
+								ALLOWED_HTTP_REQUESTS_STRING \
+								"\r\n" \
 								"\r\n"
 
 extern char

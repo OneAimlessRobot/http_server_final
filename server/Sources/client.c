@@ -58,7 +58,7 @@ static void process_header_target(http_header* the_header){
 	
 	url_decode(the_header->target, curr_client.target);
 	
-	if(logging){
+	if(logging>3){
 			fprintf(logstream,"The target is: %s\n", curr_client.target);
 	}
 }

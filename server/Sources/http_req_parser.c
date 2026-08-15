@@ -10,6 +10,16 @@
 #include "../Includes/server_vars.h"
 #include "../Includes/http_req_parser.h"
 
+const char* request_const_name_arr[MAX_REQUEST_TYPE] = {
+	
+	"GET",
+	"HEAD",
+	"POST",
+	"INVALID"
+	
+};
+
+
 static http_req_type getREQtypeFromString(char* str){
 	if(!str){
 		return INVALID;
@@ -17,35 +27,15 @@ static http_req_type getREQtypeFromString(char* str){
 	if(!strnlen(str,FIELDSIZE)){
 		return INVALID;
 	}
-	if(!strcmp(str,"GET")){
-
-		return GET;
-	}
-	if(!strcmp(str,"POST")){
-
-		return POST;
-	}
-	if(!strcmp(str,"HEAD")){
-
-		return HEAD;
+	for(http_req_type i=GET;i<sizeof(request_const_name_arr);i++){
+		
+		if(!strncmp(str,request_const_name_arr[i],FIELDSIZE)){
+				
+				return i;
+		}
+		
 	}
 	return INVALID;
-}
-static char* getREQStringFromType(http_req_type type){
-
-	switch(type){
-	case GET:
-	return "GET";
-	case POST:
-	return "POST";
-	case HEAD:
-	return "HEAD";
-	default:
-	return NULL;
-
-
-	}
-	return NULL;
 }
 void print_field_arr(FILE* fstream,http_header_field* fields){
 
@@ -58,10 +48,46 @@ void print_field_arr(FILE* fstream,http_header_field* fields){
 }
 void print_http_req_header(FILE* fstream,http_header header){
 
-		fprintf(fstream,"HTTP REQUEST HEADER:\n\nType: %s\nOrigin: %s\nTarget: %s\nVersion: %s\nHost: %s\nmimetype: %s\nOS: %s\nRange (string): |%s|\nRange: bytes=%s-\nAccepted-encoding: %s\nAccepted-encoding (split): \n",getREQStringFromType(header.type),header.origin,header.target,header.version,header.host,header.mimetype,header.os,header.range_string,header.is_partial?header.range:"NO_RANGE_SPECIFIED",header.encodingcopy);
+	fprintf(fstream,"\n\nHTTP REQUEST HEADER:\n"
+					"______________________________________\n"
+					"______________________________________\n\n\n"
+					"Type: %s\n"
+					"Origin: %s\n"
+					"Target: %s\n"
+					"Version: %s\n"
+					"Host: %s\n"
+					"mimetype: %s\n"
+					"OS: %s\n"
+					"Range (string): |%s|\n"
+					"Range: bytes=%s-\n"
+					"CF-Connecting-IP: %s\n"
+					"Accepted-encoding: %s\n"
+					"Accepted-encoding (split):\n\n",
+							request_const_name_arr[header.type],
+							header.origin,
+							header.target,
+							header.version,
+							header.host,
+							header.mimetype,
+							header.os,
+							header.range_string,
+							header.is_partial?header.range:"NO_RANGE_SPECIFIED",
+							header.cloudfare_ip,
+							header.encodingcopy);
+
 		print_string_arr(fstream,header.split_encoding);
-		fprintf(fstream,"\nContent-Type (raw): %s\nContent-Type (actual): %s\nForm-boundary: %s\nContent-Type (split):\n",header.content_type_copy,header.content_type,header.form_boundary);
+		fprintf(fstream,"\nContent-Type (raw): %s\n"
+						"Content-Type (actual): %s\n"
+						"Form-boundary: %s\n"
+						"Content-Type (split):\n\n",
+							header.content_type_copy,
+							header.content_type,
+							header.form_boundary);
 		print_string_arr(fstream,header.content_type_split);
+		fprintf(fstream,"\n\n"
+					"______________________________________\n"
+					"______________________________________\n\n"
+					"END OF HTTP REQUEST HEADER!\n\n");
 }
 static char* find_field_value_in_field_arr(char* fieldName,http_header_field* fields){
 
@@ -192,8 +218,15 @@ void spawnHTTPRequest(char *buff,http_header* header,http_request* reqresult){
 
 
 void print_http_req(FILE* fstream,http_request req){
-	fprintf(fstream,"HTTP_REQUEST:\n");
+	fprintf(fstream,"HTTP_REQUEST:\n"
+					"\n\n"
+					"______________________________________\n"
+					"______________________________________\n\n\n");
+					
 	print_http_req_header(fstream,*(req.header));
 	fprintf(fstream,"HTTP_REQUEST_CONTENTS=%s\n",req.data);
+	fprintf(fstream,"\n\n"
+					"______________________________________\n"
+					"______________________________________\n\n\n");
 
 }

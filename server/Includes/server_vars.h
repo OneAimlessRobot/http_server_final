@@ -32,7 +32,6 @@ extern char
 defaultTarget[FIELDSIZE],
 notFoundDefaultTarget[FIELDSIZE],
 mainRssFeed[FIELDSIZE],
-* defaultVersion,
 * defaultMimetype;
 
 #endif

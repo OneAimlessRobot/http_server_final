@@ -7,9 +7,13 @@
 
 #define EMBEDDER_POLICY "require-corp"
 
-#define STD_HEADER_START_OK HTTP_OK_HEADER "Accept-Ranges: bytes\r\n"  "Content-Type: %s\r\n"
+#define STD_HEADER_START_OK HTTP_OK_HEADER \
+						"Accept-Ranges: bytes\r\n" \
+						"Content-Type: %s\r\n"
 
-#define STD_HEADER_START_PARTIAL HTTP_PARTIAL_CONTENT_OK_HEADER "Accept-Ranges: bytes\r\n"  "Content-Type: %s\r\n"
+#define STD_HEADER_START_PARTIAL HTTP_PARTIAL_CONTENT_OK_HEADER \
+								"Accept-Ranges: bytes\r\n" \
+								"Content-Type: %s\r\n"
 
 /*
 "Cross-Origin-Embedder-Policy: "

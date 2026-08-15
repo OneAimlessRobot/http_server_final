@@ -55,6 +55,5 @@ char defaultTarget[]={0};
 char notFoundDefaultTarget[FIELDSIZE]={0};
 char mainRssFeed[FIELDSIZE]={0};
 
-char* defaultVersion="HTTP/1.1";
 char* defaultMimetype="*/*";
 

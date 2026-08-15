@@ -1,6 +1,12 @@
 #ifndef HTTP_REQ_PARSER_H
 #define HTTP_REQ_PARSER_H
-typedef enum {GET,HEAD,POST,INVALID} http_req_type;
+
+#define ALLOWED_HTTP_REQUESTS_STRING "GET, HEAD, POST"
+typedef enum {GET,HEAD,POST,INVALID,MAX_REQUEST_TYPE} http_req_type;
+
+
+extern const char* request_const_name_arr[MAX_REQUEST_TYPE];
+
 
 typedef struct http_header_field{
 	char* field[2];
