@@ -199,7 +199,7 @@ void fillUpFileNotFoundHeader(char headerBuff[PATHSIZE],u_int64_t size,const cha
 
 void print_response_header(char* headerBuff){
 	
-	if(logging){
+	if(logging>5){
 		fprintf(logstream,"This is the header:\n\n%s",headerBuff);
 	}
 }

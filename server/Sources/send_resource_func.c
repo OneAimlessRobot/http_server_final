@@ -174,7 +174,6 @@ void sendResource(int compress,int is_directory,int is_partial, int start_point,
 		curr_client.filepath[strlen(curr_client.filepath)-strlen(servComp.fileExt)-1]=0;
 		curr_client.target[strlen(curr_client.target)-strlen(servComp.fileExt)-1]=0;
 	}
-	fprintf(logstream,"Fetching %s...\n",curr_client.filepath);
 	if(logging > 5){
 		fprintf(logstream,"Fetching %s...\n",curr_client.filepath);
 	}
