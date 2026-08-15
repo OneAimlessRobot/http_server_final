@@ -64,7 +64,7 @@ static int compressFile(char* target, int enable){
 			}
 			return -1;
 	}
-	if(!file_exists(inpathbuff)){
+	if(!file_exists(ptr)){
 			if(logging){
 				fprintf(logstream,"Invalid filepath: %s\n%s\n",ptr,strerror(errno));
 			}
@@ -82,7 +82,7 @@ static int compressFile(char* target, int enable){
 	}
 	
 	char* argv[ARGVMAX]={0};
-	makeargv(cmd,argv, -1);
+	makeargv(cmd,argv, 3);
 	int pid=fork();
 	switch(pid){
 		case -1:
