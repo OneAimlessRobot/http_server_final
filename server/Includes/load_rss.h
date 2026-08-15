@@ -3,7 +3,7 @@
 
 int isRssFeed(char* resourceTarget);
 
-char* generateRss(char* dir);
+void generateRss(char* dir);
 
 
 #endif

@@ -61,7 +61,7 @@ int isText(char* resourceTarget){
 
 static void generateTextPrimitive(char* path){
 
-	int outfd= open(tmpDir,O_TRUNC|O_WRONLY|O_CREAT,0777);
+	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
         snprintf(currFetchedText,PATHSIZE*2-1,"%s%s",currDir,path);
 
         char* args_cmd[]={"cat", currFetchedText,NULL};
@@ -89,7 +89,7 @@ static void generateTextPrimitive(char* path){
 
 
 
-char* generateText(char* dir){
+void generateText(char* dir){
 
 	logging=1;
 	logstream=stderr;
@@ -97,13 +97,20 @@ char* generateText(char* dir){
 	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
-	int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
-	if(fd<0){
+	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	
+	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
+	if(curr_client.fd <0){
 			if(logging){
-			fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",tmpDir2,strerror(errno));
+			fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",
+															curr_client.filepath,
+															strerror(errno));
 			}
-			return NULL;
+			curr_client.fd = -1;
+			return;
+	}
+	else if(logging){
+		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
 	generateTextPrimitive(dir);
 	FILE* fstream;
@@ -111,8 +118,9 @@ char* generateText(char* dir){
 			if(logging){
 			fprintf(logstream,"ERRO NO RSS FEED %s\n",tmpDir);
 			}
-			close(fd);
-			return NULL;
+			close(curr_client.fd);
+			curr_client.fd = -1;
+			return;
 	}
 	remove(tmpDir);
 	int pathsize=strlen(dir);
@@ -122,18 +130,17 @@ char* generateText(char* dir){
 	}
 	
 	
-	dprintf(fd,TXT_HTML_PREFIX
+	dprintf(curr_client.fd,TXT_HTML_PREFIX
 		"\n<body class='%s'>\n<br>\n<br>\n\n<br>\n<br><div class='%s'>\n<pre class='%s'>\n\n",txt_prettify_css_file_path,TXT_PRETTIFY_BODY_CLASS,TXT_PRETTIFY_DIV_CLASS,TXT_PRETTIFY_PRE_CLASS);
 	
 
 	char currLine[PATHSIZE*2]={0};
 	while(fgets(currLine,PATHSIZE,fstream)){
-		dprintf(fd,"%s",currLine);
+		dprintf(curr_client.fd,"%s",currLine);
 	}
-	dprintf(fd,"\n</pre>\n</div>\n\n<br>\n<br>\n"
+	dprintf(curr_client.fd,"\n</pre>\n</div>\n\n<br>\n<br>\n"
 				"</body>\n</html>\n");
 	fclose(fstream);
-	close(fd);
-	return tmpFile2;
+	lseek(curr_client.fd,0,SEEK_SET);
 
 }

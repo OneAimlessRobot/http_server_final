@@ -33,13 +33,13 @@ int compression_level;
 
 int use_exit_func;
 
-int use_fd;
-
 int use_chunked;
 
 int ignore_partial;
 
 int use_tls;
+
+int use_valgrind;
 
 char currDir[PATHSIZE];
 int serverOn=0;

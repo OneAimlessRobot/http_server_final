@@ -11,7 +11,12 @@
 #include "../Includes/http_req_parser.h"
 
 static http_req_type getREQtypeFromString(char* str){
-
+	if(!str){
+		return INVALID;
+	}
+	if(!strnlen(str,FIELDSIZE)){
+		return INVALID;
+	}
 	if(!strcmp(str,"GET")){
 
 		return GET;
@@ -19,10 +24,6 @@ static http_req_type getREQtypeFromString(char* str){
 	if(!strcmp(str,"POST")){
 
 		return POST;
-	}
-	if(!strcmp(str,"INFO")){
-
-		return INFO;
 	}
 	if(!strcmp(str,"HEAD")){
 
@@ -37,8 +38,6 @@ static char* getREQStringFromType(http_req_type type){
 	return "GET";
 	case POST:
 	return "POST";
-	case INFO:
-	return "INFO";
 	case HEAD:
 	return "HEAD";
 	default:
@@ -93,7 +92,6 @@ return arr;
 static void spawnHTTPHeader(char* buff,http_header*result){
 	result->type=INVALID;
 	memset(result->target,0,FIELDSIZE);
-	memset(result->target_processed,0,FIELDSIZE);
 	memset(result->origin,0,FIELDSIZE);
 	memset(result->host,0,FIELDSIZE);
 	memset(result->mimetype,0,FIELDSIZE);
@@ -185,8 +183,7 @@ void spawnHTTPRequest(char *buff,http_header* header,http_request* reqresult){
 	reqresult->data_size=strlen(splitRequest[1])+1;
 	
 	}
-	reqresult->data=malloc(reqresult->data_size);
-	memset(reqresult->data,0,reqresult->data_size);
+	memset(reqresult->data,0,BUFFSIZE);
 	if(splitRequest[1]){
 	memcpy(reqresult->data,splitRequest[1],reqresult->data_size-1);
 	}

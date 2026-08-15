@@ -1,13 +1,11 @@
 #ifndef STYLE_EXTENDER_H
 #define STYLE_EXTENDER_H
 
-typedef struct comp_result{
-	int comp_enable,fd;
-	FILE* stream;
 
-}comp_result;
+int comp_enable = 0,
+	comp_fd = -1;
 
-static void push_bytes(client* c, comp_result* result, int is_partial, int start_point);
+static void push_bytes(int is_partial, int start_point);
 
 
 static char* compressionCmd = "%s -c -%d %s";
@@ -101,32 +99,21 @@ static const char* get_mime_type(const char *filename) {
     }
     return "application/octet-stream";
 }
-static void push_bytes(client* c, comp_result* result, int is_partial, int start_point){
+static void push_bytes(int is_partial, int start_point){
 	
-	(use_fd)?
-		((use_chunked)?
-			sendallchunkedfd(c,result->fd,is_partial?start_point:0)
-			:
-			sendallfd(c,result->fd,is_partial?start_point:0)
-			
-		):
-		((use_chunked)?
-			sendallchunkedstream(c,result->stream,is_partial?start_point:0)
-			:
-			sendallstream(c,result->stream,is_partial?start_point:0)
-		);
+	((use_chunked)?
+		sendallchunkedfd(&curr_client,comp_fd,is_partial?start_point:0)
+		:
+		sendallfd(&curr_client,comp_fd,is_partial?start_point:0));
 	
 }
 
-static void final_cleanup(comp_result* result, int notfound){
+static void final_cleanup(int notfound){
 	
-	close(result->fd);
-	if(result->stream!=NULL){
-		fclose(result->stream);
-	}
+	close(comp_fd);
 
-	printf("Trying to delete %s...\n",outpathbuff);
-	if(result->comp_enable&&!notfound){
+	if(comp_enable&&!notfound){
+		printf("Trying to delete %s...\n",outpathbuff);
 		remove(outpathbuff);
 	}
 

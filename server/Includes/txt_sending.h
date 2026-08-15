@@ -3,6 +3,6 @@
 
 int isText(char* resourceTarget);
 
-char* generateText(char* dir);
+void generateText(char* dir);
 
 #endif

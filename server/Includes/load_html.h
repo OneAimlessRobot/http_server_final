@@ -3,6 +3,6 @@
 
 int isDirectory(char* resourceTarget);
 
-char* generateDirListing(char* dir);
+void generateDirListing(char* dir);
 
 #endif

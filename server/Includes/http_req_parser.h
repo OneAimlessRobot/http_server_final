@@ -1,6 +1,6 @@
 #ifndef HTTP_REQ_PARSER_H
 #define HTTP_REQ_PARSER_H
-typedef enum {GET,POST,INFO,INVALID,HEAD} http_req_type;
+typedef enum {GET,HEAD,POST,INVALID} http_req_type;
 
 typedef struct http_header_field{
 	char* field[2];
@@ -11,8 +11,6 @@ typedef struct http_header{
 
 	http_req_type type;
 	char target[FIELDSIZE],
-		target_processed[FIELDSIZE],
-		target_processed_copy[FIELDSIZE],
 		version[FIELDSIZE],
 		host[FIELDSIZE],
 		*split_encoding[ARGVMAX],
@@ -39,7 +37,7 @@ typedef struct http_request{
 
 	http_header* header;
 	u_int64_t data_size;
-	char* data;
+	char data[BUFFSIZE];
 
 
 }http_request;

@@ -225,7 +225,7 @@ static void generateDirListingPrimitive(char* path){
 
 
 
-	int outfd= open(tmpDir,O_TRUNC|O_WRONLY|O_CREAT,0777);
+	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
         snprintf(currSearchedDir,PATHSIZE*2-1,"%s%s",currDir,path);
 
 	resolve_canonical_path(currSearchedDir,resolved_abs_path);
@@ -251,7 +251,7 @@ static void generateDirListingPrimitive(char* path){
         close(outfd);
 
 }
-char* generateDirListing(char* dir){
+void generateDirListing(char* dir){
 
 	logging=1;
         logstream=stderr;
@@ -281,21 +281,18 @@ char* generateDirListing(char* dir){
 	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
 	
-
-	int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
-	if(fd<0){
+	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
+	if(curr_client.fd<0){
 			if(logging){
-			fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",tmpDir2,strerror(errno));
+			fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",curr_client.filepath,strerror(errno));
 			}
-			return NULL;
+			curr_client.fd = -1;
+			return;
 	}
-	else{
-	
-		if(logging){
-			fprintf(logstream,"Ficheiro criado!\n%s\n",tmpDir2);
-		}
+	else if(logging){
+		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
 	generateDirListingPrimitive(dir);
 	FILE* fstream;
@@ -303,15 +300,16 @@ char* generateDirListing(char* dir){
 			if(logging){
 			fprintf(logstream,"ERRO NAS DIRETORIAS %s\n",tmpDir);
 			}
-			close(fd);
-			return NULL;
+			close(curr_client.fd);
+			curr_client.fd = -1;
+			return;
 	}
 	remove(tmpDir);
-	dprintf(fd,STYLESHEET_FORMAT
+	dprintf(curr_client.fd,STYLESHEET_FORMAT
 		"\n<body class='%s'>\n<br>%s\n\n<div class='%s'>\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN,DIR_LISTING_BODY_CLASS);
 	if(atRoot){
 
-		dprintf(fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>\n<br>\n",SITE_PATH_HEADER_CLASS);
+		dprintf(curr_client.fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>\n<br>\n",SITE_PATH_HEADER_CLASS);
 	}
 	else{
 		char prev_dir_rel_path[PATHSIZE*2]={0};
@@ -325,17 +323,15 @@ char* generateDirListing(char* dir){
 		uint64_t ptr_to_wanted_slash_num=(uint64_t)argv_for_slashes[wanted_slash_idx];
 		uint64_t subtraction_result=ptr_to_wanted_slash_num-ptr_to_path_num;
 		prev_dir_to_use[subtraction_result-1]=0;
-		dprintf(fd,"\n<a class='%s' href='%s'>Prev</a><br><br><br>\n",DIR_REF_CLASS,prev_dir_to_use);
+		dprintf(curr_client.fd,"\n<a class='%s' href='%s'>Prev</a><br><br><br>\n",DIR_REF_CLASS,prev_dir_to_use);
 
 	}
 	generate_header_sizes_data(fstream);
 	fseek(fstream,0,SEEK_SET);
-	print_header(fd);
-	process_lines_and_print_to_dest_file(fd,fstream,dir);
-	dprintf(fd,"</div>\n</body>\n</html>\n");
+	print_header(curr_client.fd);
+	process_lines_and_print_to_dest_file(curr_client.fd,fstream,dir);
+	dprintf(curr_client.fd,"</div>\n</body>\n</html>\n");
 	fclose(fstream);
-	close(fd);
-	return tmpFile2;
 
 }
 

@@ -25,39 +25,52 @@
 #include <sys/types.h>
 #define READ_FUNC_TO_USE timedreadall
 
-client*	curr_client = NULL;
+client curr_client = {0};
+http_request req = {0};
+http_header header = {0};
 
 char tmpFile[PATHSIZE*3]={0},
 	tmpFile2[PATHSIZE*3]={0},
-	tmpDir[PATHSIZE*4]={0},
-	tmpDir2[PATHSIZE*4]={0};
+	tmpDir[PATHSIZE*4]={0};
 	
 static socklen_t socklenpointer;
-static void initEmptyClient(client* result){
-		FD_ZERO(&result->readfd);
-		result->socket=0;
-		result->is_tls=use_tls;
-		result->ctx_if_ssl=NULL;
-		memset(result->username,0,FIELDSIZE);
-		memset(&result->client_addr,0,sizeof(struct sockaddr_in));
-		
 
-}
-static client* spawnEmptyClient(void){
-	client* result= malloc(sizeof(client));
-		initEmptyClient(result);
-	return result;
 
+void exit_function_client(void){
+	
+	if(curr_client.is_tls){
+		ShutdownSSL(&curr_client.ctx_if_ssl);
+		end_openssl_libs_server_side();
+		DestroySSL();
+	}
+	if(curr_client.fd >=0){
+		close(curr_client.fd);
+	}
+	
+	if(curr_client.socket >=0){
+		close(curr_client.socket);
+	}
+	exit(-1);
 }
+
 
 static void process_header_target(http_header* the_header){
 	
-	url_decode(the_header->target, the_header->target_processed);
+	url_decode(the_header->target, curr_client.target);
+	
+	if(logging){
+			fprintf(logstream,"The target is: %s\n", curr_client.target);
+	}
 }
-static void handleCurrentActivity(client*c,http_request req){
+static void handleCurrentActivity(void){
+	
+	if(header.type==INVALID){
+		send_wrapper((char*)HTTP_METHOD_ERR_HEADER,strlen(HTTP_METHOD_ERR_HEADER));
+		return;
+	}
+	
 	int compress=0;
 	char targetinout[PATHSIZE]={0};
-	http_header header=*(req.header);
 	if(!strcmp(header.target,"/")){
 
 		strcpy(header.target,defaultTarget);
@@ -70,108 +83,81 @@ static void handleCurrentActivity(client*c,http_request req){
 	}
 	int is_head = (header.type==HEAD);
 	
-	char* (*generating_func)(char*) = NULL;
+	void (*generating_func)(char*) = NULL;
 	
-	char* string_of_custom = NULL;
-	int is_directory=isDirectory(header.target_processed);
-	
-	if(is_directory){
+	int is_directory = 0;
+	if((is_directory=isDirectory(curr_client.target))){
 		generating_func = generateDirListing;
 	}
-	int is_rss_feed=isRssFeed(header.target_processed);
-	if(is_rss_feed){
+	else if(isRssFeed(curr_client.target)){
 		generating_func = generateRss;
 	}
-	int is_php_result=isPHPRequest(header.target_processed);
-	if(is_php_result){
+	else if(isPHPRequest(curr_client.target)){
 		generating_func = generatePHPResult;
 	}
-	int is_txt_file=isText(header.target_processed);
-	if(is_txt_file){
+	else if(isText(curr_client.target)){
 		generating_func = generateText;
 	}
-	if(generating_func!=NULL){
-		string_of_custom = generating_func(header.target_processed);
-		sendResource(c,string_of_custom,compress,is_directory,header.is_partial,header.range_number,is_head);
-		remove(tmpDir2);
-		return;
+	else if(isRconRequest(curr_client.target)){
 		
+		generating_func = generateRconResult;
 	}
 	switch(header.type){
-	case GET:
-		sendResource(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number,is_head);
+	case GET ... HEAD:
+		(generating_func!=NULL)?
+			generating_func(curr_client.target):
+			snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,curr_client.target);
 	break;
 	case POST:
-			if(isCustomPostReq(header.target_processed)){
-				int is_rcon_result=isRconRequest(header.target_processed);
-				if(is_rcon_result){
-					handleCustomPostReq(header.target_processed,req.data,targetinout);
-					sendResource(c,generateRconResult(targetinout),compress,is_directory,header.is_partial,header.range_number,0);
-					remove(tmpDir2);
-					return;
-				}
-				sendResource(c,targetinout,compress,is_directory,header.is_partial,header.range_number,0);
-			}
-			else{
-				sendResource(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number,0);
-			}
-	break;
-	case HEAD:
-		sendResource(c,header.target_processed,compress,is_directory,header.is_partial,header.range_number,1);
+		if(isCustomPostReq(curr_client.target)){
+			handleCustomPostReq(curr_client.target,req.data,targetinout);
+			
+		}
+		(generating_func!=NULL)?
+			generating_func(targetinout):
+			snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,targetinout);
+		
+		memset(curr_client.target,0,PATHSIZE);
+		snprintf(curr_client.target,PATHSIZE,"%s",targetinout);
 	break;
 	default:
-		send_wrapper(c,(char*)HTTP_METHOD_ERR_HEADER,strlen(HTTP_METHOD_ERR_HEADER));
 	break;
 	}
-	
+	sendResource(compress,
+				is_directory,
+				header.is_partial,
+				header.range_number,
+				is_head);
+	if(generating_func!=NULL){
+		remove(curr_client.filepath);
+	}
 }
 
-void handleConnection(client* c){
- 			memset(c->peerbuff,0,BUFFSIZE);
-			http_request req;
-			memset(&req,0,sizeof(http_request));
-			http_header header;
-			memset(&header,0,sizeof(http_header));
-			if(READ_FUNC_TO_USE(c,c->peerbuff)!=-2){
+void handleConnection(void){
+			if(READ_FUNC_TO_USE(&curr_client,curr_client.peerbuff)!=-2){
 				if(errno == ECONNRESET){
-					raise(SIGINT);
+					exit_function_client();
 				}
-				else if(strlen(c->peerbuff)){
-					spawnHTTPRequest(c->peerbuff,&header,&req);
+				else if(strlen(curr_client.peerbuff)){
+					spawnHTTPRequest(curr_client.peerbuff,&header,&req);
 					if(logging>0){
 						fprintf(logstream,"Recebemos request!!!:\n");
 						
 						print_http_req(logstream,req);
 					}
 					if(!strlen(req.data)){
-					free(req.data);
-					req.data=malloc(BUFFSIZE);
 					memset(req.data,0,BUFFSIZE);
-					if(READ_FUNC_TO_USE(c,req.data)!=-2){
+					if(READ_FUNC_TO_USE(&curr_client,req.data)!=-2){
 
 						if(logging>0){
 							fprintf(logstream,"Recebemos dados!!!: %s\n",req.data);
 						}
 					}
 					}
-					handleCurrentActivity(c,req);
-					free(req.data);
+					handleCurrentActivity();
 				}
 			}
 			
-}
-void exit_function_client(void){
-	
-	if(curr_client->is_tls){
-		ShutdownSSL(&curr_client->ctx_if_ssl);
-		end_openssl_libs_server_side();
-		DestroySSL();
-	}
-	close(curr_client->socket);
-	free(curr_client->peerbuff);
-	free(curr_client);
-	
-	exit(-1);
 }
 int is_tls_connection(int client_fd) {
     unsigned char packet_buff[6];
@@ -196,27 +182,24 @@ void runClientConnection(int is_tls, int sock){
 	
 	exit_func_for_this_module = exit_function_client;
 	use_tls=is_tls;
-	client*c=spawnEmptyClient();
-	curr_client= c;
-	socklenpointer=sizeof(c->client_addr);
-	c->socket=sock;
-	c->is_tls=is_tls_connection(c->socket);
-	if(c->is_tls){
+	socklenpointer=sizeof(curr_client.client_addr);
+	curr_client.socket=sock;
+	curr_client.is_tls=is_tls_connection(curr_client.socket);
+	if(curr_client.is_tls){
 			if(logging>0){
 				fprintf(logstream,"Its tls we do eht!\n");
 			}
 			InitializeSSL();
 			init_openssl_libs_server_side();
-			convert_server_con_to_ssl(&c->ctx_if_ssl,c->socket);
+			convert_server_con_to_ssl(&curr_client.ctx_if_ssl,curr_client.socket);
 	}
-	c->peerbuff=malloc(BUFFSIZE);
-	memset(c->peerbuff,0,BUFFSIZE);
+	handleConnection();
 
-	handleConnection(c);
-
-	getpeername(c->socket , (struct sockaddr*)&c->client_addr , (socklen_t*)&socklenpointer);
+	getpeername(curr_client.socket , (struct sockaddr*)&curr_client.client_addr , (socklen_t*)&socklenpointer);
 	if(logging>0){
-		fprintf(logstream,"Disconnexao cliente de:\n%s:%d\n" ,inet_ntoa(c->client_addr.sin_addr) , ntohs(c->client_addr.sin_port));
+		fprintf(logstream,"Disconnexao cliente de:\n%s:%d\n" ,
+					inet_ntoa(curr_client.client_addr.sin_addr) ,
+					ntohs(curr_client.client_addr.sin_port));
 			   
 	}
 			 

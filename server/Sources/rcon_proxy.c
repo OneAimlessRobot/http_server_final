@@ -114,7 +114,7 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 
 	make_rcon_arg_arr(the_separated_parameters,parameters_arr,MAX_NUM_RCON_ARGS+1);
 
-	int outfd= open(tmpDir,O_TRUNC|O_WRONLY|O_CREAT,0777);
+	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 
         snprintf(currFetchedRCON,PATHSIZE*2-1,"%s%s", currDir,the_rcon_script);
 
@@ -144,35 +144,40 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
         close(outfd);
 
 }
-char* generateRconResult(char* the_request_parameters){
+void generateRconResult(char* the_request_parameters){
 
 	logging=1;
-        logstream=stderr;
+    logstream=stderr;
 
 	snprintf(tmpFile,PATHSIZE*3-1,tmpOne, request_id);
 	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
-
-        int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
-        if(fd<0){
-                if(logging){
-                fprintf(logstream,"ERRO NO RCON|!|\nErro: %s\n",strerror(errno));
-                }
-                return NULL;
-        }
-        generateRconResultPrimitive(the_request_parameters);
-        FILE* fstream;
-        if(!(fstream=fopen(tmpDir,"r"))){
-                if(logging){
-                fprintf(logstream,"ERRO NO RCON %s\n",tmpDir);
-                }
-                close(fd);
-                return NULL;
-        }
-        remove(tmpDir);
-	dprintf(fd,"<!DOCTYPE html>"
+	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	
+	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
+	if(curr_client.fd <0){
+			if(logging){
+			fprintf(logstream,"ERRO NO RCON|!|\nErro: %s\n",strerror(errno));
+			}
+			curr_client.fd = -1;
+			return;
+	}
+	else if(logging){
+		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
+	}
+	generateRconResultPrimitive(the_request_parameters);
+	FILE* fstream;
+	if(!(fstream=fopen(tmpDir,"r"))){
+			if(logging){
+			fprintf(logstream,"ERRO NO RCON %s\n",tmpDir);
+			}
+			close(curr_client.fd);
+			curr_client.fd = -1;
+			return;
+	}
+	remove(tmpDir);
+	dprintf(curr_client.fd ,"<!DOCTYPE html>"
 			"\n<html>"
 			"\n<head>"
 			"\n<base href=''>"
@@ -181,11 +186,10 @@ char* generateRconResult(char* the_request_parameters){
 
 	char currListing[PATHSIZE*2]={0};
 	while(fgets(currListing,PATHSIZE,fstream)){
-		dprintf(fd,"%s",currListing);
+		dprintf(curr_client.fd,"%s",currListing);
 	}
-	dprintf(fd,"</pre>\n</body>\n</html>\n");
+	dprintf(curr_client.fd,"</pre>\n</body>\n</html>\n");
 	fclose(fstream);
-	close(fd);
-	return tmpFile2;
+	lseek(curr_client.fd,0,SEEK_SET);
 
 }

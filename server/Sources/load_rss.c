@@ -109,7 +109,7 @@ int isRssFeed(char* resourceTarget){
 
 static void generateRssPrimitive(char* path){
 
-	int outfd= open(tmpDir,O_TRUNC|O_WRONLY|O_CREAT,0777);
+	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
         snprintf(currFetchedRSS,PATHSIZE*2-1,"%s%s",currDir,path);
 
         char* args_cmd[]={"cat", currFetchedRSS,NULL};
@@ -151,7 +151,7 @@ static int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const c
 
 
 
-char* generateRss(char* dir){
+void generateRss(char* dir){
 
 	logging=1;
         logstream=stderr;
@@ -159,25 +159,32 @@ char* generateRss(char* dir){
 	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
 	
-        int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
-        if(fd<0){
-                if(logging){
-                fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",tmpDir2,strerror(errno));
-                }
-                return NULL;
-        }
-        generateRssPrimitive(dir);
-        FILE* fstream;
-        if(!(fstream=fopen(tmpDir,"r"))){
-                if(logging){
-                fprintf(logstream,"ERRO NO RSS FEED %s\n",tmpDir);
-                }
-                close(fd);
-                return NULL;
-        }
-        remove(tmpDir);
+	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
+	if(curr_client.fd<0){
+			if(logging){
+			fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",
+											curr_client.filepath,
+											strerror(errno));
+			}
+			curr_client.fd = -1;
+			return;
+	}
+	else if(logging){
+		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
+	}
+	generateRssPrimitive(dir);
+	FILE* fstream;
+	if(!(fstream=fopen(tmpDir,"r"))){
+			if(logging){
+			fprintf(logstream,"ERRO NO RSS FEED %s\n",tmpDir);
+			}
+			close(curr_client.fd);
+			curr_client.fd = -1;
+			return;
+	}
+	remove(tmpDir);
 	int pathsize=strlen(dir);
 	if(pathsize&&!strcmp(dir +pathsize-1,"/")){
 
@@ -188,7 +195,7 @@ char* generateRss(char* dir){
 	if(!obtained_channel){
 		goto end;
 	}
-	dprintf(fd,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+	dprintf(curr_client.fd,"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			"<rss version=\"2.0\" xmlns:atom=\"%s\">\n"
 			"<xhtml:script xmlns:xhtml=\"%s\" type=\"application/javascript\"/>\n"
 			"<channel>\n"
@@ -196,7 +203,7 @@ char* generateRss(char* dir){
 			"<script src=\"%s\"></script>\n",
 			uris_for_namespace_ids[ATOM],uris_for_namespace_ids[XHTML],rss_feed_self_link,FREE_ALL_APPS_COUNTDOWN);
 
-	int result_from_channel_printing=print_out_rss_line_to_fd(fd,channel_string_buff,names_for_channel_tag_ids,empty_contents_for_channel_tag_ids,MAX_CH_TAG_ID+1);
+	int result_from_channel_printing=print_out_rss_line_to_fd(curr_client.fd,channel_string_buff,names_for_channel_tag_ids,empty_contents_for_channel_tag_ids,MAX_CH_TAG_ID+1);
 	if(result_from_channel_printing<0){
 		goto channel_end;
 	}
@@ -204,16 +211,15 @@ char* generateRss(char* dir){
 
 	char currListing[PATHSIZE*2]={0};
 	while(fgets(currListing,PATHSIZE,fstream)){
-		dprintf(fd,"<item>\n");
-		print_out_rss_line_to_fd(fd, currListing,names_for_tag_ids,empty_contents_for_tag_ids,MAX_TAG_ID+1);
-		dprintf(fd,"</item>\n");
+		dprintf(curr_client.fd,"<item>\n");
+		print_out_rss_line_to_fd(curr_client.fd, currListing,names_for_tag_ids,empty_contents_for_tag_ids,MAX_TAG_ID+1);
+		dprintf(curr_client.fd,"</item>\n");
 		skip_comments(fstream);
 	}
 	channel_end:
-		dprintf(fd,"</channel>\n</rss>\n");
+		dprintf(curr_client.fd,"</channel>\n</rss>\n");
 	end:
 		fclose(fstream);
-		close(fd);
-	return tmpFile2;
+		lseek(curr_client.fd,0,SEEK_SET);
 
 }

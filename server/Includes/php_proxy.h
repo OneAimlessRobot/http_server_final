@@ -4,7 +4,7 @@
 
 int isPHPRequest(char* resourceTarget);
 
-char* generatePHPResult(char* dir);
+void generatePHPResult(char* dir);
 
 
 

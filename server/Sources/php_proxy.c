@@ -72,7 +72,7 @@ int isPHPRequest(char* resourceTarget){
 
 void generatePHPResultPrimitive(char* target){
 
-	int outfd= open(tmpDir,O_TRUNC|O_WRONLY|O_CREAT,0777);
+	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
         snprintf(currFetchedPHP,PATHSIZE*2-1,"%s%s",currDir,target);
 
         snprintf(full_php_target,PATHSIZE*2-1,"%s%s",target,query);
@@ -117,7 +117,7 @@ void generatePHPResultPrimitive(char* target){
 
 
 
-char* generatePHPResult(char* request){
+void generatePHPResult(char* request){
 
 	query = strchr(request, '?');
 	if (query) {
@@ -139,25 +139,30 @@ char* generatePHPResult(char* request){
 	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,request, request_id);
 	
 	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(tmpDir2,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
 	
-        int fd= open(tmpDir2,O_TRUNC|O_WRONLY|O_CREAT,0777);
-        if(fd<0){
-                if(logging){
-                fprintf(logstream,"ERRO NO PHP PROXY %s\nErro: %s\n",tmpDir2,strerror(errno));
-                }
-                return NULL;
-        }
-        generatePHPResultPrimitive(request);
-        FILE* fstream;
-        if(!(fstream=fopen(tmpDir,"r"))){
-                if(logging){
-                fprintf(logstream,"ERRO NO PHP PROXY %s\n",tmpDir);
-                }
-                close(fd);
-                return NULL;
-        }
-        remove(tmpDir);
+	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
+	if(curr_client.fd <0){
+			if(logging){
+			fprintf(logstream,"ERRO NO PHP PROXY %s\nErro: %s\n",curr_client.filepath,strerror(errno));
+			}
+			curr_client.fd = -1;
+			return;
+	}
+	else if(logging){
+		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
+	}
+	generatePHPResultPrimitive(request);
+	FILE* fstream;
+	if(!(fstream=fopen(tmpDir,"r"))){
+			if(logging){
+			fprintf(logstream,"ERRO NO PHP PROXY %s\n",tmpDir);
+			}
+			close(curr_client.fd);
+			curr_client.fd = -1;
+			return;
+	}
+	remove(tmpDir);
 
 	char currListing[PATHSIZE*2]={0};
 	int seen_blank = 0;
@@ -171,11 +176,10 @@ char* generatePHPResult(char* request){
 			}
 			continue;
 		}
-		dprintf(fd, "%s", currListing);
+		dprintf(curr_client.fd, "%s", currListing);
 	}
 	fclose(fstream);
-	close(fd);
-	return tmpFile2;
+	lseek(curr_client.fd,0,SEEK_SET);
 
 }
 

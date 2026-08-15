@@ -17,11 +17,35 @@
 #include <dirent.h>
 #include <sys/types.h>
 
+#define ARGV_TO_USE (use_valgrind?valgrind_argv:normal_argv)
+
 u_int64_t request_id_here =0;
 struct sigaction sa;
 
+
 static socklen_t socklenpointer;
 static int server_socket = -1;
+
+static char buff_sock[32]={0},
+	buff_tls[32]={0},
+	buff_request_id[128]={0};
+
+static char* valgrind_argv[] = {"valgrind",
+					"--leak-check=full",
+					"--show-leak-kinds=all",
+					"--track-fds=yes",
+					"./server.exe","1",
+					buff_tls,
+					buff_sock,
+					buff_request_id,
+					NULL},
+			* normal_argv[]=
+			{"./server.exe", "1",
+				buff_tls,
+				buff_sock,
+				buff_request_id,
+				NULL};
+					
 
 static struct sockaddr_in server_address, clientAddress;
 
@@ -33,10 +57,10 @@ void cleanup(void){
 		close(server_socket);
 		
 	}
+	fprintf(stdout,serverOn?"Adeus! Server out...\n":"Cliente out...\n");
 	if(logstream!=stdout && logstream!= stderr){
 		fclose(logstream);
 	}
-	fprintf(stdout,serverOn?"Adeus! Server out...\n":"Cliente out...\n");
 	
 	if(cfgs){
 	
@@ -85,14 +109,15 @@ static void handleIncommingConnections(void){
 			fprintf(logstream,"Client connected , ip %s , port %d \n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
         }
         request_id_here++;
-		char buff_sock[128]={0};
+        
+        memset(buff_sock,0, sizeof(buff_sock));
+        memset(buff_tls,0, sizeof(buff_tls));
+        memset(buff_request_id,0, sizeof(buff_request_id));
+        
 		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",client_socket);
-		char buff_tls[128]={0};
 		snprintf(buff_tls,sizeof(buff_tls)-1,"%d",use_tls);
-		char buff_request_id[128]={0};
 		snprintf(buff_request_id,sizeof(buff_request_id)-1,"%lx",request_id_here);
-		//char* args_module_cmd[]={"valgrind","--leak-check=full", "--show-leak-kinds=all", "--track-fds=yes", "./server.exe","1",buff_tls,buff_sock,buff_request_id,NULL};	
-		char* args_module_cmd[]={"./server.exe","1",buff_tls,buff_sock,buff_request_id,NULL};	
+
 		int pid=fork();
 		switch(pid){
 			case -1:
@@ -102,7 +127,8 @@ static void handleIncommingConnections(void){
 				}
 				exit(-1);
 			case 0:
-				execvp(args_module_cmd[0],args_module_cmd);
+				close(server_socket);
+				execvp(ARGV_TO_USE[0],ARGV_TO_USE);
 				perror("execvp");
 				break;
 			default:
@@ -156,8 +182,6 @@ void initializeConstants(void){
 	
 	port=atoi(find_value_in_cfg_arr("port",cfgs));
 	
-	use_fd=atoi(find_value_in_cfg_arr("use_fd",cfgs));
-	
 	compression=atoi(find_value_in_cfg_arr("compression",cfgs));
 	
 	compression_level=atoi(find_value_in_cfg_arr("compression_level",cfgs));
@@ -169,6 +193,8 @@ void initializeConstants(void){
 	logging=atoi(find_value_in_cfg_arr("logging",cfgs));
 	
 	use_tls=atoi(find_value_in_cfg_arr("use_tls",cfgs));
+	
+	use_valgrind=atoi(find_value_in_cfg_arr("use_valgrind",cfgs));
 	
 	if(logging<0){
 

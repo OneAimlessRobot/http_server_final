@@ -14,8 +14,8 @@ extern int logging
 ,port
 ,compression
 ,compression_level
-,use_fd
 ,use_chunked
+,use_valgrind
 ,ignore_partial
 ,send_socket_size,
 	recv_socket_size,
