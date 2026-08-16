@@ -74,10 +74,6 @@ void cleanup(void){
 		close(server_socket);
 		
 	}
-	if(serverWasOn&&does_dir_exist_aux(tmp_file_dir)){
-		rmdir(tmp_file_dir);
-		
-	}
 	fprintf(stdout,"Adeus! Process out.\n");
 	if(logstream!=stdout && logstream!= stderr){
 		fclose(logstream);
@@ -316,11 +312,10 @@ void initializeServer(void){
 	socklenpointer=sizeof(server_address);
 	
 	snprintf(tmp_file_dir,sizeof(tmp_file_dir)-1,"/tmp/%s",tmp_directory_name);
-	if(does_dir_exist_aux(tmp_file_dir)){
-		rmdir(tmp_file_dir);
+	if(!does_dir_exist_aux(tmp_file_dir)){
+		mkdir(tmp_file_dir, 0777);
 		
 	}
-	mkdir(tmp_file_dir, 0777);
 	mainLoop();
 	cleanup();
 }
