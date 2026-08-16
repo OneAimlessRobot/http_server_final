@@ -107,12 +107,12 @@ http_header_field* make_http_header_field_arr(char *strarr[ARGVMAX]) {
     memset(arr,0,size*sizeof(http_header_field));
     for(int i=0;strarr[i]&&i<size-1;i++){
 	
-                splitString(strarr[i],":",arr[i].field);
+			splitString(strarr[i],":",arr[i].field);
 
 
-        }
-        arr[size-1]=(http_header_field){{NULL,NULL}};
-return arr;
+	}
+    arr[size-1]=(http_header_field){{NULL,NULL}};
+	return arr;
 }
 
 static void spawnHTTPHeader(char* buff,http_header*result){

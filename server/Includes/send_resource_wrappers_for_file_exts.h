@@ -13,6 +13,7 @@ static char* compressionCmd = "%s -c -%d %s";
 static char inpathbuff[PATHSIZE*6]={0};
 static char outpathbuff[PATHSIZE*6+10]={0};
 static char cmd[PATHSIZE*30]={0};
+static char buff_for_dotted_target[PATHSIZE*3]={0};
 
 
 typedef struct {
