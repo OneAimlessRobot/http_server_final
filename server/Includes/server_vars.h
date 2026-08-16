@@ -43,8 +43,7 @@ extern char currDir[PATHSIZE],
 	defaultTarget[FIELDSIZE],
 	notFoundDefaultTarget[FIELDSIZE],
 	mainRssFeed[FIELDSIZE],
-	tmp_directory_name[PATHSIZE],
-	tmp_file_dir[PATHSIZE*2],
+	*tmp_file_dir,
 	*defaultMimetype;
 
 

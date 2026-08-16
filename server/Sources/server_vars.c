@@ -44,7 +44,7 @@ char currDir[PATHSIZE] = {0},
 	notFoundDefaultTarget[FIELDSIZE] = {0},
 	mainRssFeed[FIELDSIZE] = {0},
 	tmp_directory_name[PATHSIZE] = {0},
-	tmp_file_dir[PATHSIZE*2] = {0},
+	*tmp_file_dir= NULL,
 	*defaultMimetype = "*/*";
 
 FILE* logstream=NULL;

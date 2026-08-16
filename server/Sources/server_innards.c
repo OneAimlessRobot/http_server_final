@@ -174,7 +174,6 @@ void initializeConstants(void){
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(mainRssFeed,find_value_in_cfg_arr("mainRssFeed",cfgs),FIELDSIZE-1);
-	strncpy(tmp_directory_name,find_value_in_cfg_arr("tmp_directory_name",cfgs),FIELDSIZE-1);
 	int invalid_string_confs=
 				!((stringsAreEqual(defaultTarget,NO_SUCH_SETTING)
 				||
@@ -183,10 +182,6 @@ void initializeConstants(void){
 				(stringsAreEqual(notFoundDefaultTarget,NO_SUCH_SETTING)
 				||
 				stringsAreEqual(notFoundDefaultTarget,NO_SETTINGS_LOADED))
-				&&
-				(stringsAreEqual(tmp_directory_name,NO_SUCH_SETTING)
-				||
-				stringsAreEqual(tmp_directory_name,NO_SETTINGS_LOADED))
 				&&
 				(stringsAreEqual(mainRssFeed,NO_SUCH_SETTING)
 				||
@@ -238,6 +233,15 @@ void initializeConstants(void){
 		printf("Config error: use_valgrind must be an integer between 0 and 2!\n");
 		cleanup();
 	}
+	tmp_file_dir = getenv("tmp_file_dir");
+	if(!tmp_file_dir){
+		printf("the value from the tmp_file_dir environment variable could not be obtained!\n"
+				"Please execute the server\n"
+				"Using \"server_start.sh\"\n"
+				"exiting...\n");
+		cleanup();
+		
+	}
 }
 void the_exit_func(void){
 	serverOn=0;
@@ -254,7 +258,6 @@ void clientBootstrap(void){
 	if(logging){
 		fprintf(logstream,"Request id: %lu\n",request_id);
 	}
-	snprintf(tmp_file_dir,sizeof(tmp_file_dir)-1,"/tmp/%s",tmp_directory_name);
 	servComp=br;
 	cleanup();
 	
@@ -310,8 +313,7 @@ void initializeServer(void){
 		fprintf(logstream,"Server spawnado @ %s\n",inet_ntoa(server_address.sin_addr));
 	}
 	socklenpointer=sizeof(server_address);
-	
-	snprintf(tmp_file_dir,sizeof(tmp_file_dir)-1,"/tmp/%s",tmp_directory_name);
+
 	if(!does_dir_exist_aux(tmp_file_dir)){
 		mkdir(tmp_file_dir, 0777);
 		
