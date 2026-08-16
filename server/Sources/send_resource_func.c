@@ -119,7 +119,7 @@ static int compressFile(char* target, int enable){
 static void send_header(int notfound,  int start_point, int is_partial){
 
 	u_int64_t fileSize=0;
-	const char* the_mime_type= get_mime_type(notfound?notFoundDefaultTarget:curr_client.filepath);
+	const char* the_mime_type= get_mime_type(notfound?notFoundDefaultTarget:curr_client.relative_file_path);
 	
 	lseek(comp_fd,0,SEEK_END);
 	

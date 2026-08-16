@@ -43,7 +43,8 @@ typedef struct http_request{
 
 	http_header* header;
 	u_int64_t data_size;
-	char data[BUFFSIZE];
+	char data[BUFFSIZE],
+		processed_data[BUFFSIZE];
 
 
 }http_request;

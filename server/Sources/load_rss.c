@@ -14,9 +14,6 @@
 
 static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss";
 
-#define tmpOne "%s.tmp%lx.rss"
-#define tmpTwo "%s.tmp1%lx.rss"
-
 
 static char channel_string_buff[PATHSIZE*2]={0};
 
@@ -155,11 +152,12 @@ void generateRss(char* dir){
 
 	logging=1;
         logstream=stderr;
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir, request_id);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
-	
-	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneRSS_XML,dir, request_id);
+	replaceStringCharacter(&tmpFile[1],'/','.');
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoRSS_XML,dir, request_id);
+	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
+	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
+	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
 	
 	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
 	if(curr_client.fd<0){

@@ -81,7 +81,15 @@ char* randStr(int size){
 
 
 }
-
+int does_dir_exist_aux(char* path){
+	
+	DIR* directory=opendir(path);
+	if(directory){
+		closedir(directory);
+	}
+	errno=0;
+	return (directory!=NULL);
+}
 char** randStrArr(int sizeOfStrs,int size){
 
 	char** result= malloc(sizeof(char*)*size);

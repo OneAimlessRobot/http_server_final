@@ -20,18 +20,21 @@ extern int logging
 ,send_socket_size,
 	recv_socket_size,
 	serverOn,
+	serverWasOn,
 	use_tls,
 	use_exit_func;
 
-extern char currDir[PATHSIZE];
 extern FILE* logstream;
 extern compMethod br,gzip,bzip2,servComp;
 
 
 extern char
-defaultTarget[FIELDSIZE],
-notFoundDefaultTarget[FIELDSIZE],
-mainRssFeed[FIELDSIZE],
-* defaultMimetype;
+	defaultTarget[FIELDSIZE],
+	notFoundDefaultTarget[FIELDSIZE],
+	mainRssFeed[FIELDSIZE],
+	currDir[PATHSIZE],
+	tmp_file_dir[PATHSIZE*2],
+	tmp_directory_name[PATHSIZE],
+	* defaultMimetype;
 
 #endif

@@ -224,7 +224,7 @@ void print_http_req(FILE* fstream,http_request req){
 					"______________________________________\n\n\n");
 					
 	print_http_req_header(fstream,*(req.header));
-	fprintf(fstream,"HTTP_REQUEST_CONTENTS=%s\n",req.data);
+	fprintf(fstream,"HTTP_REQUEST_CONTENTS=\n\n%s\n",req.data);
 	fprintf(fstream,"\n\n"
 					"______________________________________\n"
 					"______________________________________\n\n\n");

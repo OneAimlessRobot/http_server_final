@@ -17,9 +17,6 @@
 #define TXT_PRETTIFY_PRE_CLASS TXT_PRETTIFY_BODY_CLASS
 #define TXT_PRETTIFY_DIV_CLASS TXT_PRETTIFY_BODY_CLASS
 
-#define tmpOne "%s.tmp%lx.txt"
-#define tmpTwo "%s.tmp1%lx.txt"
-
 
     
 static const char* txt_prettify_css_file_path= "/webcrookedstuff/.styles_file_exts/.stylesheet_txt_files.css";
@@ -62,7 +59,7 @@ int isText(char* resourceTarget){
 static void generateTextPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
-        snprintf(currFetchedText,PATHSIZE*2-1,"%s%s",currDir,path);
+        snprintf(currFetchedText,sizeof(currFetchedText)-1,"%s%s",currDir,path);
 
         char* args_cmd[]={"cat", currFetchedText,NULL};
         pid_t pid_fork_find_cmd=fork();
@@ -93,11 +90,12 @@ void generateText(char* dir){
 
 	logging=1;
 	logstream=stderr;
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,dir, request_id);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,dir, request_id);
-	
-	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneTXT_HTML,dir, request_id);
+	replaceStringCharacter(&tmpFile[1],'/','.');
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoTXT_HTML,dir, request_id);
+	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
+	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
+	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
 	
 	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
 	if(curr_client.fd <0){

@@ -31,7 +31,7 @@ http_header header = {0};
 
 char tmpFile[PATHSIZE*3]={0},
 	tmpFile2[PATHSIZE*3]={0},
-	tmpDir[PATHSIZE*4]={0};
+	tmpDir[PATHSIZE*5]={0};
 	
 static socklen_t socklenpointer;
 
@@ -52,14 +52,49 @@ void exit_function_client(void){
 	}
 	exit(-1);
 }
+static void process_req_switch_block(void (*generating_func)(char*)){
+	
 
+	switch(header.type){
+		case GET ... HEAD:
+			(generating_func!=NULL)?
+				generating_func(curr_client.target)
+				:
+				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
+							"%s%s",currDir,curr_client.target);
+		break;
+		case POST:
+			if(isCustomPostReq(&req)){
+				handleCustomPostReq(&req);
+				fprintf(logstream,"The relative file path here is: %s\n"
+								"The processed target here is: %s\n",
+									curr_client.relative_file_path,
+									req.processed_data);
+				
+				
+			}
+			(generating_func!=NULL)?
+				generating_func(req.processed_data):
+				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
+							"%s%s",currDir,curr_client.relative_file_path);
+			
+			memset(curr_client.target,0,PATHSIZE);
+			snprintf(curr_client.target,sizeof(curr_client.target),
+							"%s",curr_client.relative_file_path);
+		break;
+		default:
+		break;
+	}	
+}
 
 static void process_header_target(http_header* the_header){
 	
 	url_decode(the_header->target, curr_client.target);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path),"%s",curr_client.target);
 	
 	if(logging>3){
-			fprintf(logstream,"The target is: %s\n", curr_client.target);
+		fprintf(logstream,"The target is: %s\n", curr_client.target);
+		fprintf(logstream,"The relative file path here is: %s\n", curr_client.relative_file_path);
 	}
 }
 static void handleCurrentActivity(void){
@@ -70,7 +105,6 @@ static void handleCurrentActivity(void){
 	}
 	
 	int compress=0;
-	char targetinout[PATHSIZE]={0};
 	if(!strcmp(header.target,"/")){
 
 		strcpy(header.target,defaultTarget);
@@ -102,33 +136,13 @@ static void handleCurrentActivity(void){
 		
 		generating_func = generateRconResult;
 	}
-	switch(header.type){
-	case GET ... HEAD:
-		(generating_func!=NULL)?
-			generating_func(curr_client.target):
-			snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,curr_client.target);
-	break;
-	case POST:
-		if(isCustomPostReq(curr_client.target)){
-			handleCustomPostReq(curr_client.target,req.data,targetinout);
-			
-		}
-		(generating_func!=NULL)?
-			generating_func(targetinout):
-			snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,targetinout);
-		
-		memset(curr_client.target,0,PATHSIZE);
-		snprintf(curr_client.target,PATHSIZE,"%s",targetinout);
-	break;
-	default:
-	break;
-	}
+	process_req_switch_block(generating_func);
 	sendResource(compress,
 				is_directory,
 				header.is_partial,
 				header.range_number,
 				is_head);
-	if(generating_func!=NULL){
+	if(generating_func){
 		remove(curr_client.filepath);
 	}
 }

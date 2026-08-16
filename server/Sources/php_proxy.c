@@ -18,8 +18,6 @@
 static char* phpCmd = "php-cgi8.3 -f %s";
 static char* query=NULL;
 
-#define tmpOne "%s.tmp%lx.php"
-#define tmpTwo "%s.tmp1%lx.php"
 
 
 static char currFetchedPHP[PATHSIZE*2]={0},
@@ -29,7 +27,7 @@ static char currFetchedPHP[PATHSIZE*2]={0},
 
 
 int isPHPRequest(char* resourceTarget){
-        char path[PATHSIZE]={0};
+    char path[PATHSIZE]={0};
 	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s",resourceTarget);
 	char* query = strchr(path, '?');
@@ -73,11 +71,11 @@ int isPHPRequest(char* resourceTarget){
 void generatePHPResultPrimitive(char* target){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
-        snprintf(currFetchedPHP,PATHSIZE*2-1,"%s%s",currDir,target);
+        snprintf(currFetchedPHP,sizeof(currFetchedPHP)-1,"%s%s",currDir,target);
 
-        snprintf(full_php_target,PATHSIZE*2-1,"%s%s",target,query);
+        snprintf(full_php_target,sizeof(full_php_target)-1,"%s%s",target,query);
 
-        snprintf(full_php_root,PATHSIZE*2-1,"%s/",defaultTarget);
+        snprintf(full_php_root,sizeof(full_php_root)-1,"%s/",defaultTarget);
 
 
 	printf("(PHP) Output file path: %s\n",currFetchedPHP);
@@ -135,11 +133,12 @@ void generatePHPResult(char* request){
 	logging=1;
         logstream=stderr;
         
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne,request, request_id);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo,request, request_id);
-	
-	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOnePHP_HTML , request, request_id);
+	replaceStringCharacter(&tmpFile[1],'/','.');
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoPHP_HTML , request, request_id);
+	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
+	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
+	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
 	
 	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
 	if(curr_client.fd <0){

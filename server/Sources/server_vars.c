@@ -42,7 +42,11 @@ int use_tls;
 int use_valgrind;
 
 char currDir[PATHSIZE];
-int serverOn=0;
+
+
+int serverOn=0,
+	serverWasOn=0;
+
 FILE* logstream=NULL;
 compMethod br = {"brotli","br"," br"},
 		gzip = {"gzip","gzip"," gzip"},
@@ -54,6 +58,8 @@ compMethod servComp;
 char defaultTarget[]={0};
 char notFoundDefaultTarget[FIELDSIZE]={0};
 char mainRssFeed[FIELDSIZE]={0};
+char tmp_directory_name[PATHSIZE] = {0};
+char tmp_file_dir[PATHSIZE*2] = {0};
 
 char* defaultMimetype="*/*";
 

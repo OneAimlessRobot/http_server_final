@@ -3,6 +3,7 @@
 #include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
+#include "../Includes/http_req_parser.h"
 #include "../Includes/server_innards.h"
 #include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
@@ -15,10 +16,10 @@
 char* custompostreqs[]={RCON_REQUEST,NULL};
 
 
-static void handleRconRequest(char* fieldmess,char targetinout[PATHSIZE]){
+static void handleRconRequest(http_request* req){
 	char* argv2[ARGVMAX]={0};
-	int size=makeargvdelim(fieldmess,"&",argv2,ARGVMAX);
-	char* the_ptr=targetinout;
+	int size=makeargvdelim(req->data,"&",argv2,ARGVMAX);
+	char* the_ptr=req->processed_data;
 	for(int i=0;i<size;i++){
 		char* pair[2]={0};
 		splitString(argv2[i],"=",pair);
@@ -27,22 +28,24 @@ static void handleRconRequest(char* fieldmess,char targetinout[PATHSIZE]){
 				!strcmp(pair[0],"rcon_pass")||
 				!strcmp(pair[0],"cmd")){
 		replaceStringCharacter(pair[1],'+',' ');
-		the_ptr+=snprintf(the_ptr,PATHSIZE-1,"%s%s",pair[1],(i==(size-2))?" ":"|");
+		the_ptr+=snprintf(the_ptr,
+				sizeof(req->processed_data)-1,
+				"%s%s",pair[1],(i==(size-2))?" ":"|");
 		}
 	}
 }
 
 
-int isCustomPostReq(char* nulltermedtarget){
+int isCustomPostReq(http_request* req){
 	int result=0;
-	result=(findInStringArr(custompostreqs,nulltermedtarget)>=0);
+	result=(findInStringArr(custompostreqs,req->header->target)>=0);
 	return result;
 }
 
-void handleCustomPostReq(char* target,char* contents,char targetinout[PATHSIZE]){
+void handleCustomPostReq(http_request* req){
 	
-	if(!strcmp(target,RCON_REQUEST)){
-		handleRconRequest(contents,targetinout);
+	if(!strncmp(req->header->target,RCON_REQUEST,sizeof(req->header->target))){
+		handleRconRequest(req);
 
 	}
 }

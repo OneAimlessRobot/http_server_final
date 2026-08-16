@@ -3,8 +3,9 @@
 typedef struct client{
 	
 	char peerbuff[BUFFSIZE],
-		filepath[PATHSIZE*4],
-		target[PATHSIZE],
+		filepath[PATHSIZE*5],
+		target[PATHSIZE*3],
+		relative_file_path[PATHSIZE*3],
 		sent_header_buff[PATHSIZE];
 	int socket, fd, is_tls;
 	SSL* ctx_if_ssl;
@@ -14,8 +15,7 @@ typedef struct client{
 extern u_int64_t request_id;
 extern client curr_client;
 extern char tmpFile[PATHSIZE*3],
-	tmpFile2[PATHSIZE*3],
-	tmpDir[PATHSIZE*4];
+	tmpDir[PATHSIZE*5];
 	
 void runClientConnection(int is_tls, int sock);
 

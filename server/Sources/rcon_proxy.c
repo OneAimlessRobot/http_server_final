@@ -31,8 +31,6 @@ typedef struct rcon_arg_line{
 #define DEF_RCON_CMD "stats"
 
 
-#define tmpOne "/.tmp%lx.rcon"
-#define tmpTwo "/.tmp1%lx.rcon"
 
 static char* the_rcon_script="/webcrookedstuff/cstrike_folder/scripts/.send_command.sh";
 
@@ -109,14 +107,13 @@ static int make_rcon_arg_arr(char* the_separated_parameters,rcon_arg_line arg_ar
 }
 
 
-//static void generateRconResultPrimitive(char* path){
 static void generateRconResultPrimitive(char* the_separated_parameters){
 
 	make_rcon_arg_arr(the_separated_parameters,parameters_arr,MAX_NUM_RCON_ARGS+1);
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 
-        snprintf(currFetchedRCON,PATHSIZE*2-1,"%s%s", currDir,the_rcon_script);
+        snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s%s", currDir,the_rcon_script);
 
         char* args_cmd[]={"bash",currFetchedRCON,
 						parameters_arr[ADDR].the_actual_value,
@@ -149,11 +146,12 @@ void generateRconResult(char* the_request_parameters){
 	logging=1;
     logstream=stderr;
 
-	snprintf(tmpFile,PATHSIZE*3-1,tmpOne, request_id);
-	snprintf(tmpFile2,PATHSIZE*3-1,tmpTwo, request_id);
-	
-	snprintf(tmpDir,PATHSIZE*4-1,"%s%s",currDir,tmpFile);
-	snprintf(curr_client.filepath,PATHSIZE*4-1,"%s%s",currDir,tmpFile2);
+	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneRCON_HTML, request_id);
+	replaceStringCharacter(&tmpFile[1],'/','.');
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoRCON_HTML, request_id);
+	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
+	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
+	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
 	
 	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
 	if(curr_client.fd <0){

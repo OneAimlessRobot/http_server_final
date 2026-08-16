@@ -5,8 +5,8 @@
 
 extern char* custompostreqs[];
 
-int isCustomPostReq(char* nulltermedtarget);
+int isCustomPostReq(http_request* req);
 
-void handleCustomPostReq(char* target,char* contents,char targetinout[PATHSIZE]);
+void handleCustomPostReq(http_request* req);
 
 #endif

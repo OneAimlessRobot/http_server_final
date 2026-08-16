@@ -1,12 +1,9 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/http_req_parser.h"
-#include "../Includes/handlecustom.h"
 #include "../Includes/client.h"
 #include "../Includes/cfg_loading.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/send_resource_func.h"
 #include "../Includes/server_innards.h"
 #include "../Includes/ssl_things.h"
 #include "../Includes/sock_ops.h"
@@ -53,11 +50,15 @@ static fd_set readfds;
 
 
 void cleanup(void){
-	if(serverOn && (server_socket>=0)){
+	if(serverWasOn && (server_socket>=0)){
 		close(server_socket);
 		
 	}
-	fprintf(stdout,serverOn?"Adeus! Server out...\n":"Cliente out...\n");
+	if(serverWasOn&&does_dir_exist_aux(tmp_file_dir)){
+		rmdir(tmp_file_dir);
+		
+	}
+	fprintf(stdout,serverWasOn?"Adeus! Server out...\n":"Cliente out...\n");
 	if(logstream!=stdout && logstream!= stderr){
 		fclose(logstream);
 	}
@@ -67,6 +68,9 @@ void cleanup(void){
 		freeCFGs(&cfgs);
 
 
+	}
+	if(serverWasOn){
+		serverWasOn=0;
 	}
 }
 static void sigact_sigint_handler(int arg){
@@ -153,10 +157,23 @@ void initializeConstants(void){
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(mainRssFeed,find_value_in_cfg_arr("mainRssFeed",cfgs),FIELDSIZE-1);
-	int invalid_string_confs=!((stringsAreEqual(defaultTarget,NO_SUCH_SETTING)||
-				stringsAreEqual(defaultTarget,NO_SETTINGS_LOADED))&&
-				(stringsAreEqual(notFoundDefaultTarget,NO_SUCH_SETTING)||
-				stringsAreEqual(notFoundDefaultTarget,NO_SETTINGS_LOADED)));
+	strncpy(tmp_directory_name,find_value_in_cfg_arr("tmp_directory_name",cfgs),FIELDSIZE-1);
+	int invalid_string_confs=
+				!((stringsAreEqual(defaultTarget,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(defaultTarget,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(notFoundDefaultTarget,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(notFoundDefaultTarget,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(tmp_directory_name,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(tmp_directory_name,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(mainRssFeed,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(mainRssFeed,NO_SETTINGS_LOADED)));
 	
 	if(!invalid_string_confs){
 
@@ -237,6 +254,7 @@ void initializeConstants(void){
 	}
 }
 void the_exit_func(void){
+	serverOn=0;
 	cleanup();
 }
 void clientBootstrap(void){
@@ -250,6 +268,7 @@ void clientBootstrap(void){
 	if(logging){
 		fprintf(logstream,"Request id: %lu\n",request_id);
 	}
+	snprintf(tmp_file_dir,sizeof(tmp_file_dir)-1,"/tmp/%s",tmp_directory_name);
 	servComp=gzip;
 	cleanup();
 	
@@ -270,7 +289,7 @@ void initializeServer(void){
 	initializeConstants();
 	print_loaded_cfgs(logstream);
 
-	serverOn=1;
+	serverWasOn=serverOn=1;
 	server_socket= socket(AF_INET,SOCK_STREAM,0);
 	
 	if(server_socket<0){
@@ -300,7 +319,15 @@ void initializeServer(void){
 	if(logging){
 		fprintf(logstream,"Server spawnado @ %s\n",inet_ntoa(server_address.sin_addr));
 	}
-	socklenpointer=sizeof(clientAddress);
+	socklenpointer=sizeof(server_address);
+	
+	snprintf(tmp_file_dir,sizeof(tmp_file_dir)-1,"/tmp/%s",tmp_directory_name);
+	if(does_dir_exist_aux(tmp_file_dir)){
+		rmdir(tmp_file_dir);
+		
+	}
+	mkdir(tmp_file_dir, 0777);
 	mainLoop();
+	cleanup();
 }
 
