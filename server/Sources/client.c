@@ -25,9 +25,9 @@
 #include <sys/types.h>
 #define READ_FUNC_TO_USE timedreadall
 
-client curr_client = {0};
-http_request req = {0};
 http_header header = {0};
+http_request req = {0};
+client curr_client = {0};
 
 char tmpFile[PATHSIZE*3]={0},
 	tmpFile2[PATHSIZE*3]={0},
@@ -55,7 +55,7 @@ void exit_function_client(void){
 static void process_req_switch_block(void (*generating_func)(char*)){
 	
 
-	switch(header.type){
+	switch(curr_client.req->header->type){
 		case GET ... HEAD:
 			(generating_func!=NULL)?
 				generating_func(curr_client.target)
@@ -64,17 +64,17 @@ static void process_req_switch_block(void (*generating_func)(char*)){
 							"%s%s",currDir,curr_client.target);
 		break;
 		case POST:
-			if(isCustomPostReq(&req)){
-				handleCustomPostReq(&req);
+			if(isCustomPostReq(curr_client.req)){
+				handleCustomPostReq(curr_client.req);
 				fprintf(logstream,"The relative file path here is: %s\n"
 								"The processed target here is: %s\n",
 									curr_client.relative_file_path,
-									req.processed_data);
+									curr_client.req->processed_data);
 				
 				
 			}
 			(generating_func!=NULL)?
-				generating_func(req.processed_data):
+				generating_func(curr_client.req->processed_data):
 				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 							"%s%s",currDir,curr_client.relative_file_path);
 			
@@ -87,9 +87,9 @@ static void process_req_switch_block(void (*generating_func)(char*)){
 	}	
 }
 
-static void process_header_target(http_header* the_header){
+static void process_header_target(void){
 	
-	url_decode(the_header->target, curr_client.target);
+	url_decode(curr_client.req->header->target, curr_client.target);
 	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path),"%s",curr_client.target);
 	
 	if(logging>3){
@@ -99,28 +99,26 @@ static void process_header_target(http_header* the_header){
 }
 static void handleCurrentActivity(void){
 	
-	if(header.type==INVALID){
+	if(curr_client.req->header->type==INVALID){
 		send_wrapper((char*)HTTP_METHOD_ERR_HEADER,strlen(HTTP_METHOD_ERR_HEADER));
 		return;
 	}
-	
-	int compress=0;
-	if(!strcmp(header.target,"/")){
 
-		strcpy(header.target,defaultTarget);
+	if(!strcmp(curr_client.req->header->target,"/")){
+
+		strcpy(curr_client.req->header->target,defaultTarget);
 	}
 	
-	process_header_target(&header);
+	process_header_target();
 	
-	if(findInStringArr(header.split_encoding,servComp.encodingExt)>=0){
-		compress=compression;
+	if(findInStringArr(curr_client.req->header->split_encoding,servComp.encodingExt)>=0){
+		curr_client.compress=use_compression;
 	}
-	int is_head = (header.type==HEAD);
+	u_int8_t is_head = (curr_client.req->header->type==HEAD);
 	
 	void (*generating_func)(char*) = NULL;
 	
-	int is_directory = 0;
-	if((is_directory=isDirectory(curr_client.target))){
+	if((curr_client.is_directory=isDirectory(curr_client.target))){
 		generating_func = generateDirListing;
 	}
 	else if(isRssFeed(curr_client.target)){
@@ -137,41 +135,36 @@ static void handleCurrentActivity(void){
 		generating_func = generateRconResult;
 	}
 	process_req_switch_block(generating_func);
-	sendResource(compress,
-				is_directory,
-				header.is_partial,
-				header.range_number,
-				is_head);
+	sendResource(is_head);
 	if(generating_func){
 		remove(curr_client.filepath);
 	}
 }
 
 void handleConnection(void){
-			if(READ_FUNC_TO_USE(&curr_client,curr_client.peerbuff)!=-2){
-				if(errno == ECONNRESET){
-					exit_function_client();
-				}
-				else if(strlen(curr_client.peerbuff)){
-					spawnHTTPRequest(curr_client.peerbuff,&header,&req);
-					if(logging>0){
-						fprintf(logstream,"Recebemos request!!!:\n");
-						
-						print_http_req(logstream,req);
-					}
-					if(!strlen(req.data)){
-					memset(req.data,0,BUFFSIZE);
-					if(READ_FUNC_TO_USE(&curr_client,req.data)!=-2){
+	if(READ_FUNC_TO_USE(&curr_client,curr_client.peerbuff)!=-2){
+		if(errno == ECONNRESET){
+			exit_function_client();
+		}
+		else if(strlen(curr_client.peerbuff)){
+			spawnHTTPRequest();
+			if(logging>0){
+				fprintf(logstream,"Recebemos request!!!:\n");
+				
+				print_http_req(logstream);
+			}
+			if(!strlen(curr_client.req->data)){
+				memset(curr_client.req->data,0,BUFFSIZE);
+				if(READ_FUNC_TO_USE(&curr_client,curr_client.req->data)!=-2){
 
-						if(logging>0){
-							fprintf(logstream,"Recebemos dados!!!: %s\n",req.data);
-						}
+					if(logging>0){
+						fprintf(logstream,"Recebemos dados!!!: %s\n",curr_client.req->data);
 					}
-					}
-					handleCurrentActivity();
 				}
 			}
-			
+			handleCurrentActivity();
+		}
+	}
 }
 int is_tls_connection(int client_fd) {
     unsigned char packet_buff[6];
@@ -192,7 +185,7 @@ int is_tls_connection(int client_fd) {
     return 0;
 }
 
-void runClientConnection(int is_tls, int sock){
+void runClientConnection(u_int8_t is_tls, int32_t sock){
 	
 	exit_func_for_this_module = exit_function_client;
 	use_tls=is_tls;
@@ -200,13 +193,15 @@ void runClientConnection(int is_tls, int sock){
 	curr_client.socket=sock;
 	curr_client.is_tls=is_tls_connection(curr_client.socket);
 	if(curr_client.is_tls){
-			if(logging>0){
-				fprintf(logstream,"Its tls we do eht!\n");
-			}
-			InitializeSSL();
-			init_openssl_libs_server_side();
-			convert_server_con_to_ssl(&curr_client.ctx_if_ssl,curr_client.socket);
+		if(logging>0){
+			fprintf(logstream,"Its tls we do eht!\n");
+		}
+		InitializeSSL();
+		init_openssl_libs_server_side();
+		convert_server_con_to_ssl(&curr_client.ctx_if_ssl,curr_client.socket);
 	}
+	req.header=&header;
+	curr_client.req= &req;
 	handleConnection();
 
 	getpeername(curr_client.socket , (struct sockaddr*)&curr_client.client_addr , (socklen_t*)&socklenpointer);

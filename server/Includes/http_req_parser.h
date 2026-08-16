@@ -41,10 +41,10 @@ typedef struct http_header{
 
 typedef struct http_request{
 
-	http_header* header;
-	u_int64_t data_size;
 	char data[BUFFSIZE],
-		processed_data[BUFFSIZE];
+	processed_data[BUFFSIZE];
+	u_int64_t data_size;
+	http_header* header;
 
 
 }http_request;
@@ -53,8 +53,8 @@ http_header_field* make_http_header_field_arr(char *strarr[ARGVMAX]);
 
 void print_field_arr(FILE* fstream,http_header_field* fields);
 
-void spawnHTTPRequest(char *buff,http_header* header,http_request* reqresult);
+void spawnHTTPRequest(void);
 
-void print_http_req(FILE* fstream,http_request req);
+void print_http_req(FILE* fstream);
 
 #endif

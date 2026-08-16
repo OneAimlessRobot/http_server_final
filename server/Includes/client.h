@@ -7,7 +7,9 @@ typedef struct client{
 		target[PATHSIZE*3],
 		relative_file_path[PATHSIZE*3],
 		sent_header_buff[PATHSIZE];
-	int socket, fd, is_tls;
+	http_request* req; 
+	int32_t socket, fd;
+	u_int8_t is_tls, compress, is_directory;
 	SSL* ctx_if_ssl;
 	struct sockaddr_in client_addr;
 	
@@ -17,6 +19,6 @@ extern client curr_client;
 extern char tmpFile[PATHSIZE*3],
 	tmpDir[PATHSIZE*5];
 	
-void runClientConnection(int is_tls, int sock);
+void runClientConnection(u_int8_t is_tls, int32_t sock);
 
 #endif

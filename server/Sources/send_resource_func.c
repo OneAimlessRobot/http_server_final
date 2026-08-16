@@ -43,7 +43,7 @@ static int file_exists(const char *filename)
     return stat(filename, &buffer) == 0;
 }
 
-static int compressFile(char* target, int enable){
+static int compressFile(char* target){
 	char* ptr = NULL;
 	if(!strlen(target)){
 		ptr = curr_client.filepath;
@@ -54,7 +54,7 @@ static int compressFile(char* target, int enable){
 		snprintf(inpathbuff,sizeof(inpathbuff)-1,"%s%s",currDir,target);
 		ptr= inpathbuff;
 	}
-	if(enable){
+	if(curr_client.compress){
 		memset(buff_for_dotted_target, 0, sizeof(buff_for_dotted_target));
 		snprintf(buff_for_dotted_target, sizeof(buff_for_dotted_target), "%s",curr_client.relative_file_path);
 		replaceStringCharacter(&buff_for_dotted_target[1],'/','.');
@@ -106,20 +106,20 @@ static int compressFile(char* target, int enable){
 		}
 	}
 	else{
-	comp_fd=open(ptr,O_RDONLY,0777);
-	comp_enable=0;
-	if(comp_fd<0){
-		if(logging){
-			fprintf(logstream,"Invalid filepath: %s\n%s\n",ptr,strerror(errno));
-		}
-		return -1;
+		comp_fd=open(ptr,O_RDONLY,0777);
+		comp_enable=0;
+		if(comp_fd<0){
+			if(logging){
+				fprintf(logstream,"Invalid filepath: %s\n%s\n",ptr,strerror(errno));
+			}
+			return -1;
 
-	}
+		}
 	}
 	return 0;
 }
 
-static void send_header(int notfound,  int start_point, int is_partial){
+static void send_header(int notfound){
 
 	u_int64_t fileSize=0;
 	const char* the_mime_type= get_mime_type(notfound?notFoundDefaultTarget:curr_client.relative_file_path);
@@ -133,30 +133,53 @@ static void send_header(int notfound,  int start_point, int is_partial){
 	(!notfound)?
 		((comp_enable)?
 			((use_chunked)?
-				((!is_partial)?
-					fillUpChunkedHeaderComp(curr_client.sent_header_buff,the_mime_type,servComp.fileExt)
+				((!curr_client.req->header->is_partial)?
+					fillUpChunkedHeaderComp(
+											curr_client.sent_header_buff,
+											the_mime_type,
+											servComp.fileExt)
 					:
-					fillUpChunkedPartialHeaderComp(curr_client.sent_header_buff,the_mime_type,servComp.fileExt,start_point,fileSize)
+					fillUpChunkedPartialHeaderComp(curr_client.sent_header_buff,
+													the_mime_type,
+													servComp.fileExt,
+													curr_client.req->header->range_number,
+													fileSize)
 				)
 				:
-				((!is_partial)?
-					fillUpNormalHeaderComp(curr_client.sent_header_buff,the_mime_type,servComp.fileExt, fileSize)
+				((!curr_client.req->header->is_partial)?
+					fillUpNormalHeaderComp(curr_client.sent_header_buff,
+												the_mime_type,
+												servComp.fileExt,
+												fileSize)
 					:
-					fillUpNormalPartialHeaderComp(curr_client.sent_header_buff,the_mime_type,servComp.fileExt,start_point,fileSize)
+					fillUpNormalPartialHeaderComp(curr_client.sent_header_buff,
+													the_mime_type,
+													servComp.fileExt,
+													curr_client.req->header->range_number,
+													fileSize)
 				)
 			)
 			:
 			((use_chunked)?
-				((!is_partial)?
-					fillUpChunkedHeader(curr_client.sent_header_buff,the_mime_type)		
+				((!curr_client.req->header->is_partial)?
+					fillUpChunkedHeader(curr_client.sent_header_buff,
+										the_mime_type)		
 					:
-					fillUpChunkedPartialHeader(curr_client.sent_header_buff,the_mime_type,start_point,fileSize)
+					fillUpChunkedPartialHeader(curr_client.sent_header_buff,
+												the_mime_type,
+												curr_client.req->header->range_number,
+												fileSize)
 				)
 				:
-				((!is_partial)?
-					fillUpNormalHeader(curr_client.sent_header_buff,the_mime_type,fileSize)		
+				((!curr_client.req->header->is_partial)?
+					fillUpNormalHeader(curr_client.sent_header_buff,
+										the_mime_type,
+										fileSize)		
 					:
-					fillUpNormalPartialHeader(curr_client.sent_header_buff,the_mime_type,start_point,fileSize)
+					fillUpNormalPartialHeader(curr_client.sent_header_buff,
+												the_mime_type,
+												curr_client.req->header->range_number,
+												fileSize)
 				)
 			)
 		)
@@ -167,27 +190,44 @@ static void send_header(int notfound,  int start_point, int is_partial){
 	send_wrapper(curr_client.sent_header_buff,header_size);
 
 }
-void sendResource(int compress,int is_directory,int is_partial, int start_point, int is_head){
+void sendResource(int is_head){
 	if(curr_client.fd<0){
 		return;
 	}
 	close(curr_client.fd);
-	int we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
-	if(we_in_csgo_mode&&!is_directory){
+	u_int8_t we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
+	if(we_in_csgo_mode&&!curr_client.is_directory){
 		curr_client.filepath[strlen(curr_client.filepath)-strlen(servComp.fileExt)-1]=0;
 		curr_client.target[strlen(curr_client.target)-strlen(servComp.fileExt)-1]=0;
 	}
 	if(logging > 5){
 		fprintf(logstream,"Fetching %s...\n",curr_client.filepath);
 	}
-	int notfound=0;
-	if(compressFile("",compress)<0){
+	u_int8_t notfound=0,
+			compressibility_selected=curr_client.compress;
+
+	if(compressibility_selected){
+		curr_client.compress = (curr_client.compress && get_mime_type_compressibility(curr_client.filepath));
+
+		if(logging > 5){
+			fprintf(logstream,"Server will use compression!\n"
+								"%s is %s\n",
+								curr_client.filepath,
+								curr_client.compress?
+											"Compressible!"
+											:
+											"Non compressible!");
+		}
+		
+	}
+	if(compressFile("")<0){
 
 		if(logging){
 
 			fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 		}
-		if(compressFile(notFoundDefaultTarget,0)<0){
+		curr_client.compress = 0;
+		if(compressFile(notFoundDefaultTarget)<0){
 
 			if(logging){
 
@@ -208,9 +248,9 @@ void sendResource(int compress,int is_directory,int is_partial, int start_point,
 	if(logging){
 		fprintf(logstream,"Done!\n");
 	}
-	send_header(notfound, start_point, is_partial);
+	send_header(notfound);
 	if(!is_head){
-		push_bytes(is_partial,start_point);
+		push_bytes();
 	}
 	final_cleanup(notfound);
 }

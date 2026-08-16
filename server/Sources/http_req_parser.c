@@ -46,7 +46,7 @@ void print_field_arr(FILE* fstream,http_header_field* fields){
 	}
 
 }
-void print_http_req_header(FILE* fstream,http_header header){
+void print_http_req_header(FILE* fstream){
 
 	fprintf(fstream,"\n\nHTTP REQUEST HEADER:\n"
 					"______________________________________\n"
@@ -63,27 +63,27 @@ void print_http_req_header(FILE* fstream,http_header header){
 					"CF-Connecting-IP: %s\n"
 					"Accepted-encoding: %s\n"
 					"Accepted-encoding (split):\n\n",
-							request_const_name_arr[header.type],
-							header.origin,
-							header.target,
-							header.version,
-							header.host,
-							header.mimetype,
-							header.os,
-							header.range_string,
-							header.is_partial?header.range:"NO_RANGE_SPECIFIED",
-							header.cloudfare_ip,
-							header.encodingcopy);
+							request_const_name_arr[curr_client.req->header->type],
+							curr_client.req->header->origin,
+							curr_client.req->header->target,
+							curr_client.req->header->version,
+							curr_client.req->header->host,
+							curr_client.req->header->mimetype,
+							curr_client.req->header->os,
+							curr_client.req->header->range_string,
+							curr_client.req->header->is_partial?curr_client.req->header->range:"NO_RANGE_SPECIFIED",
+							curr_client.req->header->cloudfare_ip,
+							curr_client.req->header->encodingcopy);
 
-		print_string_arr(fstream,header.split_encoding);
+		print_string_arr(fstream,curr_client.req->header->split_encoding);
 		fprintf(fstream,"\nContent-Type (raw): %s\n"
 						"Content-Type (actual): %s\n"
 						"Form-boundary: %s\n"
 						"Content-Type (split):\n\n",
-							header.content_type_copy,
-							header.content_type,
-							header.form_boundary);
-		print_string_arr(fstream,header.content_type_split);
+							curr_client.req->header->content_type_copy,
+							curr_client.req->header->content_type,
+							curr_client.req->header->form_boundary);
+		print_string_arr(fstream,curr_client.req->header->content_type_split);
 		fprintf(fstream,"\n\n"
 					"______________________________________\n"
 					"______________________________________\n\n"
@@ -115,116 +115,112 @@ http_header_field* make_http_header_field_arr(char *strarr[ARGVMAX]) {
 	return arr;
 }
 
-static void spawnHTTPHeader(char* buff,http_header*result){
-	result->type=INVALID;
-	memset(result->target,0,FIELDSIZE);
-	memset(result->origin,0,FIELDSIZE);
-	memset(result->host,0,FIELDSIZE);
-	memset(result->mimetype,0,FIELDSIZE);
-	memset(result->version,0,FIELDSIZE);
-	memset(result->os,0,FIELDSIZE);
-	memset(result->range,0,FIELDSIZE);
-	memset(result->range_string,0,FIELDSIZE);
-	memset(result->cloudfare_ip,0, FIELDSIZE);
-	char* headerArr[ARGVMAX];
-	memset(headerArr,0,ARGVMAX*sizeof(char*));
-	char test[strlen(buff)+1];
-	memcpy(test,buff,strlen(buff)+1);
+static void spawnHTTPHeader(void){
+	curr_client.req->header->type=INVALID;
+	memset(curr_client.req->header->target,0,FIELDSIZE);
+	memset(curr_client.req->header->origin,0,FIELDSIZE);
+	memset(curr_client.req->header->host,0,FIELDSIZE);
+	memset(curr_client.req->header->mimetype,0,FIELDSIZE);
+	memset(curr_client.req->header->version,0,FIELDSIZE);
+	memset(curr_client.req->header->os,0,FIELDSIZE);
+	memset(curr_client.req->header->range,0,FIELDSIZE);
+	memset(curr_client.req->header->range_string,0,FIELDSIZE);
+	memset(curr_client.req->header->cloudfare_ip,0, FIELDSIZE);
+	char* headerArr[ARGVMAX] = {0};
+	char* firstHeaderArr[ARGVMAX] = {0};
+	char test[sizeof(curr_client.peerbuff)+1] = {0};
+	memcpy(test,curr_client.peerbuff,strlen(curr_client.peerbuff)+1);
 	make_str_arr(test,"\r\n",headerArr,ARGVMAX);
 	http_header_field* fieldarr= make_http_header_field_arr(headerArr);
 	int firstHeaderLength=strlen(fieldarr[0].field[0]);
 	char firstHeaderBuff[firstHeaderLength+1];
 	memset(firstHeaderBuff,0,firstHeaderLength+1);
 	memcpy(firstHeaderBuff,fieldarr[0].field[0],firstHeaderLength);
-	char* firstHeaderArr[ARGVMAX];
-	memset(firstHeaderArr,0,ARGVMAX*sizeof(char*));
 	make_str_arr(firstHeaderBuff," ",firstHeaderArr,ARGVMAX);
-	result->type=getREQtypeFromString(firstHeaderArr[0]);
+	curr_client.req->header->type=getREQtypeFromString(firstHeaderArr[0]);
 	if(get_string_arr_size(firstHeaderArr)==1){
-		memset(result->target,0,FIELDSIZE);
-		memset(result->version,0,FIELDSIZE);
-		strcpy(result->target,defaultTarget);
-		strcpy(result->mimetype,defaultMimetype);
+		memset(curr_client.req->header->target,0,FIELDSIZE);
+		memset(curr_client.req->header->version,0,FIELDSIZE);
+		strcpy(curr_client.req->header->target,defaultTarget);
+		strcpy(curr_client.req->header->mimetype,defaultMimetype);
 	}
 	else{
-	strcpy(result->target,firstHeaderArr[1]);
-	strcpy(result->version,firstHeaderArr[2]);
-	strcpy(result->host,find_field_value_in_field_arr("Host",fieldarr));
-	strcpy(result->origin,find_field_value_in_field_arr("Origin",fieldarr));
-	strcpy(result->mimetype,defaultMimetype);
-	strcpy(result->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));
-	strcpy(result->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
-	strcpy(result->cloudfare_ip,find_field_value_in_field_arr("CF-Connecting-IP",fieldarr));
-	strcpy(result->encodingcopy,result->encoding);
-	make_str_arr(result->encoding,",",result->split_encoding,ARGVMAX);
-	strcpy(result->content_type_raw,find_field_value_in_field_arr("Content-Type",fieldarr));
+		strcpy(curr_client.req->header->target,firstHeaderArr[1]);
+		strcpy(curr_client.req->header->version,firstHeaderArr[2]);
+		strcpy(curr_client.req->header->host,find_field_value_in_field_arr("Host",fieldarr));
+		strcpy(curr_client.req->header->origin,find_field_value_in_field_arr("Origin",fieldarr));
+		strcpy(curr_client.req->header->mimetype,defaultMimetype);
+		strcpy(curr_client.req->header->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));
+		strcpy(curr_client.req->header->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
+		strcpy(curr_client.req->header->cloudfare_ip,find_field_value_in_field_arr("CF-Connecting-IP",fieldarr));
+		strcpy(curr_client.req->header->encodingcopy,curr_client.req->header->encoding);
+		make_str_arr(curr_client.req->header->encoding,",",curr_client.req->header->split_encoding,ARGVMAX);
+		strcpy(curr_client.req->header->content_type_raw,find_field_value_in_field_arr("Content-Type",fieldarr));
+		
+		
+		if(strlen(curr_client.req->header->content_type_raw)){
+			strcpy(curr_client.req->header->content_type_copy,curr_client.req->header->content_type_raw);
+			make_str_arr(curr_client.req->header->content_type_raw,"; ",curr_client.req->header->content_type_split,ARGVMAX);
+			
+			strcpy(curr_client.req->header->content_type,curr_client.req->header->content_type_split[0]);
+			if(!curr_client.req->header->content_type_split[1]){
+				memset(curr_client.req->header->form_boundary,0,FIELDSIZE);
+			}
+			else{
+				splitString(curr_client.req->header->content_type_split[1],"=", curr_client.req->header->form_boundary_split);
+				strcpy(curr_client.req->header->form_boundary,curr_client.req->header->form_boundary_split[1]);
+			
+			}
+		}
 	
-	
-	if(strlen(result->content_type_raw)){
-	strcpy(result->content_type_copy,result->content_type_raw);
-	make_str_arr(result->content_type_raw,"; ",result->content_type_split,ARGVMAX);
-	
-	strcpy(result->content_type,result->content_type_split[0]);
-	if(!result->content_type_split[1]){
-	memset(result->form_boundary,0,FIELDSIZE);
+		else{
+			curr_client.req->header->content_type_split[0]=NULL;
+			curr_client.req->header->form_boundary_split[0]=NULL;
+			memset(curr_client.req->header->content_type_raw,0,FIELDSIZE);
+			memset(curr_client.req->header->content_type_copy,0,FIELDSIZE);
+			memset(curr_client.req->header->content_type,0,FIELDSIZE);
+		}
 	}
-	else{
-	splitString(result->content_type_split[1],"=", result->form_boundary_split);
-	strcpy(result->form_boundary,result->form_boundary_split[1]);
-	
-	}
-	}
-	
-	else{
-	result->content_type_split[0]=NULL;
-	result->form_boundary_split[0]=NULL;
-	memset(result->content_type_raw,0,FIELDSIZE);
-	memset(result->content_type_copy,0,FIELDSIZE);
-	memset(result->content_type,0,FIELDSIZE);
-	}
-	}
-	result->range_number= 0;
-	if((result->is_partial=(!ignore_partial))){
-		strcpy(result->range_string,find_field_value_in_field_arr("Range",fieldarr));
-		result->range_number= 0;
-		if((result->is_partial=(strlen(result->range_string)>0))){
-			sscanf(result->range_string," bytes=%ld-",&result->range_number);
+	curr_client.req->header->range_number= 0;
+	if((curr_client.req->header->is_partial=(!ignore_partial))){
+		strcpy(curr_client.req->header->range_string,find_field_value_in_field_arr("Range",fieldarr));
+		curr_client.req->header->range_number= 0;
+		if((curr_client.req->header->is_partial=(strlen(curr_client.req->header->range_string)>0))){
+			sscanf(curr_client.req->header->range_string," bytes=%ld-",&curr_client.req->header->range_number);
 			
 		}
 	}
-	snprintf(result->range,FIELDSIZE-1,"%ld",result->is_partial?result->range_number:-1);
+	snprintf(curr_client.req->header->range,FIELDSIZE-1,"%ld",curr_client.req->header->is_partial?curr_client.req->header->range_number:-1);
 	free(fieldarr);
 	
 }
 
-void spawnHTTPRequest(char *buff,http_header* header,http_request* reqresult){
-	char* splitRequest[2];
-	splitString(buff,"\r\n\r\n",splitRequest);
-	spawnHTTPHeader(splitRequest[0],header);
-	reqresult->header=header;
+void spawnHTTPRequest(void){
+	char* splitRequest[2] = {0};
+	splitString(curr_client.peerbuff,"\r\n\r\n",splitRequest);
+	spawnHTTPHeader();
 	if(!splitRequest[1]){
-	reqresult->data_size=1;
+		curr_client.req->data_size=1;
 	}
 	else{
-	reqresult->data_size=strlen(splitRequest[1])+1;
+		curr_client.req->data_size=strlen(splitRequest[1])+1;
 	
 	}
-	memset(reqresult->data,0,BUFFSIZE);
 	if(splitRequest[1]){
-	memcpy(reqresult->data,splitRequest[1],reqresult->data_size-1);
+		memcpy(curr_client.req->data,splitRequest[1],curr_client.req->data_size-1);
 	}
 
 }
 
 
-void print_http_req(FILE* fstream,http_request req){
+void print_http_req(FILE* fstream){
 	fprintf(fstream,"HTTP_REQUEST:\n"
 					"\n\n"
 					"______________________________________\n"
 					"______________________________________\n\n\n");
 					
-	print_http_req_header(fstream,*(req.header));
-	fprintf(fstream,"HTTP_REQUEST_CONTENTS=\n\n%s\n",req.data);
+	print_http_req_header(fstream);
+	fprintf(fstream,"HTTP_REQUEST_CONTENTS=\n\n%s\n",curr_client.req->data);
 	fprintf(fstream,"\n\n"
 					"______________________________________\n"
 					"______________________________________\n\n\n");

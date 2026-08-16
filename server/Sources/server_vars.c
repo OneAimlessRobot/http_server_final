@@ -7,59 +7,51 @@
 #include "../Includes/cfg_loading.h"
 #include "../Includes/server_vars.h"
 
-int logging;
 
-int smalltimeoutsecs,smalltimeoutusecs;
+u_int32_t smalltimeoutsecs,
+	smalltimeoutusecs,
 
-int bigtimeoutsecs,bigtimeoutusecs;
+	bigtimeoutsecs,
+	bigtimeoutusecs,
 
-int tls_shake_timeout_secs,tls_shake_timeout_usecs;
+	tls_shake_timeout_secs,
+	tls_shake_timeout_usecs,
 
-int tls_data_timeout_secs,tls_data_timeout_usecs;
-
-int port;
-
-int quota;
-
-int recv_socket_size;
-
-int send_socket_size;
-
-int session_time_usecs;
-
-int compression;
-
-int compression_level;
-
-int use_exit_func;
-
-int use_chunked;
-
-int ignore_partial;
-
-int use_tls;
-
-int use_valgrind;
-
-char currDir[PATHSIZE];
+	tls_data_timeout_secs,
+	tls_data_timeout_usecs,
+	
+	recv_socket_size,
+	send_socket_size;
 
 
-int serverOn=0,
-	serverWasOn=0;
+u_int16_t port = 0;
+
+
+u_int8_t logging=0,
+	serverOn=0,
+	serverWasOn=0,
+	use_valgrind=0,
+	ignore_partial=0,
+	use_tls=0,
+	use_exit_func=0,
+	use_chunked=0,
+	use_compression=0,
+	compression_level=0;
+
+
+char currDir[PATHSIZE] = {0},
+	defaultTarget[FIELDSIZE] = {0},
+	notFoundDefaultTarget[FIELDSIZE] = {0},
+	mainRssFeed[FIELDSIZE] = {0},
+	tmp_directory_name[PATHSIZE] = {0},
+	tmp_file_dir[PATHSIZE*2] = {0},
+	*defaultMimetype = "*/*";
 
 FILE* logstream=NULL;
+
 compMethod br = {"brotli","br"," br"},
 		gzip = {"gzip","gzip"," gzip"},
-		bzip2 = {"bzip2","bz2"," bzip2"};
+		bzip2 = {"bzip2","bz2"," bzip2"},
+		servComp = {0};
 
-compMethod servComp;
-
-
-char defaultTarget[]={0};
-char notFoundDefaultTarget[FIELDSIZE]={0};
-char mainRssFeed[FIELDSIZE]={0};
-char tmp_directory_name[PATHSIZE] = {0};
-char tmp_file_dir[PATHSIZE*2] = {0};
-
-char* defaultMimetype="*/*";
 

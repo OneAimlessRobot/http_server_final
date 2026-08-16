@@ -1,6 +1,5 @@
 #!/bin/bash
 
 #nano S*/*.c *.c -l
-geany S*/*.c *.c&
-geany I*/*.h&
+geany S*/*.c *.c I*/*.h&
 

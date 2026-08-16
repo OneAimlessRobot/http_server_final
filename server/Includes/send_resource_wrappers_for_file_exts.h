@@ -2,90 +2,91 @@
 #define STYLE_EXTENDER_H
 
 
-int comp_enable = 0,
-	comp_fd = -1;
+u_int8_t comp_enable = 0;
+int comp_fd = -1;
 
-static void push_bytes(int is_partial, int start_point);
+static void push_bytes(void);
 
 
 static char* compressionCmd = "%s -c -%d %s";
 
-static char inpathbuff[PATHSIZE*6]={0};
-static char outpathbuff[PATHSIZE*6+10]={0};
-static char cmd[PATHSIZE*30]={0};
-static char buff_for_dotted_target[PATHSIZE*3]={0};
+static char inpathbuff[PATHSIZE*6]={0},
+		outpathbuff[PATHSIZE*6+10]={0},
+		cmd[PATHSIZE*30]={0},
+		buff_for_dotted_target[PATHSIZE*3]={0};
 
 
 typedef struct {
-    const char *extension;
-    const char *mime_type;
+    const char *extension,
+				*mime_type;
+	u_int8_t allows_compression;
 
 } MimeEntry;
 
 static MimeEntry mime_types[] = {
-    {".html", "text/html"},
-    {".css", "text/css"},
-    {".js", "application/javascript"},
-    {".png", "image/png"},
-    {".PNG", "image/png"},
-    {".jpg", "image/jpeg"},
-    {".jpeg", "image/jpeg"},
-    {".webp", "image/webp"},
-    {".mp4", "video/mp4"},
-    {".yml", "text/yaml"},
-    {".yaml", "text/yaml"},
-    {".mp3", "audio/mp3"},
-    {".wasm", "application/wasm"},
-    {".webmanifest", "application/manifest+json"},
-    {".gif", "image/gif"},
-    {".jfif", "image/jpeg"},
-    {".avif", "image/avif"},
-    {".java", "text/x-java-source"},
-    {".ico", "image/x-icon"},
-    {".icon", "image/x-icon"},
-    {".json", "application/json"},
-    {".svg", "image/svg+xml"},
-    {".txt", "text/html"},
-    {".webm", "audio/webm"},
-    {".wav", "audio/wav"},
-    {".m4a", "audio/mp4"},
-    {".sp", "text/x-sourcepawn"},
-    {".sma", "text/x-sourcepawn"},
-    {".inc", "text/x-sourcepawn"},
-    {".cpp", "text/x-c++"},
-    {".c", "text/x-c++"},
-    {".h", "text/x-c++"},
-    {".hpp", "text/x-cpp"},
-    {".cfg", "text/x-config"},
-    {".php", "text/html"},
-    {".vdf", "text/plain"},
-    {".gam", "text/plain"},
-    {".py", "text/x-python"},
-    {".bmp", "image/bmp"},
-    {".log", "text/plain"},
-    {".tga", "image/x-targa"},
-    {".tga", "image/x-targa"},
-    {".dds","image/x-dds"},
-    {".vtf","image/x-vtf"},
-    {".vmt","text/x-vmt"},
-    {".ogg","audio/ogg"},
-    {".flv","video/x-flv"},
-    {".flac","audio/flac"},
-    {".avi","video/x-msvideo"},
-    {".pl","text/plain"},
-    {".wad","application/x-doom-wad"},
-    {".lst","text/plain"},
-    {".db","text/plain"},
-    {".md","text/markdown"},
-    {".php","application/x-httpd-php"},
-    {".php2","application/json"},
-    {".pdf","application/pdf"},
-    {".sh","text/plain"},
-    {".rss","application/rss+xml"},
-    {".rcon","text/html"},
-    {".xml","application/xml"},
-    {".3gp","video/3gpp"},
-    {NULL, "application/octet-stream"}
+    {".html", "text/html", 1},
+    {".css", "text/css", 1},
+    {".js", "application/javascript", 1},
+    {".png", "image/png", 1},
+    {".PNG", "image/png", 1},
+    {".jpg", "image/jpeg", 1},
+    {".jpeg", "image/jpeg", 1},
+    {".webp", "image/webp", 1},
+    {".mp4", "video/mp4", 0},
+    {".yml", "text/yaml", 1},
+    {".yaml", "text/yaml", 1},
+    {".mp3", "audio/mp3", 0},
+    {".wasm", "application/wasm", 1},
+    {".webmanifest", "application/manifest+json", 1},
+    {".gif", "image/gif", 1},
+    {".jfif", "image/jpeg", 1},
+    {".avif", "image/avif", 1},
+    {".java", "text/x-java-source", 1},
+    {".ico", "image/x-icon", 1},
+    {".icon", "image/x-icon", 1},
+    {".json", "application/json", 1},
+    {".svg", "image/svg+xml", 1},
+    {".txt", "text/html", 1},
+    {".webm", "audio/webm", 0},
+    {".wav", "audio/wav", 0},
+    {".m4a", "audio/mp4", 0},
+    {".sp", "text/x-sourcepawn", 1},
+    {".sma", "text/x-sourcepawn", 1},
+    {".inc", "text/x-sourcepawn", 1},
+    {".cpp", "text/x-c++", 1},
+    {".c", "text/x-c++", 1},
+    {".h", "text/x-c++", 1},
+    {".hpp", "text/x-cpp", 1},
+    {".cfg", "text/x-config", 1},
+    {".php", "text/html", 1},
+    {".vdf", "text/plain", 1},
+    {".gam", "text/plain", 1},
+    {".py", "text/x-python", 1},
+    {".bmp", "image/bmp", 1},
+    {".log", "text/plain", 1},
+    {".tga", "image/x-targa", 1},
+    {".tga", "image/x-targa", 1},
+    {".dds","image/x-dds", 1},
+    {".vtf","image/x-vtf", 1},
+    {".vmt","text/x-vmt", 1},
+    {".ogg","audio/ogg", 0},
+    {".flv","video/x-flv", 0},
+    {".flac","audio/flac", 0},
+    {".avi","video/x-msvideo", 0},
+    {".pl","text/plain", 1},
+    {".wad","application/x-doom-wad", 1},
+    {".lst","text/plain", 1},
+    {".db","text/plain", 1},
+    {".md","text/markdown", 1},
+    {".php","application/x-httpd-php", 1},
+    {".php2","application/json", 1},
+    {".pdf","application/pdf", 1},
+    {".sh","text/plain", 1},
+    {".rss","application/rss+xml", 1},
+    {".rcon","text/html", 1},
+    {".xml","application/xml", 1},
+    {".3gp","video/3gpp", 0},
+    {NULL, "application/octet-stream", 1}
 };
 
 static const char* get_mime_type(const char *filename) {
@@ -100,12 +101,30 @@ static const char* get_mime_type(const char *filename) {
     }
     return "application/octet-stream";
 }
-static void push_bytes(int is_partial, int start_point){
+static u_int8_t get_mime_type_compressibility(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if (!dot){
+		return 1;
+	}
+    for (int i = 0; mime_types[i].extension != NULL; i++) {
+        if (strcmp(dot, mime_types[i].extension) == 0) {
+            return mime_types[i].allows_compression;
+        }
+    }
+    return 1;
+}
+static void push_bytes(void){
 	
 	((use_chunked)?
-		sendallchunkedfd(&curr_client,comp_fd,is_partial?start_point:0)
+		sendallchunkedfd(&curr_client,comp_fd,curr_client.req->header->is_partial?
+							curr_client.req->header->range_number
+							:
+							0)
 		:
-		sendallfd(&curr_client,comp_fd,is_partial?start_point:0));
+		sendallfd(&curr_client,comp_fd,curr_client.req->header->is_partial?
+							curr_client.req->header->range_number
+							:
+							0));
 	
 }
 

@@ -14,7 +14,7 @@
 #include <dirent.h>
 #include <sys/types.h>
 
-#define ARGV_TO_USE (use_valgrind?valgrind_argv:normal_argv)
+#define ARGV_TO_USE (exec_argv_arr[use_valgrind])
 
 u_int64_t request_id_here =0;
 struct sigaction sa;
@@ -27,7 +27,8 @@ static char buff_sock[32]={0},
 	buff_tls[32]={0},
 	buff_request_id[128]={0};
 
-static char* valgrind_argv[] = {"valgrind",
+static char* super_valgrind_argv[] = {"valgrind",
+					"--track-origins=yes",
 					"--leak-check=full",
 					"--show-leak-kinds=all",
 					"--track-fds=yes",
@@ -36,13 +37,32 @@ static char* valgrind_argv[] = {"valgrind",
 					buff_sock,
 					buff_request_id,
 					NULL},
-			* normal_argv[]=
-			{"./server.exe", "1",
-				buff_tls,
-				buff_sock,
-				buff_request_id,
-				NULL};
+	
+			* valgrind_argv[] = {"valgrind",
+					"--leak-check=full",
+					"--show-leak-kinds=all",
+					"--track-fds=yes",
+					"./server.exe","1",
+					buff_tls,
+					buff_sock,
+					buff_request_id,
+					NULL},
 					
+			* normal_argv[] = {"./server.exe", 
+					"1",
+					buff_tls,
+					buff_sock,
+					buff_request_id,
+					NULL};
+					
+typedef typeof(char** ) argv_type;
+
+argv_type exec_argv_arr[3] = { normal_argv,
+					valgrind_argv,
+					super_valgrind_argv};
+					
+
+
 
 static struct sockaddr_in server_address, clientAddress;
 
@@ -58,7 +78,7 @@ void cleanup(void){
 		rmdir(tmp_file_dir);
 		
 	}
-	fprintf(stdout,serverWasOn?"Adeus! Server out...\n":"Cliente out...\n");
+	fprintf(stdout,"Adeus! Process out.\n");
 	if(logstream!=stdout && logstream!= stderr){
 		fclose(logstream);
 	}
@@ -66,6 +86,7 @@ void cleanup(void){
 	if(cfgs){
 	
 		freeCFGs(&cfgs);
+		cfgs = NULL;
 
 
 	}
@@ -110,7 +131,7 @@ static void handleIncommingConnections(void){
 		setNonBlocking(client_socket);
 		getpeername(client_socket , (struct sockaddr*)&clientAddress , (socklen_t*)&socklenpointer);
         if(logging){
-			fprintf(logstream,"Client connected , ip %s , port %d \n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
+			fprintf(logstream,"Client connected , ip %s , port %hu\n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
         }
         request_id_here++;
         
@@ -119,7 +140,7 @@ static void handleIncommingConnections(void){
         memset(buff_request_id,0, sizeof(buff_request_id));
         
 		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",client_socket);
-		snprintf(buff_tls,sizeof(buff_tls)-1,"%d",use_tls);
+		snprintf(buff_tls,sizeof(buff_tls)-1,"%hhu",use_tls);
 		snprintf(buff_request_id,sizeof(buff_request_id)-1,"%lx",request_id_here);
 
 		int pid=fork();
@@ -199,7 +220,7 @@ void initializeConstants(void){
 	
 	port=atoi(find_value_in_cfg_arr("port",cfgs));
 	
-	compression=atoi(find_value_in_cfg_arr("compression",cfgs));
+	use_compression=atoi(find_value_in_cfg_arr("use_compression",cfgs));
 	
 	compression_level=atoi(find_value_in_cfg_arr("compression_level",cfgs));
 	
@@ -213,43 +234,12 @@ void initializeConstants(void){
 	
 	use_valgrind=atoi(find_value_in_cfg_arr("use_valgrind",cfgs));
 	
-	if(logging<0){
-
-		printf("Config error: logging level must be a non negative 32 bit integer!\n");
-		cleanup();
-	}
-	if(smalltimeoutsecs<0){
-
-		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		cleanup();
-	}
-	if(smalltimeoutusecs<0){
-
-		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		cleanup();
-	}
-	if(bigtimeoutsecs<0){
-
-		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		cleanup();
-	}
-	if(bigtimeoutusecs<0){
-
-		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		cleanup();
-	}
-	if(tls_shake_timeout_secs<0){
-
-		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		cleanup();
-	}
-	if(tls_shake_timeout_usecs<0){
-
-		printf("Config error: timeout must be a non negative 32 bit integer!\n");
-		cleanup();
-	}
-	if(compression_level<0 || compression_level > 9){
+	if(compression_level > 9){
 		printf("Config error: compression level must be an integer between 0 and 9!\n");
+		cleanup();
+	}
+	if(use_valgrind > 2){
+		printf("Config error: use_valgrind must be an integer between 0 and 2!\n");
 		cleanup();
 	}
 }
@@ -269,7 +259,7 @@ void clientBootstrap(void){
 		fprintf(logstream,"Request id: %lu\n",request_id);
 	}
 	snprintf(tmp_file_dir,sizeof(tmp_file_dir)-1,"/tmp/%s",tmp_directory_name);
-	servComp=gzip;
+	servComp=br;
 	cleanup();
 	
 }
@@ -287,8 +277,12 @@ void initializeServer(void){
 	logstream=stdout;
 	loadCfg();
 	initializeConstants();
-	print_loaded_cfgs(logstream);
-
+	if(cfgs){
+		print_loaded_cfgs(logstream);
+	}
+	else{
+		exit(-1);
+	}
 	serverWasOn=serverOn=1;
 	server_socket= socket(AF_INET,SOCK_STREAM,0);
 	

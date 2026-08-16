@@ -33,14 +33,14 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "buffSizes.h"
-#include "client.h"
-#include "server_vars.h"
 #include "filePaths.h"
 #include "auxFuncs.h"
 #include "resource_consts.h"
 #include "http_req_parser.h"
 #include "http_response_aux.h"
 #include "filePaths.h"
+#include "client.h"
+#include "server_vars.h"
 
 #define FREE_ALL_APPS_COUNTDOWN "<script src=\"/webcrookedstuff/.keep_android_open_please.js\"></script>"
 
