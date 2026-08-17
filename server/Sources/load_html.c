@@ -46,17 +46,6 @@ static char* category_names[CATEGORY_ID_MAX]={
 
 };
 
-
-static char* excluded_xtensions[]={
-		"boundary",
-		"dll",
-		"so",
-		"o",
-		"exe",
-		"bin",
-		"iso",
-		NULL
-};
 static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
 	SIZE,
 	DATE,
@@ -76,7 +65,7 @@ static char resolved_abs_path[PATH_MAX]={0};
 
 //ls -lhu --sort=time --time=mtime --time-style=long-iso --group-directories-first 
 
-static char* the_command[]={"ls","-lhu","--sort=time", "--time=mtime", "--time-style=long-iso", "--group-directories-first",resolved_abs_path,NULL};
+static char* the_dir_command[]={"ls","-lhu","--sort=time", "--time=mtime", "--time-style=long-iso", "--group-directories-first",resolved_abs_path,NULL};
 
 
 static char resolved_rel_path[PATH_MAX]={0},
@@ -215,35 +204,35 @@ static void generateDirListingPrimitive(char* path){
 
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
-        snprintf(currSearchedDir,PATHSIZE*2-1,"%s%s",currDir,path);
+    snprintf(currSearchedDir,PATHSIZE*2-1,"%s%s",currDir,path);
 
 	resolve_canonical_path(currSearchedDir,resolved_abs_path);
 	
         
-        pid_t pid_fork_find_cmd=fork();
-        switch(pid_fork_find_cmd){
+	pid_t pid_fork_find_cmd=fork();
+	switch(pid_fork_find_cmd){
 
-                case -1:
-                        close(outfd);
-                        exit(-1);
-                break;
-                case 0:
-                        dup2(outfd,STDOUT_FILENO);
-                        close(outfd);
-                        execvp(the_command[0],the_command);
-                break;
-                default:
-                        wait(NULL);
-                break;
+			case -1:
+					close(outfd);
+					exit(-1);
+			break;
+			case 0:
+					dup2(outfd,STDOUT_FILENO);
+					close(outfd);
+					execvp(the_dir_command[0],the_dir_command);
+			break;
+			default:
+					wait(NULL);
+			break;
 
-        }
-        close(outfd);
+	}
+	close(outfd);
 
 }
 void generateDirListing(char* dir){
 
 	logging=1;
-        logstream=stderr;
+    logstream=stderr;
 
 	resolve_canonical_path_relative(dir,resolved_rel_path);
 	resolve_canonical_path_relative(defaultTarget,resolved_default_path);

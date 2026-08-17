@@ -51,16 +51,13 @@ static rcon_arg_line parameters_arr[MAX_NUM_RCON_ARGS]={
 
 
 int isRconRequest(char* resourceTarget){
-        char path[PATHSIZE]={0};
+    char path[PATHSIZE]={0};
 	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s",resourceTarget);
 	char* query = strchr(path, '?');
 	if (query) {
 	    *query = 0;
 	    query++;
-		if(logging){
-			fprintf(logstream,"Some request of sorts!\nThe request: %s\n",query);
-		}
 	}
 	else{
 
@@ -68,24 +65,9 @@ int isRconRequest(char* resourceTarget){
 	}
 	char* ext=get_file_extension(path);
 	if(ext){
-		if(stringsAreEqual(ext,"rcon")){
-			if(logging){
-				fprintf(logstream,"RCON Request pedido!!: %s (RCON)\n",path);
-			}
-			return 1;
-		}
-		else{
-			if(logging){
-				fprintf(logstream,"Nepia... não é rcon...: %s (RCON)\n",path);
-			}
-			return 0;
-
-		}
+		return stringsAreEqual(ext,"rcon");
 	}
 	else{
-		if(logging){
-			fprintf(logstream,"Nepia... não é rcon...: %s (RCON)\n",path);
-		}
 		return 0;
 
 	}

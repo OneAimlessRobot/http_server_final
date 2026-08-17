@@ -27,7 +27,7 @@ u_int32_t smalltimeoutsecs,
 u_int16_t port = 0;
 
 
-u_int8_t logging=0,
+u_int32_t logging=0,
 	serverOn=0,
 	serverWasOn=0,
 	use_valgrind=0,

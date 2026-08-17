@@ -186,7 +186,9 @@ static void send_header(int notfound){
 		:
 		fillUpFileNotFoundHeader(curr_client.sent_header_buff,fileSize,the_mime_type);
 	int header_size=strlen(curr_client.sent_header_buff);
-	print_response_header(curr_client.sent_header_buff);
+	if(logging>50){
+		print_response_header(curr_client.sent_header_buff);
+	}
 	send_wrapper(curr_client.sent_header_buff,header_size);
 
 }

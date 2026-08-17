@@ -6,3 +6,17 @@
 
 
 
+
+char* excluded_xtensions[]={
+		"class",
+		"pem",
+		"sample",
+		"boundary",
+		"dll",
+		"so",
+		"o",
+		"exe",
+		"bin",
+		"iso",
+		NULL
+};

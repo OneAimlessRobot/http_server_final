@@ -10,6 +10,24 @@
 #include "../Includes/server_vars.h"
 #include "../Includes/http_req_parser.h"
 
+char* reserved_characters[]={
+	"|",
+	">",
+	"<",
+	"\\",
+	"\""
+	":",
+	NULL
+},
+* reserved_characters_for_special[]={
+	">",
+	"<",
+	"\\",
+	"\""
+	":",
+	NULL
+};
+
 const char* request_const_name_arr[MAX_REQUEST_TYPE] = {
 	
 	"GET",

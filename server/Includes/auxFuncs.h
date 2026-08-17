@@ -38,7 +38,7 @@ int make_str_arr(char *s,char*delim, char *argv[ARGVMAX],int maxlen);
 
 int stringsAreEqual(char* s1,char* s2);
 char from_hex(char c);
-int url_decode(char *src, char *dst);
+int url_decode(char *src, char *dst, char** reserved_characters_arr);
 int stringsAreEqualN(char* s1,char*s2,int n);
 
 int findInStringArrN(char* arr[],char* nullTermStr,int n);

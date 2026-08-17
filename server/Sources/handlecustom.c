@@ -13,7 +13,7 @@
 #include "../Includes/load_html.h"
 
 
-char* custompostreqs[]={RCON_REQUEST,NULL};
+char* custompostreqs[]={RCON_REQUEST,FIND_REQUEST,NULL};
 
 
 static void handleRconRequest(http_request* req){
@@ -35,6 +35,23 @@ static void handleRconRequest(http_request* req){
 	}
 }
 
+static void handleFindRequest(http_request* req){
+	char* argv2[ARGVMAX]={0};
+	int size=makeargvdelim(req->data,"&",argv2,ARGVMAX);
+	char* the_ptr=req->processed_data;
+	for(int i=0;i<size;i++){
+		char* pair[2]={0};
+		splitString(argv2[i],"=",pair);
+		if(!strcmp(pair[0],"rootdir")||
+				!strcmp(pair[0],"regexp")){
+		replaceStringCharacter(pair[1],'+',' ');
+		the_ptr+=snprintf(the_ptr,
+				sizeof(req->processed_data)-1,
+				"%s%s",pair[1],(i==(size-2))?" ":"|");
+		}
+	}
+}
+
 
 int isCustomPostReq(http_request* req){
 	int result=0;
@@ -46,6 +63,10 @@ void handleCustomPostReq(http_request* req){
 	
 	if(!strncmp(req->header->target,RCON_REQUEST,sizeof(req->header->target))){
 		handleRconRequest(req);
+
+	}
+	else if(!strncmp(req->header->target,FIND_REQUEST,sizeof(req->header->target))){
+		handleFindRequest(req);
 
 	}
 }

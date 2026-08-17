@@ -53,4 +53,13 @@
 			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
 			"\n</head>"
 
+#define FIND_HTML_PREFIX "<!DOCTYPE html>" \
+			"\n<html>" \
+			"\n<head>" \
+			"\n<meta charset=\"UTF-8\">\n" \
+			"\n<base href=\'\'>" \
+			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
+			"\n<!-- <link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\"> -->" \
+			"\n</head>"
+			
 #endif

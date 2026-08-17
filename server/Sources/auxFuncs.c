@@ -2,16 +2,8 @@
 #include "../Includes/http_req_parser.h"
 #include "../Includes/auxFuncs.h"
 #include <ctype.h>
-static char* reserved_characters[]={
-	"|",
-	">",
-	"<",
-	"\\",
-	"\""
-	":",
-	NULL
-};
-int url_decode(char *src, char *dst) {
+
+int url_decode(char *src, char *dst, char** reserved_characters_arr) {
     int result=0;
     int counter_src=0;
     int counter_dst=0;
@@ -27,7 +19,7 @@ int url_decode(char *src, char *dst) {
 	    counter_dst+=1;
 	    counter_src += 3;
         }
-	else if(findInStringArrN(reserved_characters,&src[counter_src],1)>=0){
+	else if(findInStringArrN(reserved_characters_arr,&src[counter_src],1)>=0){
 		
 		dst[counter_dst] = '\0';
     		return 0;
@@ -170,7 +162,7 @@ int64_t max(int64_t arg1, int64_t arg2){
 char *get_file_extension(const char *path) {
     char *extension = strrchr(path, '.');
 
-    if (extension != NULL) {
+    if (extension) {
 
         return extension + 1;
     }
@@ -220,7 +212,6 @@ int findInStringArr(char* arr[],char* nullTermStr){
 
 	for (int i=0;arr[i];i++){
 		if(stringsAreEqual(nullTermStr,arr[i])){
-
 			return i;
 		}
 	}

@@ -6,6 +6,7 @@
 #include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/client.h"
+#include "../Includes/load_find_results.h"
 #include "../Includes/load_html.h"
 #include "../Includes/ssl_things.h"
 #include "../Includes/load_rss.h"
@@ -65,6 +66,24 @@ static void head_and_get_wrapper(void (*generating_func)(char*)){
 			snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 						"%s%s",currDir,curr_client.target);
 }
+static void process_req_data(void){
+	
+	url_decode(curr_client.req->processed_data, curr_client.req->final_data,reserved_characters_for_special);
+	
+	if(logging>3){
+		fprintf(logstream,"The data is: %s\n", curr_client.req->final_data);
+	}
+}
+static void process_header_target(void){
+	
+	url_decode(curr_client.req->header->target, curr_client.target,reserved_characters);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path),"%s",curr_client.target);
+	
+	if(logging>3){
+		fprintf(logstream,"The target is: %s\n", curr_client.target);
+		fprintf(logstream,"The relative file path here is: %s\n", curr_client.relative_file_path);
+	}
+}
 static void process_req_switch_block(void (*generating_func)(char*)){
 	
 
@@ -85,10 +104,11 @@ static void process_req_switch_block(void (*generating_func)(char*)){
 									curr_client.relative_file_path,
 									curr_client.req->processed_data);
 				
-				
+				process_req_data();
 			}
+			
 			(generating_func!=NULL)?
-				generating_func_wrapper(generating_func, curr_client.req->processed_data):
+				generating_func_wrapper(generating_func, curr_client.req->final_data):
 				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 							"%s%s",currDir,curr_client.relative_file_path);
 			
@@ -101,16 +121,6 @@ static void process_req_switch_block(void (*generating_func)(char*)){
 	}	
 }
 
-static void process_header_target(void){
-	
-	url_decode(curr_client.req->header->target, curr_client.target);
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path),"%s",curr_client.target);
-	
-	if(logging>3){
-		fprintf(logstream,"The target is: %s\n", curr_client.target);
-		fprintf(logstream,"The relative file path here is: %s\n", curr_client.relative_file_path);
-	}
-}
 static void handleCurrentActivity(void){
 	
 	if(curr_client.req->header->type==INVALID){
@@ -147,6 +157,10 @@ static void handleCurrentActivity(void){
 	else if(isRconRequest(curr_client.target)){
 		
 		generating_func = generateRconResult;
+	}
+	else if(isFindRequest(curr_client.target)){
+		
+		generating_func = generateFindResult;
 	}
 	process_req_switch_block(generating_func);
 	sendResource(is_head);

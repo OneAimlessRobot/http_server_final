@@ -32,24 +32,9 @@ int isText(char* resourceTarget){
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	char* ext=get_file_extension(path);
 	if(ext){
-		if(stringsAreEqual(ext,"txt")){
-			if(logging){
-				fprintf(logstream,"Texto pedido!!: %s (TXT)\n",path);
-			}
-			return 1;
-		}
-		else{
-			if(logging){
-				fprintf(logstream,"Nepia... não é texto...: %s (TXT)\n",path);
-			}
-			return 0;
-
-		}
+		return stringsAreEqual(ext,"txt");
 	}
 	else{
-		if(logging){
-			fprintf(logstream,"Nepia... não é texto...: %s (TXT)\n",path);
-		}
 		return 0;
 
 	}

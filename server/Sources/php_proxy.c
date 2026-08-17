@@ -44,24 +44,10 @@ int isPHPRequest(char* resourceTarget){
 	}
 	char* ext=get_file_extension(path);
 	if(ext){
-		if(stringsAreEqual(ext,"php")||stringsAreEqual(ext,"php2")){
-			if(logging){
-				fprintf(logstream,"PHP request pedido!!: %s (PHP)\n",path);
-			}
-			return 1;
-		}
-		else{
-			if(logging){
-				fprintf(logstream,"Nepia... não é php ou php2...: %s (PHP)\n",path);
-			}
-			return 0;
-
-		}
+		return (stringsAreEqual(ext,"php")||stringsAreEqual(ext,"php2"));
+			
 	}
 	else{
-		if(logging){
-			fprintf(logstream,"Nepia... não é php ou php2...: %s (PHP)\n",path);
-		}
 		return 0;
 
 	}

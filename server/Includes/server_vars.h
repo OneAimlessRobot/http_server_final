@@ -27,7 +27,7 @@ extern u_int32_t smalltimeoutsecs,
 extern u_int16_t port;
 
 
-extern u_int8_t logging,
+extern u_int32_t logging,
 	serverOn,
 	serverWasOn,
 	use_valgrind,

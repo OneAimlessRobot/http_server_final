@@ -80,24 +80,9 @@ int isRssFeed(char* resourceTarget){
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	char* ext=get_file_extension(path);
 	if(ext){
-		if(stringsAreEqual(ext,"rss")){
-			if(logging){
-				fprintf(logstream,"RSS feed pedido!!: %s (RSS)\n",path);
-			}
-			return 1;
-		}
-		else{
-			if(logging){
-				fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
-			}
-			return 0;
-
-		}
+		return stringsAreEqual(ext,"rss");
 	}
 	else{
-		if(logging){
-			fprintf(logstream,"Nepia... não é rss...: %s (RSS)\n",path);
-		}
 		return 0;
 
 	}

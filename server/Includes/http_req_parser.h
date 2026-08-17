@@ -5,6 +5,10 @@
 typedef enum {GET,HEAD,POST,INVALID,MAX_REQUEST_TYPE} http_req_type;
 
 
+
+extern char* reserved_characters[],
+	* reserved_characters_for_special[];
+
 extern const char* request_const_name_arr[MAX_REQUEST_TYPE];
 
 
@@ -42,7 +46,8 @@ typedef struct http_header{
 typedef struct http_request{
 
 	char data[BUFFSIZE],
-	processed_data[BUFFSIZE];
+	processed_data[BUFFSIZE],
+	final_data[BUFFSIZE];
 	int64_t data_size;
 	http_header* header;
 

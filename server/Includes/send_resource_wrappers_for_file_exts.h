@@ -84,6 +84,7 @@ static MimeEntry mime_types[] = {
     {".sh","text/plain", 1},
     {".rss","application/rss+xml", 1},
     {".rcon","text/html", 1},
+    {".find","text/html", 1},
     {".xml","application/xml", 1},
     {".3gp","video/3gpp", 0},
     {NULL, "application/octet-stream", 1}
