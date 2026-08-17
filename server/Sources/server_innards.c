@@ -174,6 +174,8 @@ void initializeConstants(void){
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(mainRssFeed,find_value_in_cfg_arr("mainRssFeed",cfgs),FIELDSIZE-1);
+	strncpy(host_cert_file_path,find_value_in_cfg_arr("host_cert_file_path",cfgs),FIELDSIZE-1);
+	strncpy(host_pkey_file_path,find_value_in_cfg_arr("host_pkey_file_path",cfgs),FIELDSIZE-1);
 	int invalid_string_confs=
 				!((stringsAreEqual(defaultTarget,NO_SUCH_SETTING)
 				||
@@ -185,7 +187,15 @@ void initializeConstants(void){
 				&&
 				(stringsAreEqual(mainRssFeed,NO_SUCH_SETTING)
 				||
-				stringsAreEqual(mainRssFeed,NO_SETTINGS_LOADED)));
+				stringsAreEqual(mainRssFeed,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(host_cert_file_path,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(host_cert_file_path,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(host_pkey_file_path,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(host_pkey_file_path,NO_SETTINGS_LOADED)));
 	
 	if(!invalid_string_confs){
 
