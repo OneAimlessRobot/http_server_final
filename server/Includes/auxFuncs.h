@@ -42,6 +42,5 @@ int url_decode(char *src, char *dst);
 int stringsAreEqualN(char* s1,char*s2,int n);
 
 int findInStringArrN(char* arr[],char* nullTermStr,int n);
-int convert_http_encoded_thingie_into_actual_path(char* src);
 void skip_comments(FILE* fp);
 #endif

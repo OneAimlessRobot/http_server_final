@@ -79,12 +79,12 @@ static char resolved_abs_path[PATH_MAX]={0};
 static char* the_command[]={"ls","-lhu","--sort=time", "--time=mtime", "--time-style=long-iso", "--group-directories-first",resolved_abs_path,NULL};
 
 
-static char resolved_rel_path[PATH_MAX]={0};
-static char resolved_default_path[PATH_MAX]={0};
-static char header_buff[4+(PATHSIZE+4)*CATEGORY_ID_MAX]={0};
-static char* curr_listing_argv[ARGVMAX]={0};
-static char* header_argv[ARGVMAX]={0};
-static char curr_listing_buff[4+(PATHSIZE+8)*CATEGORY_ID_MAX]={0};
+static char resolved_rel_path[PATH_MAX]={0},
+		resolved_default_path[PATH_MAX]={0},
+		header_buff[4+(PATHSIZE+4)*CATEGORY_ID_MAX]={0},
+		* curr_listing_argv[ARGVMAX]={0},
+		* header_argv[ARGVMAX]={0},
+		curr_listing_buff[4+(PATHSIZE+8)*CATEGORY_ID_MAX]={0};
 
 
 int isDirectory(char* resourceTarget){
@@ -132,7 +132,7 @@ static void print_header(int fd){
 	dprintf(fd,"\n<h2 class='%s'><span>%s|</span></h2>\n",DIR_LISTING_HEADER_CLASS,header_buff);
 
 }
-static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv, char* dir){
+static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv,char* dir){
 	
 	
 	dprintf(fd,"\n<span class='%s'>| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|</span><br>\n",

@@ -27,8 +27,8 @@ extern char
 * redirectHeader,*notFoundHeader;
 
 
-void fillUpNormalHeader(char headerBuff[PATHSIZE],const char* mimetype,u_int64_t size);
-void fillUpNormalHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,u_int64_t size);
+void fillUpNormalHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t size);
+void fillUpNormalHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t size);
 
 
 void fillUpChunkedHeader(char headerBuff[PATHSIZE],const char* mimetype);
@@ -45,12 +45,12 @@ void fillUpChunkedHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char
 -----------------------------------------------------------------------------------
 */
 
-void fillUpNormalPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,u_int64_t start_point,u_int64_t size);
-void fillUpNormalPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,u_int64_t start_point,u_int64_t size);
+void fillUpNormalPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t start_point,int64_t size);
+void fillUpNormalPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t start_point,int64_t size);
 
 
-void fillUpChunkedPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,u_int64_t start_point,u_int64_t size);
-void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,u_int64_t start_point,u_int64_t size);
+void fillUpChunkedPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t start_point,int64_t size);
+void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t start_point,int64_t size);
 
 
 /*
@@ -66,7 +66,7 @@ void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimety
 
 void fillUpRedirectHeader(char headerBuff[PATHSIZE],char* path);
 
-void fillUpFileNotFoundHeader(char headerBuff[PATHSIZE],u_int64_t size,const char* mimetype);
+void fillUpFileNotFoundHeader(char headerBuff[PATHSIZE],int64_t size,const char* mimetype);
 
 void fillUpRequestErrorHeader(char headerBuff[PATHSIZE]);
 

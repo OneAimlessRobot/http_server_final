@@ -1,5 +1,6 @@
 #include "../Includes/preprocessor.h"
 #include <errno.h>
+#include "../Includes/auxFuncs.h"
 #include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
@@ -12,12 +13,11 @@
 #include "../Includes/load_rss.h"
 #include <sys/wait.h>
 
-static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss";
-
-
-static char channel_string_buff[PATHSIZE*2]={0};
-
-static char currFetchedRSS[PATHSIZE*2]={0};
+static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss",
+		
+		channel_string_buff[PATHSIZE*2]={0},
+		
+		currFetchedRSS[PATHSIZE*2]={0};
 
 typedef enum {ATOM=0,XHTML,MAX_NAMESPACE_URI_ID}namespace_uri_id;
 
@@ -75,8 +75,8 @@ static const char* empty_contents_for_channel_tag_ids[MAX_CH_TAG_ID]=
 
 
 int isRssFeed(char* resourceTarget){
-        char path[PATHSIZE]={0};
-	char* ptr=path;
+    char path[PATHSIZE]={0},
+		* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	char* ext=get_file_extension(path);
 	if(ext){

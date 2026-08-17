@@ -18,7 +18,7 @@ int url_decode(char *src, char *dst) {
     while (strnlen(&src[counter_src],PATHSIZE-1)) {
 	if (src[counter_src] == '%' && isxdigit(src[counter_src+1]) && isxdigit(src[counter_src+2])) {
         
-	    sscanf(&src[counter_src],"%%%2hhx",&dst[counter_dst]);
+	    sscanf(&src[counter_src],"%%%2hhx",(unsigned char*)&dst[counter_dst]);
 	    if(dst[counter_dst]>126){
 			
 		dst[counter_dst] = '\0';
@@ -360,27 +360,6 @@ int stringsAreEqualTheFinalString(char* s1,char*s2,int n){
 
 }
 
-int convert_http_encoded_thingie_into_actual_path(char* src){
-
-	char buff[PATHSIZE]={0};
-	char buff2[PATHSIZE]={0};
-	memcpy(buff,src,strnlen(src,sizeof(buff)-1));
-	//char* argv_from_src[ARGVMAX]={0};
-	//make_str_arr(buff,"/",argv_from_src,ARGVMAX);
-	//print_string_arr(logstream,argv_from_src);
-	//int length_of_str_arr=get_string_arr_size(argv_from_src);
-	//char* the_string=&(argv_from_src[length_of_str_arr-1][0]);
-	//int64_t str_pos_to_work_with=(int64_t)(the_string-((char*)buff));
-	int64_t str_pos_to_work_with=0;
-	int length_of_str_arr=0;
-	char* the_string=NULL;
-	fprintf(logstream,"original path: %s\nThe path we got: %s\nlength_of_str_arr: %d\nstr_pos_to_work_with: %ld\n",src,the_string,length_of_str_arr,str_pos_to_work_with);
-	int result= url_decode(buff,(char*)(buff2));
-	//char buff2[PATHSIZE+5]={0};
-	snprintf(src,strlen(src)+4,"\"%s\"",buff2);
-	fprintf(logstream,"we modified it to: %s\n",src);
-	return result;
-}
 
 void skip_comments(FILE* fp){
 

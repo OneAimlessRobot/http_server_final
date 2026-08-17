@@ -21,28 +21,28 @@
 			   "\r\n"
 */
 char* normalHeader= STD_HEADER_START_OK
-			"Content-Length: %lu\r\n"
+			"Content-Length: %ld\r\n"
 			  //"Origin: localhost\r\n"
 			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: "*/
 			  //EMBEDDER_POLICY  "\r\n"
  			  "\r\n";
 
-void fillUpNormalHeader(char headerBuff[PATHSIZE],const char* mimetype,u_int64_t size){
+void fillUpNormalHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t size){
 
 	snprintf(headerBuff,PATHSIZE,normalHeader,mimetype,size);
 
 }
 
 char* normalHeaderComp= STD_HEADER_START_OK
-				"Content-Length: %lu\r\n"
+				"Content-Length: %ld\r\n"
 			  //"Origin: localhost\r\n"
 			  "Content-encoding: %s\r\n"
 			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: "*/
 			  //EMBEDDER_POLICY "\r\n"
 			   "\r\n";
-void fillUpNormalHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,u_int64_t size){
+void fillUpNormalHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t size){
 
 	snprintf(headerBuff,PATHSIZE,normalHeaderComp,mimetype,size,method);
 
@@ -90,21 +90,21 @@ void fillUpChunkedHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char
 
 
 char* normalPartialHeader= STD_HEADER_START_PARTIAL
-						"Content-Length: %lu\r\n"
-						"Content-Range: bytes %d-%d/%d\r\n"
+						"Content-Length: %ld\r\n"
+						"Content-Range: bytes %ld-%ld/%ld\r\n"
 			  //"Origin: localhost\r\n"
 			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: "*/
 			  //EMBEDDER_POLICY  "\r\n"
  			  "\r\n";
-void fillUpNormalPartialHeader(char headerBuff[PATHSIZE],const char* mimetype, u_int64_t start_point,u_int64_t size){
+void fillUpNormalPartialHeader(char headerBuff[PATHSIZE],const char* mimetype, int64_t start_point,int64_t size){
 	snprintf(headerBuff,PATHSIZE,normalPartialHeader,mimetype,size-start_point,start_point,size-1,size);
 }
 
 
 char* normalPartialHeaderComp= STD_HEADER_START_PARTIAL
 						"Content-Length: %lu\r\n"
-						"Content-Range: bytes %d-%d/%d\r\n"
+						"Content-Range: bytes %ld-%ld/%ld\r\n"
 			  //"Origin: localhost\r\n"
 			  "Content-encoding: %s\r\n"
 			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
@@ -112,12 +112,12 @@ char* normalPartialHeaderComp= STD_HEADER_START_PARTIAL
 			  //EMBEDDER_POLICY "\r\n"
 			   "\r\n";
 			   
-void fillUpNormalPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method, u_int64_t start_point,u_int64_t size){
+void fillUpNormalPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method, int64_t start_point,int64_t size){
 	snprintf(headerBuff,PATHSIZE,normalPartialHeaderComp,mimetype,size-start_point,start_point,start_point+size-1,size,method);
 }
 		   
 char* chunkedPartialHeader= STD_HEADER_START_PARTIAL
-						"Content-Range: bytes %d-%d/%d\r\n"
+						"Content-Range: bytes %ld-%ld/%ld\r\n"
 			  //"Origin: localhost\r\n"
 			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: require-corp\r\n"*/
@@ -125,12 +125,12 @@ char* chunkedPartialHeader= STD_HEADER_START_PARTIAL
 			  //EMBEDDER_POLICY  "\r\n"
 			  "Transfer-Encoding: chunked\r\n"
                           "\r\n";
-void fillUpChunkedPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,u_int64_t start_point,u_int64_t size){
+void fillUpChunkedPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t start_point,int64_t size){
 	snprintf(headerBuff,PATHSIZE,chunkedPartialHeader,mimetype,start_point,start_point+size-1,size);
 }
 
 char* chunkedPartialHeaderComp= STD_HEADER_START_PARTIAL
-						"Content-Range: bytes %d-%d/%d\r\n"
+						"Content-Range: bytes %ld-%ld/%ld\r\n"
 			  //"Origin: localhost\r\n"
 			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           /*"Cross-Origin-Embedder-Policy: "*/
@@ -138,7 +138,7 @@ char* chunkedPartialHeaderComp= STD_HEADER_START_PARTIAL
                           "Transfer-Encoding: %s, chunked\r\n"
                           "\r\n";
 
-void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,u_int64_t start_point,u_int64_t size){
+void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t start_point,int64_t size){
 	snprintf(headerBuff,PATHSIZE,chunkedPartialHeaderComp,mimetype,start_point,start_point+size-1,size,method);
 }
 
@@ -177,13 +177,13 @@ char* notFoundHeader= "HTTP/2 404 Not Found\r\n"
 						"Accept-Ranges: bytes\r\n"
                                 "Content-Type: %s\r\n"
 			  	//"Origin: localhost\r\n"
-			  	"Content-Length: %lu\r\n"
+			  	"Content-Length: %ld\r\n"
 			  	/*"Cross-Origin-Embedder-Policy: "*/
 			  	//EMBEDDER_POLICY "\r\n"
 			   	/*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
                           	"\r\n";
 
-void fillUpFileNotFoundHeader(char headerBuff[PATHSIZE],u_int64_t size,const char* mimetype){
+void fillUpFileNotFoundHeader(char headerBuff[PATHSIZE],int64_t size,const char* mimetype){
 
 	snprintf(headerBuff,PATHSIZE,notFoundHeader,mimetype,size);
 

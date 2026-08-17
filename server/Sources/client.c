@@ -52,16 +52,30 @@ void exit_function_client(void){
 	}
 	exit(-1);
 }
+
+static int generating_func_wrapper(void (*generating_func)(char*), char* arg){
+	generating_func(arg);
+	return 0;
+}
+
+static void head_and_get_wrapper(void (*generating_func)(char*)){
+	(generating_func!=NULL)?
+			generating_func_wrapper(generating_func, curr_client.target)
+			:
+			snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
+						"%s%s",currDir,curr_client.target);
+}
 static void process_req_switch_block(void (*generating_func)(char*)){
 	
 
 	switch(curr_client.req->header->type){
-		case GET ... HEAD:
-			(generating_func!=NULL)?
-				generating_func(curr_client.target)
-				:
-				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
-							"%s%s",currDir,curr_client.target);
+		case GET:
+			head_and_get_wrapper(generating_func);
+		break;
+		case HEAD:
+			head_and_get_wrapper(generating_func);
+		break;
+			
 		break;
 		case POST:
 			if(isCustomPostReq(curr_client.req)){
@@ -74,7 +88,7 @@ static void process_req_switch_block(void (*generating_func)(char*)){
 				
 			}
 			(generating_func!=NULL)?
-				generating_func(curr_client.req->processed_data):
+				generating_func_wrapper(generating_func, curr_client.req->processed_data):
 				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 							"%s%s",currDir,curr_client.relative_file_path);
 			
@@ -167,7 +181,7 @@ void handleConnection(void){
 	}
 }
 int is_tls_connection(int client_fd) {
-    unsigned char packet_buff[6];
+    char packet_buff[6];
     ssize_t n = readsome(client_fd, (char*)packet_buff, sizeof(packet_buff), MSG_PEEK);
     
     if( n< 6){
