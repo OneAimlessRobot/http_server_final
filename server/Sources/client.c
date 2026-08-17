@@ -187,12 +187,22 @@ int is_tls_connection(int client_fd) {
     if( n< 6){
 			return 0;
 	}
+	if(((packet_buff[0] & 0x80) == 0x80)
+		&&
+		(((packet_buff[0] & 0x7f) << 8 | packet_buff[1]) > 9)
+		&&
+		(packet_buff[2] == 0x01)){
+
+		return 1;
+	
+	}
+	
     //https://stackoverflow.com/questions/16194050/tls-protocol-detection-by-using-client-hello-message
 	//Check 22 and version info 0300 0301 or 0302
 	if (packet_buff[0] == 0x16 && packet_buff[1] == 0x03
 	  && (packet_buff[2] == 0x00 || packet_buff[2] == 0x01 || packet_buff[2] == 0x02)){
 		if (packet_buff[5] == 1){
-			return 1;
+			return 2;
 		}
 	}
     
