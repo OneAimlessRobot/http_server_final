@@ -145,6 +145,7 @@ static void generateFindResultPrimitive(char* the_request_parameters){
 	make_find_arg_arr(the_request_parameters,parameters_arr,MAX_NUM_FIND_ARGS+1);
 
     snprintf(aux_buff,sizeof(aux_buff)-1,"%s%s",currDir,DEF_FIND_ROOTDIR);
+    replaceStringCharacter(parameters_arr[REGEXP].the_actual_value,' ','*');
     snprintf(aux_exp_buff,sizeof(aux_exp_buff)-1,"*%s*",parameters_arr[REGEXP].the_actual_value);
     
     chdir(aux_buff);
