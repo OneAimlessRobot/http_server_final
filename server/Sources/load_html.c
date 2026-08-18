@@ -20,8 +20,6 @@
 
 #define DIR_LISTING_HEADER_CLASS "header_for_dir_listing"
 
-#define PAGE_DEBUG_HEADER_CLASS "header_for_page_debug"
-
 #define DIR_LISTING_TABLE_LINE_CLASS "dir_listing_table"
 
 #define DIR_LISTING_BODY_CLASS "dir_listing"

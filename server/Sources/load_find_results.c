@@ -16,9 +16,22 @@
 #include <limits.h>
 #include <sys/wait.h>
 
+
+#define FIND_LISTING_HEADER_CLASS "header_for_find_listing"
+
+#define FIND_LISTING_LINE_CLASS "find_listing_line"
+
+#define FIND_LISTING_DIV_CLASS "find_listing_table"
+
+#define FIND_LISTING_BODY_CLASS "find_listing"
+
+
+
 #define DEF_FIND_ROOTDIR defaultTarget
 
 #define DEF_FIND_REXEXP "*"
+
+static const char* find_listing_css_file_path= "/webcrookedstuff/.find_listing_style.css";
 
 u_int64_t num_files_found=0;
 
@@ -88,7 +101,9 @@ static int make_find_arg_arr(char* the_separated_parameters,find_arg_line arg_ar
 static void print_dir_entry(int fd, char* curr_listing_arg){
 	
 	
-	dprintf(fd,"\n<a href='%s/%s'>%s</a><br>\n",
+	dprintf(fd,"\n<span class='%s'>|<a class='%s' href='%s/%s'>%s</a>|</span><br>\n",
+			FIND_LISTING_DIV_CLASS,
+			FIND_LISTING_LINE_CLASS,
 			DEF_FIND_ROOTDIR,
 			curr_listing_arg,
 			curr_listing_arg
@@ -216,9 +231,12 @@ void generateFindResult(char* the_request_parameters){
 	}
 	remove(tmpDir);
 	dprintf(curr_client.fd,FIND_HTML_PREFIX
-		"\n<body>\n<br>\n\n<br>\n");
-	dprintf(curr_client.fd,"\n<h1>The files found on the server with the expression: |*%s*| </h1>\n<br>\n<br>\n"
-			,parameters_arr[REGEXP].the_actual_value);
+		"\n<body class=\"%s\">\n<br>\n\n\n<div class='%s'>\n<br>\n"
+		"\n<h1>The files found on the server with the expression: |*%s*| </h1>\n<br>\n<br>\n",
+			find_listing_css_file_path,
+			FIND_LISTING_BODY_CLASS,
+			FIND_LISTING_DIV_CLASS,
+			parameters_arr[REGEXP].the_actual_value);
 	
 	fseek(fstream,0,SEEK_SET);
 	process_lines_and_print_to_dest_file_find(curr_client.fd,fstream);
