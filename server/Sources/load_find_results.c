@@ -124,14 +124,15 @@ static void process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
 			if(findInStringArr(excluded_xtensions,extension)<0){
 				
 				print_dir_entry(fd, &curr_listing_buff[2]);
+				num_files_found++;
 				
 			}
 		}
 		else{		
 	
 			print_dir_entry(fd, &curr_listing_buff[2]);
+			num_files_found++;
 		}
-		num_files_found++;
 		memset(curr_listing_buff,0,sizeof(curr_listing_buff));
 	}
 
