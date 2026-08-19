@@ -71,6 +71,8 @@ void print_http_req_header(FILE* fstream){
 					"______________________________________\n\n\n"
 					"Type: %s\n"
 					"Origin: %s\n"
+					"Specific: %s\n"
+					"Content-Length: %s\n"
 					"Target: %s\n"
 					"Version: %s\n"
 					"Host: %s\n"
@@ -83,6 +85,8 @@ void print_http_req_header(FILE* fstream){
 					"Accepted-encoding (split):\n\n",
 							request_const_name_arr[curr_client.req->header->type],
 							curr_client.req->header->origin,
+							curr_client.req->header->specific,
+							curr_client.req->header->content_length,
 							curr_client.req->header->target,
 							curr_client.req->header->version,
 							curr_client.req->header->host,
@@ -137,8 +141,10 @@ static void spawnHTTPHeader(void){
 	curr_client.req->header->type=INVALID;
 	memset(curr_client.req->header->target,0,FIELDSIZE);
 	memset(curr_client.req->header->origin,0,FIELDSIZE);
+	memset(curr_client.req->header->content_length,0,FIELDSIZE);
 	memset(curr_client.req->header->host,0,FIELDSIZE);
 	memset(curr_client.req->header->mimetype,0,FIELDSIZE);
+	memset(curr_client.req->header->specific,0,FIELDSIZE);
 	memset(curr_client.req->header->version,0,FIELDSIZE);
 	memset(curr_client.req->header->os,0,FIELDSIZE);
 	memset(curr_client.req->header->range,0,FIELDSIZE);
@@ -170,7 +176,9 @@ static void spawnHTTPHeader(void){
 		strcpy(curr_client.req->header->mimetype,defaultMimetype);
 		strcpy(curr_client.req->header->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));
 		strcpy(curr_client.req->header->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
+		strcpy(curr_client.req->header->content_length,find_field_value_in_field_arr("Content-Length",fieldarr));
 		strcpy(curr_client.req->header->cloudfare_ip,find_field_value_in_field_arr("CF-Connecting-IP",fieldarr));
+		strcpy(curr_client.req->header->specific,find_field_value_in_field_arr("Specific",fieldarr));
 		strcpy(curr_client.req->header->encodingcopy,curr_client.req->header->encoding);
 		make_str_arr(curr_client.req->header->encoding,",",curr_client.req->header->split_encoding,ARGVMAX);
 		strcpy(curr_client.req->header->content_type_raw,find_field_value_in_field_arr("Content-Type",fieldarr));
@@ -214,18 +222,30 @@ static void spawnHTTPHeader(void){
 }
 
 void spawnHTTPRequest(void){
-	char* splitRequest[2] = {0};
-	splitString(curr_client.peerbuff,"\r\n\r\n",splitRequest);
+	char* split_one[2];
+		
+	splitString(curr_client.peerbuff,"\r\n\r\n",split_one);
 	spawnHTTPHeader();
-	if(!splitRequest[1]){
+	if(!split_one[1]){
 		curr_client.req->data_size=1;
 	}
 	else{
-		curr_client.req->data_size=strlen(splitRequest[1])+1;
-	
-	}
-	if(splitRequest[1]){
-		memcpy(curr_client.req->data,splitRequest[1],curr_client.req->data_size-1);
+			u_int8_t is_a_form = curr_client.req->is_a_form = (strlen(curr_client.req->header->specific)==0);
+			
+			int64_t dummy_size_under_recv_size = (split_one[1]-curr_client.peerbuff);
+			
+			int64_t under_recv_size = sizeof(curr_client.peerbuff) - dummy_size_under_recv_size;
+			
+			int64_t the_size_to_use = min(curr_client.recv_size, under_recv_size);
+			
+			curr_client.req->form_size = (is_a_form?the_size_to_use:0);
+			curr_client.req->begin_data_size = is_a_form?0:the_size_to_use;
+			
+			memcpy(is_a_form?curr_client.req->form:curr_client.req->data,
+							split_one[1],
+							(is_a_form?curr_client.req->form_size:curr_client.req->begin_data_size));
+			
+			curr_client.req->data_size=is_a_form?0:strtoll(curr_client.req->header->content_length,NULL,10);
 	}
 
 }
@@ -238,9 +258,20 @@ void print_http_req(FILE* fstream){
 					"______________________________________\n\n\n");
 					
 	print_http_req_header(fstream);
-	fprintf(fstream,"HTTP_REQUEST_CONTENTS=\n\n%s\n",curr_client.req->data);
-	fprintf(fstream,"\n\n"
+	fprintf(fstream,"HTTP_REQUEST_CONTENTS=\n"
+					"Data size:\n%ld\n"
 					"______________________________________\n"
-					"______________________________________\n\n\n");
+					"Form size:\n%ld\n"
+					"Form:\n\n%s\n"
+					"______________________________________\n"
+					"Begin-Data size:\n%ld\n"
+					"Begin-Data:\n%s\n"
+					"______________________________________\n"
+					"______________________________________\n\n\n",
+					curr_client.req->is_a_form?0:curr_client.req->data_size,
+					curr_client.req->is_a_form?curr_client.req->form_size:0,
+					curr_client.req->is_a_form?curr_client.req->form:"There is no form...",
+					curr_client.req->is_a_form?0:curr_client.req->begin_data_size,
+					curr_client.req->is_a_form?"There is no data...":curr_client.req->data);
 
 }

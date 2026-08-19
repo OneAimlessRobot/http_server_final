@@ -91,7 +91,9 @@ static int make_find_arg_arr(char* the_separated_parameters,find_arg_line arg_ar
 
 		return -1;
 	}
-	argv[max_len-2][strlen(argv[max_len-2])-1]=0;
+	if(max_len - 2 > 0){
+		argv[max_len-2][strlen(argv[max_len-2])-1]=0;
+	}
 	for(uint64_t i=0;i<max_len-1;i++){
 		arg_arr[i].the_actual_value=((strlen(argv[i]))?argv[i]:arg_arr[i].default_value);
 	}
@@ -241,7 +243,7 @@ void generateFindResult(char* the_request_parameters){
 	fseek(fstream,0,SEEK_SET);
 	process_lines_and_print_to_dest_file_find(curr_client.fd,fstream);
 	
-	dprintf(curr_client.fd,"\n<h1>%lu files were found! </h1>\n<br>\n<br>\n"
+	dprintf(curr_client.fd,"\n<h1>%ld files were found! </h1>\n<br>\n<br>\n"
 			,num_files_found);
 	dprintf(curr_client.fd,"</div>\n</body>\n</html>\n");
 	fclose(fstream);

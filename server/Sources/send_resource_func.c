@@ -247,12 +247,13 @@ void sendResource(int is_head){
 			}
 		}
 	}
-	if(logging){
-		fprintf(logstream,"Done!\n");
-	}
 	send_header(notfound);
 	if(!is_head){
 		push_bytes();
 	}
 	final_cleanup(notfound);
+	
+	if(logging){
+		fprintf(logstream,"Done!\n");
+	}
 }

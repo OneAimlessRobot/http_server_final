@@ -26,4 +26,17 @@
 
 extern char* excluded_xtensions[];
 
+typedef struct {
+    const char *extension,
+				*mime_type;
+	u_int8_t allows_compression;
+
+} MimeEntry;
+
+extern MimeEntry mime_types[];
+
+u_int8_t get_mime_type_compressibility(const char *filename);
+
+const char* get_mime_type(const char *filename);
+
 #endif

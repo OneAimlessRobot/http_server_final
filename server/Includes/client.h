@@ -9,6 +9,7 @@ typedef struct client{
 		sent_header_buff[PATHSIZE];
 	http_request* req; 
 	int32_t socket, fd;
+	int64_t recv_size;
 	u_int8_t is_tls, compress, is_directory;
 	SSL* ctx_if_ssl;
 	struct sockaddr_in client_addr;

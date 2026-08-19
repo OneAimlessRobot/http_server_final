@@ -5,6 +5,8 @@
 
 #define HTTP_PARTIAL_CONTENT_OK_HEADER "HTTP/1.1 206 Partial-Content\r\n"
 
+#define HTTP_CREATED_OK_HEADER "HTTP/1.1 201 Created\r\n"
+
 #define HTTP_METHOD_ERR_HEADER  "HTTP/1.1 405 Method Not Allowed\r\n" \
 								"Content-Length: 0\r\n" \
 								"Allow: " \
@@ -26,6 +28,15 @@ extern char
 
 * redirectHeader,*notFoundHeader;
 
+/*
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-------------------------------NORMALS---------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+*/
 
 void fillUpNormalHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t size);
 void fillUpNormalHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t size);
@@ -51,6 +62,19 @@ void fillUpNormalPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetyp
 
 void fillUpChunkedPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t start_point,int64_t size);
 void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t start_point,int64_t size);
+
+
+/*
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-------------------------------UPLOADS---------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+*/
+
+void fillUploadHeader(char headerBuff[PATHSIZE],const char* mimetype, char* target);
 
 
 /*

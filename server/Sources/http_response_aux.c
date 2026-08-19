@@ -15,11 +15,34 @@
 								"Accept-Ranges: bytes\r\n" \
 								"Content-Type: %s\r\n"
 
+
+#define UPLOAD_HEADER HTTP_CREATED_OK_HEADER \
+					"Content-Type: %s\r\n" \
+					"Location: " \
+					PROTO \
+					"://" \
+					DOMAIN_NAME \
+					":%hu/" \
+					"%s\r\n" \
+					"\r\n"
+					
 /*
 "Cross-Origin-Embedder-Policy: "
 			  //EMBEDDER_POLICY
 			   "\r\n"
 */
+
+
+/*
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-------------------------------NORMALS---------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+*/
+
 char* normalHeader= STD_HEADER_START_OK
 			"Content-Length: %ld\r\n"
 			  //"Origin: localhost\r\n"
@@ -103,7 +126,7 @@ void fillUpNormalPartialHeader(char headerBuff[PATHSIZE],const char* mimetype, i
 
 
 char* normalPartialHeaderComp= STD_HEADER_START_PARTIAL
-						"Content-Length: %lu\r\n"
+						"Content-Length: %ld\r\n"
 						"Content-Range: bytes %ld-%ld/%ld\r\n"
 			  //"Origin: localhost\r\n"
 			  "Content-encoding: %s\r\n"
@@ -142,6 +165,22 @@ void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimety
 	snprintf(headerBuff,PATHSIZE,chunkedPartialHeaderComp,mimetype,start_point,start_point+size-1,size,method);
 }
 
+
+/*
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-------------------------------UPLOADS---------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+*/
+
+
+void fillUploadHeader(char headerBuff[PATHSIZE],const char* mimetype, char* target){
+
+	snprintf(headerBuff,PATHSIZE,UPLOAD_HEADER,mimetype,port,target);
+}
 
 
 /*

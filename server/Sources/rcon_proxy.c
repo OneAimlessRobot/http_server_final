@@ -81,7 +81,10 @@ static int make_rcon_arg_arr(char* the_separated_parameters,rcon_arg_line arg_ar
 
 		return -1;
 	}
-	argv[max_len-2][strlen(argv[max_len-2])-1]=0;
+	
+	if(max_len - 2 > 0){
+		argv[max_len-2][strlen(argv[max_len-2])-1]=0;
+	}
 	for(uint64_t i=0;i<max_len-1;i++){
 		arg_arr[i].the_actual_value=((strlen(argv[i]))?argv[i]:arg_arr[i].default_value);
 	}
@@ -103,6 +106,10 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 						parameters_arr[PASS].the_actual_value,
 						parameters_arr[CMD].the_actual_value,
 						NULL};
+		if(logging>6){
+			
+			print_string_arr(logstream,args_cmd);
+        }
         pid_t pid_fork_find_cmd=fork();
         switch(pid_fork_find_cmd){
 

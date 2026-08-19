@@ -13,6 +13,7 @@
 #include "../Includes/php_proxy.h"
 #include "../Includes/rcon_proxy.h"
 #include "../Includes/send_resource_func.h"
+#include "../Includes/recv_resource_func.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/sock_ops.h"
 #include "../Includes/txt_sending.h"
@@ -24,12 +25,13 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/types.h>
-#define READ_FUNC_TO_USE timedreadall
+#define READ_FUNC_TO_USE readall
 
-http_header header = {0};
-http_request req = {0};
+static http_header header = {0};
+static http_request req = {0};
+static void (*generating_func)(char*) = NULL;
+
 client curr_client = {0};
-
 char tmpFile[PATHSIZE*3]={0},
 	tmpFile2[PATHSIZE*3]={0},
 	tmpDir[PATHSIZE*5]={0};
@@ -68,10 +70,10 @@ static void head_and_get_wrapper(void (*generating_func)(char*)){
 }
 static void process_req_data(void){
 	
-	url_decode(curr_client.req->processed_data, curr_client.req->final_data,reserved_characters_for_special);
+	url_decode(curr_client.req->processed_form, curr_client.req->final_form,reserved_characters_for_special);
 	
 	if(logging>3){
-		fprintf(logstream,"The data is: %s\n", curr_client.req->final_data);
+		fprintf(logstream,"The data is: %s\n", curr_client.req->final_form);
 	}
 }
 static void process_header_target(void){
@@ -94,21 +96,21 @@ static void process_req_switch_block(void (*generating_func)(char*)){
 		case HEAD:
 			head_and_get_wrapper(generating_func);
 		break;
-			
-		break;
 		case POST:
 			if(isCustomPostReq(curr_client.req)){
 				handleCustomPostReq(curr_client.req);
 				fprintf(logstream,"The relative file path here is: %s\n"
-								"The processed target here is: %s\n",
+								"The processed target here is: <%s>\n",
 									curr_client.relative_file_path,
-									curr_client.req->processed_data);
+									curr_client.req->processed_form);
 				
-				process_req_data();
+				if(curr_client.req->is_a_form){
+					process_req_data();
+				}
 			}
 			
 			(generating_func!=NULL)?
-				generating_func_wrapper(generating_func, curr_client.req->final_data):
+				generating_func_wrapper(generating_func, curr_client.req->final_form):
 				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 							"%s%s",currDir,curr_client.relative_file_path);
 			
@@ -140,58 +142,57 @@ static void handleCurrentActivity(void){
 	}
 	u_int8_t is_head = (curr_client.req->header->type==HEAD);
 	
-	void (*generating_func)(char*) = NULL;
 	
-	if((curr_client.is_directory=isDirectory(curr_client.target))){
-		generating_func = generateDirListing;
-	}
-	else if(isRssFeed(curr_client.target)){
-		generating_func = generateRss;
-	}
-	else if(isPHPRequest(curr_client.target)){
-		generating_func = generatePHPResult;
-	}
-	else if(isText(curr_client.target)){
-		generating_func = generateText;
-	}
-	else if(isRconRequest(curr_client.target)){
-		
-		generating_func = generateRconResult;
-	}
-	else if(isFindRequest(curr_client.target)){
-		
-		generating_func = generateFindResult;
+	
+	if(curr_client.req->is_a_form){
+		if((curr_client.is_directory=isDirectory(curr_client.target))){
+			generating_func = generateDirListing;
+		}
+		else if(isRssFeed(curr_client.target)){
+			generating_func = generateRss;
+		}
+		else if(isPHPRequest(curr_client.target)){
+			generating_func = generatePHPResult;
+		}
+		else if(isText(curr_client.target)){
+			generating_func = generateText;
+		}
+		else if(isRconRequest(curr_client.target)){
+			
+			generating_func = generateRconResult;
+		}
+		else if(isFindRequest(curr_client.target)){
+			
+			generating_func = generateFindResult;
+		}
 	}
 	process_req_switch_block(generating_func);
-	sendResource(is_head);
-	if(generating_func){
-		remove(curr_client.filepath);
+	
+	if(curr_client.req->is_a_form){
+		sendResource(is_head);
+		if(generating_func){
+			remove(curr_client.filepath);
+		}
+	}
+	else{
+		recvResource();
 	}
 }
-
 void handleConnection(void){
-	if(READ_FUNC_TO_USE(&curr_client,curr_client.peerbuff)!=-2){
+	int64_t obtained_read_size=READ_FUNC_TO_USE(&curr_client,curr_client.peerbuff);
+	
+	curr_client.recv_size = obtained_read_size;
+	if(curr_client.recv_size>0 
+		||
+		curr_client.recv_size==-2){
 		if(errno == ECONNRESET){
 			exit_function_client();
 		}
-		else if(strlen(curr_client.peerbuff)){
-			spawnHTTPRequest();
-			if(logging>0){
-				fprintf(logstream,"Recebemos request!!!:\n");
-				
-				print_http_req(logstream);
-			}
-			if(!strlen(curr_client.req->data)){
-				memset(curr_client.req->data,0,BUFFSIZE);
-				if(READ_FUNC_TO_USE(&curr_client,curr_client.req->data)!=-2){
-
-					if(logging>0){
-						fprintf(logstream,"Recebemos dados!!!: %s\n",curr_client.req->data);
-					}
-				}
-			}
-			handleCurrentActivity();
+		spawnHTTPRequest();
+		if(logging>4){
+			print_http_req(logstream);
 		}
+		handleCurrentActivity();
 	}
 }
 int is_tls_connection(int client_fd) {

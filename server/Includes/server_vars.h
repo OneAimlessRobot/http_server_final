@@ -43,6 +43,7 @@ extern char currDir[PATHSIZE],
 	defaultTarget[FIELDSIZE],
 	notFoundDefaultTarget[FIELDSIZE],
 	mainRssFeed[FIELDSIZE],
+	uploadTarget[FIELDSIZE],
 	*tmp_file_dir,
 	*defaultMimetype;
 

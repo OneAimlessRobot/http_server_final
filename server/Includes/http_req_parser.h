@@ -2,6 +2,8 @@
 #define HTTP_REQ_PARSER_H
 
 #define ALLOWED_HTTP_REQUESTS_STRING "GET, HEAD, POST"
+#define PROTO "http"
+#define DOMAIN_NAME "lenasattic.ddns.net"
 typedef enum {GET,HEAD,POST,INVALID,MAX_REQUEST_TYPE} http_req_type;
 
 
@@ -23,6 +25,8 @@ typedef struct http_header{
 	char target[FIELDSIZE],
 		version[FIELDSIZE],
 		host[FIELDSIZE],
+		specific[FIELDSIZE],
+		content_length[FIELDSIZE],
 		*split_encoding[ARGVMAX],
 		encoding[FIELDSIZE],
 		encodingcopy[FIELDSIZE],
@@ -45,10 +49,16 @@ typedef struct http_header{
 
 typedef struct http_request{
 
+	char form[BUFFSIZE],
+		processed_form[BUFFSIZE],
+		final_form[BUFFSIZE];
 	char data[BUFFSIZE],
-	processed_data[BUFFSIZE],
-	final_data[BUFFSIZE];
-	int64_t data_size;
+		processed_data[BUFFSIZE],
+		final_data[BUFFSIZE];
+	int64_t begin_data_size,
+			data_size,
+			form_size;
+	u_int8_t is_a_form;
 	http_header* header;
 
 

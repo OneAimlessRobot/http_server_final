@@ -35,6 +35,37 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr) {
     result=1;
     return result;
 }
+
+int does_dir_exist_aux(char* path){
+	
+	DIR* directory=opendir(path);
+	if(directory){
+		closedir(directory);
+	}
+	errno=0;
+	return (directory!=NULL);
+}
+void super_mkdir(const char *dir) {
+    char tmp[256];
+    char *p = NULL;
+    size_t len;
+
+    snprintf(tmp, sizeof(tmp),"%s",dir);
+    len = strlen(tmp);
+    if (tmp[len - 1] == '/'){
+        tmp[len - 1] = 0;
+    }
+    for (p = tmp + 1; *p; p++){
+        if (*p == '/') {
+            *p = 0;
+            mkdir(tmp, S_IRWXU);
+            *p = '/';
+        }
+    }
+    mkdir(tmp, S_IRWXU);
+}
+
+
 double genRanddouble(double min, double max){
 
     if (max < min) {
@@ -72,15 +103,6 @@ char* randStr(int size){
 
 
 
-}
-int does_dir_exist_aux(char* path){
-	
-	DIR* directory=opendir(path);
-	if(directory){
-		closedir(directory);
-	}
-	errno=0;
-	return (directory!=NULL);
 }
 char** randStrArr(int sizeOfStrs,int size){
 
@@ -186,7 +208,6 @@ int makeargv(char *s, char *argv[ARGVMAX], int n_max) {
         return -1;
     }
     argv[ntokens] = strtok(s, " \t\n");
-	//use_nmax?(printf("The arg%d/%d: |%s| ",ntokens,n_max,argv[ntokens])):(1+1);
     while ((argv[ntokens] != NULL) && (ntokens < ARGVMAX)) {
         
 		if(use_nmax && (ntokens >=  (n_max-1))){
@@ -269,8 +290,9 @@ void splitString(char *input, char *delimiter, char *pair[2]) {
 int make_str_arr(char *s,char* delim, char *argv[ARGVMAX],int maxlen) {
     int nheaders = 0;
     int lentoadvance=0;
-    if (s == NULL || argv == NULL || maxlen<2 || maxlen>ARGVMAX ||ARGVMAX == 0)
+    if (s == NULL || argv == NULL || maxlen<2 || maxlen>ARGVMAX ||ARGVMAX == 0){
         return -1;
+    }
     char* nextHeader = strstr(s, delim);
     if(!nextHeader){
 	argv[0]=s;

@@ -35,6 +35,7 @@ int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX], int maxlen);
 
 int make_str_arr(char *s,char*delim, char *argv[ARGVMAX],int maxlen);
 
+void super_mkdir(const char *dir);
 
 int stringsAreEqual(char* s1,char* s2);
 char from_hex(char c);

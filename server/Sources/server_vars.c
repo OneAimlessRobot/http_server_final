@@ -43,6 +43,7 @@ char currDir[PATHSIZE] = {0},
 	defaultTarget[FIELDSIZE] = {0},
 	notFoundDefaultTarget[FIELDSIZE] = {0},
 	mainRssFeed[FIELDSIZE] = {0},
+	uploadTarget[FIELDSIZE] = {0},
 	tmp_directory_name[PATHSIZE] = {0},
 	*tmp_file_dir= NULL,
 	*defaultMimetype = "*/*";
