@@ -67,7 +67,7 @@ void recvResource(void){
 						"%s\n",upload_file_dest_dir);
 	}
 	
-	recv_fd=open(upload_file_dest_dir,O_WRONLY|O_CREAT,0777);
+	recv_fd=open(upload_file_dest_dir,O_TRUNC|O_WRONLY|O_CREAT,0777);
 	if(recv_fd<0){
 		if(logging>4){
 			fprintf(logstream,"Upload destination fd could not be created!\n"
