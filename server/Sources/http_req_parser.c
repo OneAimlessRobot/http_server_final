@@ -239,12 +239,12 @@ void spawnHTTPRequest(void){
 			int64_t the_size_to_use = min(curr_client.recv_size, under_recv_size);
 			
 			curr_client.req->form_size = (is_a_form?the_size_to_use:0);
-			curr_client.req->begin_data_size = is_a_form?0:the_size_to_use;
 			
-			memcpy(is_a_form?curr_client.req->form:curr_client.req->data,
+			if(is_a_form){
+				memcpy(curr_client.req->form,
 							split_one[1],
-							(is_a_form?curr_client.req->form_size:curr_client.req->begin_data_size));
-			
+							(curr_client.req->form_size));
+			}
 			curr_client.req->data_size=is_a_form?0:strtoll(curr_client.req->header->content_length,NULL,10);
 	}
 
@@ -264,14 +264,12 @@ void print_http_req(FILE* fstream){
 					"Form size:\n%ld\n"
 					"Form:\n\n%s\n"
 					"______________________________________\n"
-					"Begin-Data size:\n%ld\n"
 					"Begin-Data:\n%s\n"
 					"______________________________________\n"
 					"______________________________________\n\n\n",
 					curr_client.req->is_a_form?0:curr_client.req->data_size,
 					curr_client.req->is_a_form?curr_client.req->form_size:0,
 					curr_client.req->is_a_form?curr_client.req->form:"There is no form...",
-					curr_client.req->is_a_form?0:curr_client.req->begin_data_size,
 					curr_client.req->is_a_form?"There is no data...":curr_client.req->data);
 
 }

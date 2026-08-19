@@ -59,7 +59,7 @@ static int compressFile(char* target){
 		snprintf(buff_for_dotted_target, sizeof(buff_for_dotted_target), "%s",curr_client.relative_file_path);
 		replaceStringCharacter(&buff_for_dotted_target[1],'/','.');
 		memset(outpathbuff,0,sizeof(outpathbuff)-1);
-		snprintf(outpathbuff,sizeof(outpathbuff)+1,"%s%s%lu.%s",tmp_file_dir,buff_for_dotted_target,request_id,servComp.fileExt);
+		snprintf(outpathbuff,sizeof(outpathbuff)-1,"%s%s%lu.%s",tmp_file_dir,buff_for_dotted_target,request_id,servComp.fileExt);
 		int fd=comp_fd=open(outpathbuff,O_RDWR|O_CREAT,0777);
 		if(fd<0){
 				if(logging){

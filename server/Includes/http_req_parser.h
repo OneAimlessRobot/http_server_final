@@ -55,8 +55,7 @@ typedef struct http_request{
 	char data[BUFFSIZE],
 		processed_data[BUFFSIZE],
 		final_data[BUFFSIZE];
-	int64_t begin_data_size,
-			data_size,
+	int64_t data_size,
 			form_size;
 	u_int8_t is_a_form;
 	http_header* header;

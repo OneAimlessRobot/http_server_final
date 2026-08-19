@@ -44,7 +44,7 @@
 
 #define FREE_ALL_APPS_COUNTDOWN "<script src=\"/webcrookedstuff/.keep_android_open_please.js\"></script>"
 
-typedef typeof(void (void)) *exit_func_t;
+typedef void (* exit_func_t)(void);
 
 
 #include "io_ops.h"

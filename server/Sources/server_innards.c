@@ -55,7 +55,7 @@ static char* super_valgrind_argv[] = {"valgrind",
 					buff_request_id,
 					NULL};
 					
-typedef typeof(char** ) argv_type;
+typedef char**  argv_type;
 
 argv_type exec_argv_arr[3] = { normal_argv,
 					valgrind_argv,

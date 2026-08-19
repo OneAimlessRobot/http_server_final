@@ -2,7 +2,7 @@
 #define RECV_EXTENDER_H
 
 int recv_fd = -1;
-char upload_file_dest_dir[PATHSIZE*5]={0};
+char upload_file_dest_dir[PATHSIZE*7]={0};
 static void pull_bytes(void);
 
 

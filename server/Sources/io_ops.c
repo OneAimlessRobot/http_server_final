@@ -338,23 +338,15 @@ int64_t readall(client*c,char* buff){
 
 }
 int64_t pullallfd(int fd){
-    int64_t len=curr_client.req->begin_data_size;
+    int64_t len=1;
 	int64_t total=0;
-	uint8_t first_time = 1;
-	char buff[LOCAL_BUFF_SIZE];
-	memset(buff,0,LOCAL_BUFF_SIZE);
+	char buff[BUFFSIZE]={0};
 	for(;(len==-2||len>0)&&(total!=curr_client.req->data_size);){
-		if(first_time){
-			memcpy(buff,curr_client.req->data,len);
-			first_time=0;
-		}
-		else{
-			
-			len= readall(&curr_client,buff);
-			
-			if(logging>50){
-				fprintf(logstream,"pullallfd subread devolve resultado de %ld!\n",len);
-			}
+		
+		len= readall(&curr_client,buff);
+		
+		if(logging>50){
+			fprintf(logstream,"pullallfd subread devolve resultado de %ld!\n",len);
 		}
 		if(len > 0){
 			size_t written_total = 0;

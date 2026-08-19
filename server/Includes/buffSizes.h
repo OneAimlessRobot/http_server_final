@@ -1,7 +1,6 @@
 #ifndef BUFFSIZES_H
 #define BUFFSIZES_H
 
-#define LOCAL_BUFF_SIZE 10240
 #define BUFFSIZE (2048)
 #define PATHSIZE PATH_MAX
 #define FIELDSIZE PATH_MAX

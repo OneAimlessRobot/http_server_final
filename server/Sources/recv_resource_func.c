@@ -37,7 +37,7 @@ static void send_header(void){
 
 }
 void recvResource(void){
-	snprintf(upload_file_dest_dir,2*sizeof(upload_file_dest_dir)-1,"%s%s%s%s",currDir,defaultTarget,uploadTarget,curr_client.target);
+	snprintf(upload_file_dest_dir,sizeof(upload_file_dest_dir)-1,"%s%s%s%s",currDir,defaultTarget,uploadTarget,curr_client.target);
 	if(logging>4){
 		fprintf(logstream,"The full path will be: %s\n",upload_file_dest_dir);
 	}
@@ -50,6 +50,7 @@ void recvResource(void){
 	 * 
 	 */
 	char* dir_ptr= strrchr(upload_file_dest_dir,'/');
+	char prev_c = *(dir_ptr+1);
 	*(dir_ptr+1) = '\0';
 	if(logging>4){
 		fprintf(logstream,"We are building this directory in case it does not exist!: \n"
@@ -57,8 +58,7 @@ void recvResource(void){
 	}
 	
 	super_mkdir(upload_file_dest_dir);
-	
-	*(dir_ptr+1) = '/';
+	*(dir_ptr+1) = prev_c;
 	
 	
 	
