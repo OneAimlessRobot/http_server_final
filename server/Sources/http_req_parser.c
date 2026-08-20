@@ -239,14 +239,6 @@ static void spawnHTTPHeader(void){
 void spawnHTTPRequest(void){
 	char* split_one[2];
 	
-	printf("_________________________________\n"
-			"Raw peer buff:\n"
-			"_________________________________\n"
-			"%s\n"
-			"_________________________________\n"
-			"_________________________________\n",curr_client.peerbuff);
-			
-		
 	splitString(curr_client.peerbuff,REQUEST_SECTION_DELIMITER_STRING,split_one);
 
 
