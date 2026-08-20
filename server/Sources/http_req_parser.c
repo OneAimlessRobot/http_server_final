@@ -37,13 +37,6 @@ const char* request_const_name_arr[MAX_REQUEST_TYPE] = {
 	
 };
 
-const browser_struct_t request_const_browser_name_arr[MAX_BROWSER_MODE]={
-	
-	{"Chrome",{1,0}},
-	{"Firefox",{1,1}},
-	{"Safari",{1,1}},
-	{"Invalid",{0,0}}
-};
 
 static http_req_type getREQtypeFromString(char* str){
 	if(!str){
@@ -61,19 +54,6 @@ static http_req_type getREQtypeFromString(char* str){
 		
 	}
 	return INVALID;
-}
-static void fillOutBrowserModeInREQ(http_request*req){
-	
-	for(browser_mode_t i=(browser_mode_t)0;i<BROWSER_INVALID;i++){
-		
-		if(strstr(req->header->user_agent,request_const_browser_name_arr[i].browser_name)){
-				
-				req->browser_mode=i;
-				return;
-		}
-		
-	}
-	req->browser_mode=BROWSER_INVALID;
 }
 void print_field_arr(FILE* fstream,http_header_field* fields){
 
@@ -212,7 +192,6 @@ static void spawnHTTPHeader(void){
 		strcpy(curr_client.req->header->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
 		strcpy(curr_client.req->header->content_length,find_field_value_in_field_arr("Content-Length",fieldarr));
 		strcpy(curr_client.req->header->user_agent,find_field_value_in_field_arr("User-Agent",fieldarr));
-		fillOutBrowserModeInREQ(curr_client.req);
 		strcpy(curr_client.req->header->cloudfare_ip,find_field_value_in_field_arr("CF-Connecting-IP",fieldarr));
 		strcpy(curr_client.req->header->specific,find_field_value_in_field_arr("Specific",fieldarr));
 		strcpy(curr_client.req->header->encodingcopy,curr_client.req->header->encoding);
@@ -283,16 +262,8 @@ void spawnHTTPRequest(void){
 			
 			curr_client.req->form_size = (is_a_form?the_size_to_use:0);
 			curr_client.req->begin_data_size = (is_a_form?0:the_size_to_use);
-			curr_client.enable_first_time_in_upload=
-					(
-					
-						(the_size_to_use>0)
+			curr_client.enable_first_time_in_upload = (the_size_to_use>0);
 						
-							&&
-						
-						request_const_browser_name_arr[curr_client.req->browser_mode].first_time_if_http_or_https[(curr_client.is_tls>0)]
-					
-					);
 
 			memcpy(is_a_form?curr_client.req->form:curr_client.req->begin_data,
 						split_one[1],
@@ -322,31 +293,22 @@ void print_http_req(FILE* fstream){
 					"Begin-Data:\n%s\n"
 					"______________________________________\n"
 					"______________________________________\n"
-					"Browser-Mode: %s\n"
-					"______________________________________\n"
 					"______________________________________\n\n\n",
 					curr_client.req->is_a_form?0:curr_client.req->data_size,
 					curr_client.req->is_a_form?curr_client.req->form_size:0,
 					curr_client.req->is_a_form?curr_client.req->form:"There is no form...",
 					curr_client.recv_size,
 					curr_client.req->is_a_form?0:curr_client.req->begin_data_size,
-					curr_client.req->is_a_form?"There is no data...":curr_client.req->begin_data,
-					request_const_browser_name_arr[curr_client.req->browser_mode].browser_name);
+					curr_client.req->is_a_form?"There is no data...":curr_client.req->begin_data);
 	
 	if(logging> 7){
 		
 		fprintf(logstream, "Browser-Mode view:\n"
 						"_____________________________________\n"
-						"Append pending data if http?:%hhu\n"
-						"Append pending data if http(s)?:%hhu\n"
-						"Are we tls?%hhu\n"
 						"So. Should we enable first time if this is an upload??:%s\n"
 						"_____________________________________\n"
 						"______________________________________\n\n\n",
-				request_const_browser_name_arr[curr_client.req->browser_mode].first_time_if_http_or_https[0],
-				request_const_browser_name_arr[curr_client.req->browser_mode].first_time_if_http_or_https[1],
-				(curr_client.is_tls>0),
-				curr_client.enable_first_time_in_upload?"Yes!":"No...");
+						curr_client.enable_first_time_in_upload?"Yes!":"No...");
 	}			
 
 }

@@ -370,7 +370,7 @@ int64_t pullallfd(int fd){
 		}
 		else{
 			len= readall(&curr_client,buff);
-			if(logging){
+			if(logging > 50){
 				fprintf(logstream,"pullallfd subread devolve resultado de %ld!\n%ld out of %ld bytes accumulated!\n",len,
 								total+(len>=0?len:0),
 								curr_client.req->data_size);
