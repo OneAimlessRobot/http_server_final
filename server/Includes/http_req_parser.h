@@ -5,6 +5,7 @@
 #define PROTO "http"
 #define DOMAIN_NAME "lenasattic.ddns.net"
 typedef enum {GET,HEAD,POST,INVALID,MAX_REQUEST_TYPE} http_req_type;
+typedef enum {BROWSER_CHROMIUM, BROWSER_FIREFOX, BROWSER_INVALID,MAX_BROWSER_MODE} browser_mode_t;
 
 
 
@@ -12,6 +13,7 @@ extern char* reserved_characters[],
 	* reserved_characters_for_special[];
 
 extern const char* request_const_name_arr[MAX_REQUEST_TYPE];
+extern const char* request_const_browser_name_arr[MAX_BROWSER_MODE];
 
 
 typedef struct http_header_field{
@@ -32,6 +34,7 @@ typedef struct http_header{
 		encodingcopy[FIELDSIZE],
 		origin[FIELDSIZE],
 		mimetype[FIELDSIZE],
+		user_agent[FIELDSIZE],
 		range_string[FIELDSIZE],
 		range[FIELDSIZE],
 		content_type_raw[FIELDSIZE],
@@ -52,12 +55,12 @@ typedef struct http_request{
 	char form[BUFFSIZE],
 		processed_form[BUFFSIZE],
 		final_form[BUFFSIZE];
-	char data[BUFFSIZE],
-		processed_data[BUFFSIZE],
-		final_data[BUFFSIZE];
+	char begin_data[BUFFSIZE];
 	int64_t data_size,
+			begin_data_size,
 			form_size;
 	u_int8_t is_a_form;
+	browser_mode_t browser_mode;
 	http_header* header;
 
 

@@ -338,13 +338,24 @@ int64_t readall(client*c,char* buff){
 
 }
 int64_t pullallfd(int fd){
-    int64_t len=1;
+    browser_mode_t mode = curr_client.req->browser_mode;
+    int64_t len=((mode==BROWSER_FIREFOX)?curr_client.req->begin_data_size:1);
 	int64_t total=0;
+	u_int8_t first_time = (mode==BROWSER_FIREFOX);
 	char buff[BUFFSIZE]={0};
 	for(;(len==-2||len>0)&&(total!=curr_client.req->data_size);){
-		
-		len= readall(&curr_client,buff);
-		
+		if(first_time){
+			memcpy(buff,curr_client.req->begin_data, curr_client.req->begin_data_size);
+			
+			if(logging){
+				fprintf(logstream,"pullallfd appended %ld to file in first time read!\n",len);
+			}
+			first_time =0;
+			
+		}
+		else{
+			len= readall(&curr_client,buff);
+		}
 		if(logging>50){
 			fprintf(logstream,"pullallfd subread devolve resultado de %ld!\n",len);
 		}
