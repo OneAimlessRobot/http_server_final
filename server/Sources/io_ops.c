@@ -25,9 +25,45 @@
 
 exit_func_t  exit_func_for_this_module=NULL;
 
+int64_t sendsome(int sd,char* buff,u_int64_t size, int flags){
+		if(sd < 0){
+			return -1;
+		}
+		int iResult;
+		struct timeval tv;
+		int64_t send_total = 0;
+		fd_set rfds;
+		FD_ZERO(&rfds);
+		FD_SET(sd,&rfds);
+		tv.tv_sec=smalltimeoutsecs;
+		tv.tv_usec=smalltimeoutusecs;
+		iResult=select(sd+1,(fd_set*)0,&rfds,(fd_set*)0,&tv);
+		if(iResult>0){
+			send_total=send(sd,buff,size,flags);
+			if(send_total < 0){
+				return -1;
+			}
+			return send_total;
+		}
+		else if(!iResult){
+			return -2;
+		}
+		else{
+			if(logging){
+
+				fprintf(logstream, "SELECT ERROR!!!!! SEND\n");
+			}
+			return -1;
+		}
+		return send_total;
+}
+
 int64_t sendsome_ssl(SSL* ssl,const char* buf, int64_t len) {
 
 	int sd= SSL_get_fd(ssl);
+	if(sd < 0){
+		return -1;
+	}
 	int64_t send_total = 0;
 	struct timeval tv;
 	tv.tv_sec=tls_data_timeout_secs;
@@ -124,10 +160,47 @@ int64_t sendsome_ssl(SSL* ssl,const char* buf, int64_t len) {
 
 }
 
+int64_t readsome(int sd,char buff[],int64_t size,int flags){
+		if(sd < 0){
+			return -1;
+		}
+		int iResult;
+		struct timeval tv;
+		int64_t read_total=0;
+		fd_set rfds;
+		FD_ZERO(&rfds);
+		FD_SET(sd,&rfds);
+		tv.tv_sec=smalltimeoutsecs;
+		tv.tv_usec=smalltimeoutusecs;
+		iResult=select(sd+1,&rfds,(fd_set*)0,(fd_set*)0,&tv);
+		if(iResult>0){
+			read_total=recv(sd,buff,size,flags);
+			if(read_total < 0){
+				return -1;
+			}
+			return read_total;
+		}
+		else if(!iResult){
+				return -2;
+		}
+		else{
+			if(logging){
+
+				fprintf(logstream, "SELECT ERROR!!!!! READ\n%s\n",strerror(errno));
+			}
+			if(use_exit_func){
+				exit_func_for_this_module();
+			}
+			return -1;
+		}
+}
+
 int64_t readsome_ssl(SSL* ssl,char* buf, int64_t len) {
 	
 	int sd= SSL_get_fd(ssl);
-	int64_t read_total = 0;
+	if(sd < 0){
+		return -1;
+	}
 	int has_pending_result=SSL_has_pending(ssl);
 	int pending_result=SSL_pending(ssl);
 	if(has_pending_result){
@@ -135,6 +208,7 @@ int64_t readsome_ssl(SSL* ssl,char* buf, int64_t len) {
 			goto read_label;
 		}
 	}
+	int64_t read_total = 0;
 	struct timeval tv;
 	tv.tv_sec=tls_data_timeout_secs;
 	tv.tv_usec=tls_data_timeout_usecs;
@@ -144,7 +218,7 @@ int64_t readsome_ssl(SSL* ssl,char* buf, int64_t len) {
 	int iResult=select(sd + 1, &rfds, (fd_set*)0, (fd_set*)0, &tv);
 	if(iResult>0){
 		read_label:
-		read_total = SSL_read(ssl, buf + read_total, len - read_total);
+		read_total = SSL_read(ssl, buf, len);
 		if (read_total >= 0) {
 			return read_total;
 		}
@@ -233,66 +307,6 @@ int64_t readsome_ssl(SSL* ssl,char* buf, int64_t len) {
 
 }
 
-int64_t readsome(int sd,char buff[],int64_t size,int flags){
-		if(sd>=0){
-			int iResult;
-			struct timeval tv;
-			int64_t read_total=0;
-			fd_set rfds;
-			FD_ZERO(&rfds);
-			FD_SET(sd,&rfds);
-			tv.tv_sec=smalltimeoutsecs;
-			tv.tv_usec=smalltimeoutusecs;
-			iResult=select(sd+1,&rfds,(fd_set*)0,(fd_set*)0,&tv);
-			if(iResult>0){
-				read_total=recv(sd,buff,size,flags);
-				if(read_total < 0){
-					return -1;
-				}
-				return read_total;
-			}
-			else if(!iResult){
-					return -2;
-			}
-			else{
-				if(logging){
-
-					fprintf(logstream, "SELECT ERROR!!!!! READ\n%s\n",strerror(errno));
-				}
-				if(use_exit_func){
-					exit_func_for_this_module();
-				}
-				return -1;
-			}
-		}
-		return -1;
-}
-
-int64_t sendsome(int sd,char* buff,u_int64_t size, int flags){
-		int iResult;
-		struct timeval tv;
-		fd_set rfds;
-		FD_ZERO(&rfds);
-		FD_SET(sd,&rfds);
-		tv.tv_sec=smalltimeoutsecs;
-		tv.tv_usec=smalltimeoutusecs;
-		iResult=select(sd+1,(fd_set*)0,&rfds,(fd_set*)0,&tv);
-		if(iResult>0){
-
-			return send(sd,buff,size,flags);
-		}
-		else if(!iResult){
-            return -2;
-		}
-		else{
-			if(logging){
-
-				fprintf(logstream, "SELECT ERROR!!!!! SEND\n");
-			}
-			return -1;
-		}
-}
-
 int64_t readall(client*c,char* buff){
 	int64_t total=0,
 			len=0;
@@ -303,7 +317,9 @@ int64_t readall(client*c,char* buff){
 		
 		if(len<0){
 			if (errno == EAGAIN || errno == EWOULDBLOCK) {
-				
+				if(logging > 49){
+					fprintf(logstream,"Would block/Try again later!!!!\n");
+				}
 				continue;
 			}
 			else if(errno==EPIPE){
@@ -338,16 +354,15 @@ int64_t readall(client*c,char* buff){
 
 }
 int64_t pullallfd(int fd){
-    browser_mode_t mode = curr_client.req->browser_mode;
-    int64_t len=((mode==BROWSER_FIREFOX)?curr_client.req->begin_data_size:1);
+    int64_t len=(curr_client.enable_first_time_in_upload?curr_client.req->begin_data_size:1);
 	int64_t total=0;
-	u_int8_t first_time = (mode==BROWSER_FIREFOX);
+	u_int8_t first_time = curr_client.enable_first_time_in_upload;
 	char buff[BUFFSIZE]={0};
-	for(;(len==-2||len>0)&&(total!=curr_client.req->data_size);){
+	for(;(len==-2||len>0)&&(total<curr_client.req->data_size);){
 		if(first_time){
 			memcpy(buff,curr_client.req->begin_data, curr_client.req->begin_data_size);
 			
-			if(logging){
+			if(logging> 50){
 				fprintf(logstream,"pullallfd appended %ld to file in first time read!\n",len);
 			}
 			first_time =0;
@@ -355,10 +370,13 @@ int64_t pullallfd(int fd){
 		}
 		else{
 			len= readall(&curr_client,buff);
+			if(logging){
+				fprintf(logstream,"pullallfd subread devolve resultado de %ld!\n%ld out of %ld bytes accumulated!\n",len,
+								total+(len>=0?len:0),
+								curr_client.req->data_size);
+			}
 		}
-		if(logging>50){
-			fprintf(logstream,"pullallfd subread devolve resultado de %ld!\n",len);
-		}
+		
 		if(len > 0){
 			size_t written_total = 0;
 			while(written_total < (size_t)len){
@@ -388,22 +406,28 @@ int64_t pullallfd(int fd){
 			break;
 		}
 	}
-	if(!(total-curr_client.req->data_size)){
-		if(logging){
-		fprintf(logstream,"pullallfd bem sucedido!! A socket e %d\n",curr_client.socket);
+	if(!(total-curr_client.req->data_size) && logging){
+		
+		fprintf(logstream,"pullallfd bem sucedido?\n"
+						"O numero de bytes escrito\n"
+						"É igual ao numero de bytes prescritos\n"
+						"No request...\n");
 
-		}
+	}
+	else if(logging){
+		
+		fprintf(logstream,"pullallfd saiu sem erros\n"
+						"mas com numero de bytes escrito diferente\n"
+						"Do que o que foi prescrito\n"
+						"no request...\n");
+		
 	}
 	if(len<0){
-		if (errno == EAGAIN || errno == EWOULDBLOCK) {
-	        	if(logging){
-				fprintf(logstream,"pullallfd bem sucedido!! A socket e %d\n",curr_client.socket);
-			}
-		}
-		else if(errno==EPIPE){
+		
+		if(errno==EPIPE){
 
 			if(logging){
-				fprintf(logstream,"Pipe partido em pullallfd!!! A socket e %d\n",curr_client.socket);
+				fprintf(logstream,"Pipe partido em pullallfd!!!\n");
 			}
 			return -2;
 		}
@@ -420,7 +444,7 @@ int64_t pullallfd(int fd){
 		}
 	}
 	if(logging){
-		fprintf(logstream,"pullallfd termina com exito!:\n%ld de %ld bytes foram lidos!\n",total,curr_client.req->data_size);
+		fprintf(logstream,"\n%ld de %ld bytes foram lidos!\n",total,curr_client.req->data_size);
 	}
     return 0;
 }
@@ -448,14 +472,14 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
 	if(sent<0){
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 if(logging){
-		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
+		fprintf(logstream,"Block no sending!!!!: %s\n",strerror(errno));
                 }
 		break;
         }
 	else if(errno==EPIPE){
 
 		if(logging){
-		fprintf(logstream,"Pipe partido!!! A socket e %d\n",c->socket);
+		fprintf(logstream,"Pipe partido!!\n");
 		}
 		return -1;
 	}
@@ -506,7 +530,7 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
 	if(sent<0){
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 if(logging){
-		fprintf(logstream,"Block no sending!!!!: %s\nsocket %d\n",strerror(errno),c->socket);
+					fprintf(logstream,"Block no sending!!!! %s\n",strerror(errno));
                 }
 		break;
 
@@ -514,7 +538,7 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
 	else if(errno==EPIPE){
 
 		if(logging){
-		fprintf(logstream,"Pipe partido!!! A socket e %d\n",c->socket);
+		fprintf(logstream,"Pipe partido!!!\n");
 		}
 		return -1;
 	}

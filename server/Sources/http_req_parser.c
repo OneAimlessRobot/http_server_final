@@ -37,11 +37,12 @@ const char* request_const_name_arr[MAX_REQUEST_TYPE] = {
 	
 };
 
-const char* request_const_browser_name_arr[MAX_BROWSER_MODE]={
+const browser_struct_t request_const_browser_name_arr[MAX_BROWSER_MODE]={
 	
-	"Firefox",
-	"Chrome",
-	"Invalid"
+	{"Chrome",{1,0}},
+	{"Firefox",{1,1}},
+	{"Safari",{1,1}},
+	{"Invalid",{0,0}}
 };
 
 static http_req_type getREQtypeFromString(char* str){
@@ -65,7 +66,7 @@ static void fillOutBrowserModeInREQ(http_request*req){
 	
 	for(browser_mode_t i=(browser_mode_t)0;i<BROWSER_INVALID;i++){
 		
-		if(strstr(req->header->user_agent,request_const_browser_name_arr[i])){
+		if(strstr(req->header->user_agent,request_const_browser_name_arr[i].browser_name)){
 				
 				req->browser_mode=i;
 				return;
@@ -98,6 +99,8 @@ void print_http_req_header(FILE* fstream){
 					"User-Agent: %s\n"
 					"mimetype: %s\n"
 					"OS: %s\n"
+					"Mobile? (raw): %s\n"
+					"Mobile? (captured value): %hhu\n"
 					"Range (string): |%s|\n"
 					"Range: bytes=%s-\n"
 					"CF-Connecting-IP: %s\n"
@@ -113,6 +116,8 @@ void print_http_req_header(FILE* fstream){
 							curr_client.req->header->user_agent,
 							curr_client.req->header->mimetype,
 							curr_client.req->header->os,
+							curr_client.req->header->is_mobile,
+							curr_client.req->header->is_mobile_value,
 							curr_client.req->header->range_string,
 							curr_client.req->header->is_partial?curr_client.req->header->range:"NO_RANGE_SPECIFIED",
 							curr_client.req->header->cloudfare_ip,
@@ -166,6 +171,7 @@ static void spawnHTTPHeader(void){
 	memset(curr_client.req->header->host,0,FIELDSIZE);
 	memset(curr_client.req->header->mimetype,0,FIELDSIZE);
 	memset(curr_client.req->header->specific,0,FIELDSIZE);
+	memset(curr_client.req->header->is_mobile,0,FIELDSIZE);
 	memset(curr_client.req->header->version,0,FIELDSIZE);
 	memset(curr_client.req->header->os,0,FIELDSIZE);
 	memset(curr_client.req->header->user_agent,0,FIELDSIZE);
@@ -197,6 +203,12 @@ static void spawnHTTPHeader(void){
 		strcpy(curr_client.req->header->origin,find_field_value_in_field_arr("Origin",fieldarr));
 		strcpy(curr_client.req->header->mimetype,defaultMimetype);
 		strcpy(curr_client.req->header->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));
+		strcpy(curr_client.req->header->is_mobile,find_field_value_in_field_arr("sec-ch-ua-mobile",fieldarr));
+		if(strnlen(curr_client.req->header->is_mobile,FIELDSIZE)>0){
+			
+			sscanf(curr_client.req->header->is_mobile,"?%hhu",&curr_client.req->header->is_mobile_value);
+			
+		}
 		strcpy(curr_client.req->header->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
 		strcpy(curr_client.req->header->content_length,find_field_value_in_field_arr("Content-Length",fieldarr));
 		strcpy(curr_client.req->header->user_agent,find_field_value_in_field_arr("User-Agent",fieldarr));
@@ -247,8 +259,19 @@ static void spawnHTTPHeader(void){
 
 void spawnHTTPRequest(void){
 	char* split_one[2];
+	
+	printf("_________________________________\n"
+			"Raw peer buff:\n"
+			"_________________________________\n"
+			"%s\n"
+			"_________________________________\n"
+			"_________________________________\n",curr_client.peerbuff);
+			
 		
-	splitString(curr_client.peerbuff,"\r\n\r\n",split_one);
+	splitString(curr_client.peerbuff,REQUEST_SECTION_DELIMITER_STRING,split_one);
+
+
+
 	spawnHTTPHeader();
 	if(!split_one[1]){
 		curr_client.req->data_size=1;
@@ -256,20 +279,25 @@ void spawnHTTPRequest(void){
 	else{
 			u_int8_t is_a_form = curr_client.req->is_a_form = (strlen(curr_client.req->header->specific)==0);
 			
-			int64_t dummy_size_under_recv_size = (split_one[1]-curr_client.peerbuff);
-			
-			int64_t under_recv_size = sizeof(curr_client.peerbuff) - dummy_size_under_recv_size;
-			
-			int64_t the_size_to_use = min(curr_client.recv_size, under_recv_size);
+			int64_t the_size_to_use = curr_client.recv_size-(strlen(split_one[0])+strlen(REQUEST_SECTION_DELIMITER_STRING));
 			
 			curr_client.req->form_size = (is_a_form?the_size_to_use:0);
 			curr_client.req->begin_data_size = (is_a_form?0:the_size_to_use);
+			curr_client.enable_first_time_in_upload=
+					(
+					
+						(the_size_to_use>0)
+						
+							&&
+						
+						request_const_browser_name_arr[curr_client.req->browser_mode].first_time_if_http_or_https[(curr_client.is_tls>0)]
+					
+					);
+
+			memcpy(is_a_form?curr_client.req->form:curr_client.req->begin_data,
+						split_one[1],
+						is_a_form?(curr_client.req->form_size):(curr_client.req->begin_data_size));
 			
-			if(is_a_form){
-				memcpy(is_a_form?curr_client.req->form:curr_client.req->begin_data,
-							split_one[1],
-							is_a_form?(curr_client.req->form_size):(curr_client.req->begin_data_size));
-			}
 			curr_client.req->data_size=is_a_form?0:strtoll(curr_client.req->header->content_length,NULL,10);
 	}
 
@@ -289,6 +317,7 @@ void print_http_req(FILE* fstream){
 					"Form size:\n%ld\n"
 					"Form:\n\n%s\n"
 					"______________________________________\n"
+					"Client received size:\n%ld\n"
 					"Begin-Data-Size:\n%ld\n"
 					"Begin-Data:\n%s\n"
 					"______________________________________\n"
@@ -299,8 +328,25 @@ void print_http_req(FILE* fstream){
 					curr_client.req->is_a_form?0:curr_client.req->data_size,
 					curr_client.req->is_a_form?curr_client.req->form_size:0,
 					curr_client.req->is_a_form?curr_client.req->form:"There is no form...",
+					curr_client.recv_size,
 					curr_client.req->is_a_form?0:curr_client.req->begin_data_size,
 					curr_client.req->is_a_form?"There is no data...":curr_client.req->begin_data,
-					request_const_browser_name_arr[curr_client.req->browser_mode]);
+					request_const_browser_name_arr[curr_client.req->browser_mode].browser_name);
+	
+	if(logging> 7){
+		
+		fprintf(logstream, "Browser-Mode view:\n"
+						"_____________________________________\n"
+						"Append pending data if http?:%hhu\n"
+						"Append pending data if http(s)?:%hhu\n"
+						"Are we tls?%hhu\n"
+						"So. Should we enable first time if this is an upload??:%s\n"
+						"_____________________________________\n"
+						"______________________________________\n\n\n",
+				request_const_browser_name_arr[curr_client.req->browser_mode].first_time_if_http_or_https[0],
+				request_const_browser_name_arr[curr_client.req->browser_mode].first_time_if_http_or_https[1],
+				(curr_client.is_tls>0),
+				curr_client.enable_first_time_in_upload?"Yes!":"No...");
+	}			
 
 }

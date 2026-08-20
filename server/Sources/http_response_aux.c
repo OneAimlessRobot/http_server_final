@@ -19,7 +19,7 @@
 #define UPLOAD_HEADER HTTP_CREATED_OK_HEADER \
 					"Content-Type: %s\r\n" \
 					"Location: " \
-					PROTO \
+					"%s" \
 					"://" \
 					DOMAIN_NAME \
 					":%hu/" \
@@ -179,7 +179,13 @@ void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimety
 
 void fillUploadHeader(char headerBuff[PATHSIZE],const char* mimetype, char* target){
 
-	snprintf(headerBuff,PATHSIZE,UPLOAD_HEADER,mimetype,port,target);
+	snprintf(headerBuff,
+				PATHSIZE,
+				UPLOAD_HEADER,
+				mimetype,
+				curr_client.is_tls?"https":"http",
+				port,
+				target);
 }
 
 

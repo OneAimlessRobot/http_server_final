@@ -2,18 +2,22 @@
 #define HTTP_REQ_PARSER_H
 
 #define ALLOWED_HTTP_REQUESTS_STRING "GET, HEAD, POST"
-#define PROTO "http"
+#define REQUEST_SECTION_DELIMITER_STRING "\r\n\r\n"
 #define DOMAIN_NAME "lenasattic.ddns.net"
 typedef enum {GET,HEAD,POST,INVALID,MAX_REQUEST_TYPE} http_req_type;
-typedef enum {BROWSER_CHROMIUM, BROWSER_FIREFOX, BROWSER_INVALID,MAX_BROWSER_MODE} browser_mode_t;
+typedef enum {BROWSER_CHROMIUM, BROWSER_FIREFOX, BROWSER_SAFARI, BROWSER_INVALID,MAX_BROWSER_MODE} browser_mode_t;
 
-
+typedef struct {
+	char* browser_name;
+	u_int8_t first_time_if_http_or_https[2];
+	
+}browser_struct_t;
 
 extern char* reserved_characters[],
 	* reserved_characters_for_special[];
 
 extern const char* request_const_name_arr[MAX_REQUEST_TYPE];
-extern const char* request_const_browser_name_arr[MAX_BROWSER_MODE];
+extern const browser_struct_t request_const_browser_name_arr[MAX_BROWSER_MODE];
 
 
 typedef struct http_header_field{
@@ -34,6 +38,7 @@ typedef struct http_header{
 		encodingcopy[FIELDSIZE],
 		origin[FIELDSIZE],
 		mimetype[FIELDSIZE],
+		is_mobile[FIELDSIZE],
 		user_agent[FIELDSIZE],
 		range_string[FIELDSIZE],
 		range[FIELDSIZE],
@@ -45,7 +50,8 @@ typedef struct http_header{
 		form_boundary[FIELDSIZE],
 		cloudfare_ip[FIELDSIZE],
 		os[FIELDSIZE];
-	u_int8_t is_partial;
+	u_int8_t is_partial,
+			is_mobile_value;
 	int64_t range_number;
 
 }http_header;

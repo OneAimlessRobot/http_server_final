@@ -1,7 +1,7 @@
 #ifndef BUFFSIZES_H
 #define BUFFSIZES_H
 
-#define BUFFSIZE (2048)
+#define BUFFSIZE (1024)
 #define PATHSIZE PATH_MAX
 #define FIELDSIZE PATH_MAX
 #define ARGVMAX 100
