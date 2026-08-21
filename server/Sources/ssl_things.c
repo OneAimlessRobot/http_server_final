@@ -1,18 +1,9 @@
 #include "../Includes/preprocessor.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/http_req_parser.h"
-#include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/load_html.h"
-#include "../Includes/load_rss.h"
-#include "../Includes/php_proxy.h"
-#include "../Includes/rcon_proxy.h"
-#include "../Includes/send_resource_func.h"
 #include "../Includes/server_innards.h"
+#include "../Includes/filePaths.h"
 #include "../Includes/ssl_things.h"
-#include <openssl/provider.h>
-#include <stdio.h>
 
 static OSSL_PROVIDER *legacy_prov = NULL,
 		*default_prov = NULL;

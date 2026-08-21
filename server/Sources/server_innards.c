@@ -1,18 +1,11 @@
 #include "../Includes/preprocessor.h"
-#include "../Includes/auxFuncs.h"
-#include "../Includes/resource_consts.h"
+#include "../Includes/filePaths.h"
 #include "../Includes/client.h"
 #include "../Includes/cfg_loading.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/ssl_things.h"
 #include "../Includes/sock_ops.h"
-#include <sys/wait.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/types.h>
+#include "../Includes/io_ops.h"
 
 #define ARGV_TO_USE (exec_argv_arr[use_valgrind])
 
@@ -55,7 +48,6 @@ static char* super_valgrind_argv[] = {"valgrind",
 					buff_request_id,
 					NULL};
 					
-typedef char**  argv_type;
 
 argv_type exec_argv_arr[3] = { normal_argv,
 					valgrind_argv,
@@ -239,6 +231,8 @@ void initializeConstants(void){
 	use_tls=atoi(find_value_in_cfg_arr("use_tls",cfgs));
 	
 	use_valgrind=atoi(find_value_in_cfg_arr("use_valgrind",cfgs));
+	
+	use_fancy_find=atoi(find_value_in_cfg_arr("use_fancy_find",cfgs));
 	
 	if(compression_level > 9){
 		printf("Config error: compression level must be an integer between 0 and 9!\n");

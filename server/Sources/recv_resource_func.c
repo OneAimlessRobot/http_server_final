@@ -1,27 +1,11 @@
 #include "../Includes/preprocessor.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/client.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/http_req_parser.h"
-#include "../Includes/handlecustom.h"
+#include "../Includes/http_response_aux.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/load_html.h"
-#include "../Includes/load_rss.h"
-#include "../Includes/php_proxy.h"
 #include "../Includes/rcon_proxy.h"
 #include "../Includes/send_resource_func.h"
-#include "../Includes/server_innards.h"
-#include "../Includes/template_funcs.h"
-#include <sys/socket.h>
-#include <errno.h>
-#include <unistd.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include <sys/wait.h>
+#include "../Includes/io_ops.h"
 
 #include "../Includes/recv_resource_wrappers_for_file_exts.h"
 

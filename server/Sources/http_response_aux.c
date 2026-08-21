@@ -1,9 +1,7 @@
 #include "../Includes/preprocessor.h"
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/http_response_aux.h"
+#include "../Includes/server_vars.h"
+#include "../Includes/client.h"
 
 #define EMBEDDER_POLICY "require-corp"
 

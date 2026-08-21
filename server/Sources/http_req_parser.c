@@ -1,11 +1,4 @@
 #include "../Includes/preprocessor.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <netinet/in.h>
-#include "../Includes/buffSizes.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/http_req_parser.h"

@@ -1,16 +1,12 @@
 #include "../Includes/preprocessor.h"
 #include <errno.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/http_req_parser.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
 #include "../Includes/handlecustom.h"
-#include "../Includes/sock_ops.h"
-#include "../Includes/load_html.h"
 
 
 char* custompostreqs[]={RCON_REQUEST,FIND_REQUEST,NULL},
@@ -39,7 +35,7 @@ static void handleRconRequest(http_request* req){
 static void handleFindRequest(http_request* req){
 	char* argv2[ARGVMAX]={0};
 	int size=makeargvdelim(req->form,"&",argv2,ARGVMAX);
-	char* the_ptr=req->processed_form;
+	char* the_ptr = req->processed_form;
 	for(int i=0;i<size;i++){
 		char* pair[2]={0};
 		splitString(argv2[i],"=",pair);
@@ -47,7 +43,7 @@ static void handleFindRequest(http_request* req){
 		replaceStringCharacter(pair[1],'+',' ');
 		the_ptr+=snprintf(the_ptr,
 				sizeof(req->processed_form)-1,
-				"%s%s",pair[1],(i==(size-1))?" ":"|");
+				"%s",pair[1]);
 		}
 	}
 }

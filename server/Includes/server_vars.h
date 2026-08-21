@@ -1,12 +1,6 @@
 #ifndef SERVER_VARS_H
 #define SERVER_VARS_H
-typedef struct compMethod{
-	char * cmdTool,
-		*fileExt,
-		*encodingExt;
 
-
-}compMethod;
 
 extern u_int32_t smalltimeoutsecs,
 	smalltimeoutusecs,
@@ -27,10 +21,11 @@ extern u_int32_t smalltimeoutsecs,
 extern u_int16_t port;
 
 
-extern u_int32_t logging,
+extern u_int8_t logging,
 	serverOn,
 	serverWasOn,
 	use_valgrind,
+	use_fancy_find,
 	ignore_partial,
 	use_tls,
 	use_exit_func,

@@ -26,12 +26,6 @@
 
 extern char* excluded_xtensions[];
 
-typedef struct {
-    const char *extension,
-				*mime_type;
-	u_int8_t allows_compression;
-
-} MimeEntry;
 
 extern MimeEntry mime_types[];
 

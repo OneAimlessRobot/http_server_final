@@ -1,15 +1,10 @@
 #include "../Includes/preprocessor.h"
 #include <errno.h>
-#include "../Includes/auxFuncs.h"
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/handlecustom.h"
-#include "../Includes/sock_ops.h"
 #include "../Includes/load_rss.h"
 #include <sys/wait.h>
 
@@ -19,14 +14,10 @@ static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss",
 		
 		currFetchedRSS[PATHSIZE*2]={0};
 
-typedef enum {ATOM=0,XHTML,MAX_NAMESPACE_URI_ID}namespace_uri_id;
-
 static const char* uris_for_namespace_ids[MAX_NAMESPACE_URI_ID]={
 	"http://www.w3.org/2005/Atom",
 	"http://www.w3.org/1999/xhtml"
 };
-
-typedef enum {TITLE=0,DESC,CAT,DATE,LINK,MAX_TAG_ID}tag_id;
 
 static const char* names_for_tag_ids[MAX_TAG_ID]=
 				{"title",
@@ -44,12 +35,6 @@ static const char* empty_contents_for_tag_ids[MAX_TAG_ID]=
 				"about:blank"};
 
 
-typedef enum {CH_TITLE=0,CH_LINK,CH_LANGUAGE,CH_UPDATE_PERIOD,CH_UPDATE_FREQUENCY,CH_DESCRIPTION,CH_DATE,CH_GENERATOR,MAX_CH_TAG_ID}channel_tag_id;
-/*
-<language>en-us</language>
- <sy:updatePeriod>hourly</sy:updatePeriod>
- <sy:updateFrequency>1</sy:updateFrequency>1
-*/
 static const char* names_for_channel_tag_ids[MAX_CH_TAG_ID]=
 				{"title",
 	         		"link",

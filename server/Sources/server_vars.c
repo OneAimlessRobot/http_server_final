@@ -1,5 +1,4 @@
 #include "../Includes/preprocessor.h"
-#include "../Includes/buffSizes.h"
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <pthread.h>
@@ -27,10 +26,11 @@ u_int32_t smalltimeoutsecs,
 u_int16_t port = 0;
 
 
-u_int32_t logging=0,
+u_int8_t logging=0,
 	serverOn=0,
 	serverWasOn=0,
 	use_valgrind=0,
+	use_fancy_find=0,
 	ignore_partial=0,
 	use_tls=0,
 	use_exit_func=0,

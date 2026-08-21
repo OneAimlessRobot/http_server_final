@@ -1,21 +1,12 @@
 #include "../Includes/preprocessor.h"
-#include <errno.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/io_ops.h"
 #include "../Includes/send_resource_func.h"
-#include "../Includes/handlecustom.h"
-#include "../Includes/sock_ops.h"
-#include "../Includes/load_html.h"
 #include "../Includes/template_funcs.h"
-#include <dirent.h>
-#include <limits.h>
-#include <sys/wait.h>
 
+#define FIND_CMD_TO_USE (exec_find_arr[use_fancy_find])
 
 #define FIND_LISTING_HEADER_CLASS "header_for_find_listing"
 
@@ -35,27 +26,45 @@ static const char* find_listing_css_file_path= "/webcrookedstuff/.find_listing_s
 
 u_int64_t num_files_found=0;
 
-typedef enum {REGEXP,MAX_NUM_FIND_ARGS}find_args;
-
-typedef struct rcon_arg_line{
-
-	char* default_value;
-	char* the_actual_value;
-
-}find_arg_line;
 
 
-
-
-static find_arg_line parameters_arr[MAX_NUM_FIND_ARGS]={
-
-	{.default_value=DEF_FIND_REXEXP,NULL}
-};
+static char* regexp_arg = DEF_FIND_REXEXP;
 
 
 static char aux_buff[PATH_MAX*2]={0},
 			aux_exp_buff[PATH_MAX*2]={0},
 	curr_listing_buff[4+(PATH_MAX+8)*MAX_NUM_FIND_ARGS]={0};
+
+static char * fancy_find_command[]=
+
+									{"find",
+										"-L",
+										".",
+										"-type",
+										"f",
+										"-iregex",
+										aux_exp_buff,
+										NULL
+										},
+
+		   * the_normal_person_find_command[]=
+
+									{"find",
+										"-L",
+										".",
+										"-type",
+										"f",
+										"-iwholename",
+										aux_exp_buff,
+										NULL
+										};
+
+				
+
+argv_type exec_find_arr[2] = { 
+								the_normal_person_find_command,
+								fancy_find_command
+							  };
 
 
 int isFindRequest(char* resourceTarget){
@@ -84,21 +93,6 @@ int isFindRequest(char* resourceTarget){
 }
 
 
-static int make_find_arg_arr(char* the_separated_parameters,find_arg_line arg_arr[],uint64_t max_len){
-	char* argv[ARGVMAX]={0};
-	int num_tags=make_str_arr(the_separated_parameters,"|",argv,max_len);
-	if(num_tags<=0){
-
-		return -1;
-	}
-	if(max_len - 2 > 0){
-		argv[max_len-2][strlen(argv[max_len-2])-1]=0;
-	}
-	for(uint64_t i=0;i<max_len-1;i++){
-		arg_arr[i].the_actual_value=((strlen(argv[i]))?argv[i]:arg_arr[i].default_value);
-	}
-	return 0;
-}
 
 static void print_dir_entry(int fd, char* curr_listing_arg){
 	
@@ -156,15 +150,14 @@ static void process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
 }
 static void generateFindResultPrimitive(char* the_request_parameters){
 
-
+	regexp_arg=the_request_parameters;
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 	
-	make_find_arg_arr(the_request_parameters,parameters_arr,MAX_NUM_FIND_ARGS+1);
 
     snprintf(aux_buff,sizeof(aux_buff)-1,"%s%s",currDir,DEF_FIND_ROOTDIR);
-    replaceStringCharacter(parameters_arr[REGEXP].the_actual_value,' ','*');
-    snprintf(aux_exp_buff,sizeof(aux_exp_buff)-1,"*%s*",parameters_arr[REGEXP].the_actual_value);
+    replaceStringCharacter(regexp_arg,' ','*');
+    snprintf(aux_exp_buff,sizeof(aux_exp_buff)-1,use_fancy_find?"%s":"*%s*",regexp_arg);
     
     chdir(aux_buff);
     if(logging>40){
@@ -172,11 +165,10 @@ static void generateFindResultPrimitive(char* the_request_parameters){
 		fprintf(logstream,"Changing into %s directory for find command!\n",aux_buff);
 	}
     
-    char* the_find_command[]={"find","-L",".","-type","f","-iwholename",aux_exp_buff,NULL};
 	if(logging>40){
 		
 		fprintf(logstream,"Here is the issued command:\n");
-		print_string_arr(logstream,the_find_command);
+		print_string_arr(logstream,FIND_CMD_TO_USE);
 	}
 	pid_t pid_fork_find_cmd=fork();
 	switch(pid_fork_find_cmd){
@@ -188,7 +180,7 @@ static void generateFindResultPrimitive(char* the_request_parameters){
 			case 0:
 					dup2(outfd,STDOUT_FILENO);
 					close(outfd);
-					execvp(the_find_command[0],the_find_command);
+					execvp(FIND_CMD_TO_USE[0],FIND_CMD_TO_USE);
 			break;
 			default:
 					wait(NULL);
@@ -234,11 +226,11 @@ void generateFindResult(char* the_request_parameters){
 	remove(tmpDir);
 	dprintf(curr_client.fd,FIND_HTML_PREFIX
 		"\n<body class=\"%s\">\n<br>\n\n\n<div class='%s'>\n<br>\n"
-		"\n<h1>The files found on the server with the expression: |*%s*| </h1>\n<br>\n<br>\n",
+		"\n<h1>The files found on the server with the expression: |%s| </h1>\n<br>\n<br>\n",
 			find_listing_css_file_path,
 			FIND_LISTING_BODY_CLASS,
 			FIND_LISTING_DIV_CLASS,
-			parameters_arr[REGEXP].the_actual_value);
+			aux_exp_buff);
 	
 	fseek(fstream,0,SEEK_SET);
 	process_lines_and_print_to_dest_file_find(curr_client.fd,fstream);

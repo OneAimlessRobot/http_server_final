@@ -1,6 +1,5 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/http_req_parser.h"
-#include "../Includes/auxFuncs.h"
 #include <ctype.h>
 
 int url_decode(char *src, char *dst, char** reserved_characters_arr) {

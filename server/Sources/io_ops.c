@@ -1,27 +1,8 @@
 #include "../Includes/preprocessor.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-#include <signal.h>
-#include <sys/socket.h>
-#include <sys/ioctl.h>
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/select.h>
-#include <sys/time.h>
 #include "../Includes/filePaths.h"
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/http_req_parser.h"
-#include "../Includes/auxFuncs.h"
-#include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/http_response_aux.h"
-#define SEND_FUNC_TO_USE sendsome
 
 exit_func_t  exit_func_for_this_module=NULL;
 
@@ -465,7 +446,9 @@ while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < truesize + numread + 2) {
         errno=0;
-	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, chunkbuff + totalsent, truesize + numread + 2 - totalsent):SEND_FUNC_TO_USE(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, chunkbuff + totalsent, truesize + numread + 2 - totalsent)
+					:
+					sendsome(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
 	if(sent==-2){
 		continue;
 	}
@@ -522,7 +505,9 @@ while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;
-	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, buff + totalsent,  numread - totalsent):SEND_FUNC_TO_USE(c->socket, buff + totalsent,  numread - totalsent, 0);
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, buff + totalsent,  numread - totalsent)
+					:
+					sendsome(c->socket, buff + totalsent,  numread - totalsent, 0);
 	if(sent==-2){
 
 		continue;

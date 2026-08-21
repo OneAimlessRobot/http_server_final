@@ -1,6 +1,8 @@
 #ifndef HTTP_RESPONSE_AUX_H
 #define HTTP_RESPONSE_AUX_H
 
+#define DOMAIN_NAME "lenasattic.ddns.net"
+
 #define HTTP_OK_HEADER "HTTP/1.1 200 OK\r\n"
 
 #define HTTP_PARTIAL_CONTENT_OK_HEADER "HTTP/1.1 206 Partial-Content\r\n"

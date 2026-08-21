@@ -1,8 +1,7 @@
-
 #include "../Includes/preprocessor.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/http_req_parser.h"
+#include "../Includes/http_response_aux.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/client.h"
@@ -15,17 +14,9 @@
 #include "../Includes/send_resource_func.h"
 #include "../Includes/recv_resource_func.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/sock_ops.h"
+#include "../Includes/io_ops.h"
 #include "../Includes/txt_sending.h"
-#include <time.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-#include <errno.h>
-#include <unistd.h>
-#include <string.h>
-#include <dirent.h>
-#include <sys/types.h>
-#define READ_FUNC_TO_USE readall
+
 
 static http_header header = {0};
 static http_request req = {0};
@@ -179,7 +170,7 @@ static void handleCurrentActivity(void){
 	}
 }
 void handleConnection(void){
-	int64_t obtained_read_size=READ_FUNC_TO_USE(&curr_client,curr_client.peerbuff);
+	int64_t obtained_read_size=readall(&curr_client,curr_client.peerbuff);
 	
 	curr_client.recv_size = obtained_read_size;
 	if(curr_client.recv_size>0 

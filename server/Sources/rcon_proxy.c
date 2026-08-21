@@ -1,25 +1,13 @@
 #include "../Includes/preprocessor.h"
 #include <errno.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/handlecustom.h"
-#include "../Includes/sock_ops.h"
 #include "../Includes/rcon_proxy.h"
 #include <sys/wait.h>
 
-typedef enum {ADDR=0,PORT,PASS,CMD,MAX_NUM_RCON_ARGS}rcon_args;
-
-typedef struct rcon_arg_line{
-
-	char* default_value;
-	char* the_actual_value;
-
-}rcon_arg_line;
 
 
 #define DEF_RCON_ADDRESS "192.168.0.100"

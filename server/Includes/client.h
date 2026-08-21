@@ -1,23 +1,5 @@
 #ifndef CLIENT_H
 #define CLIENT_H
-typedef struct client{
-	
-	char peerbuff[BUFFSIZE],
-		filepath[PATHSIZE*5],
-		target[PATHSIZE*3],
-		relative_file_path[PATHSIZE*3],
-		sent_header_buff[PATHSIZE];
-	http_request* req; 
-	int32_t socket, fd;
-	int64_t recv_size;
-	u_int8_t is_tls,
-			enable_first_time_in_upload,
-			compress,
-			is_directory;
-	SSL* ctx_if_ssl;
-	struct sockaddr_in client_addr;
-	
-}client;
 extern u_int64_t request_id;
 extern client curr_client;
 extern char tmpFile[PATHSIZE*3],

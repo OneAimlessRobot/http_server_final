@@ -4,12 +4,6 @@
 #define NO_SUCH_SETTING "NO_SUCH_SETTING"
 #define NO_SETTINGS_LOADED "NO_SETTINGS_LOADED"
 
-typedef struct cfg_field{
-        char* mem;
-        char* field[2];
-
-}cfg_field;
-
 
 
 extern cfg_field** cfgs;

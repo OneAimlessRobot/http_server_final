@@ -1,14 +1,10 @@
 #include "../Includes/preprocessor.h"
 #include <errno.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/handlecustom.h"
-#include "../Includes/sock_ops.h"
 #include "../Includes/php_proxy.h"
 #include <sys/wait.h>
 

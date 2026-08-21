@@ -16,6 +16,9 @@
 #include <unistd.h>
 #include <limits.h>
 #include <time.h>
+#include <dirent.h>
+#include <limits.h>
+#include <sys/wait.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/time.h>
@@ -32,22 +35,14 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
+#include <openssl/provider.h>
 #include "buffSizes.h"
-#include "filePaths.h"
+#include "custom_types.h"
 #include "auxFuncs.h"
-#include "resource_consts.h"
-#include "http_req_parser.h"
-#include "http_response_aux.h"
-#include "filePaths.h"
-#include "client.h"
-#include "server_vars.h"
 
 #define FREE_ALL_APPS_COUNTDOWN "<script src=\"/webcrookedstuff/.keep_android_open_please.js\"></script>"
 
-typedef void (* exit_func_t)(void);
 
-
-#include "io_ops.h"
 
 
 

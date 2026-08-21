@@ -1,20 +1,12 @@
 #include "../Includes/preprocessor.h"
-#include <errno.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
 #include "../Includes/send_resource_func.h"
-#include "../Includes/handlecustom.h"
-#include "../Includes/sock_ops.h"
 #include "../Includes/load_html.h"
 #include "../Includes/template_funcs.h"
-#include <dirent.h>
-#include <limits.h>
-#include <sys/wait.h>
 
 #define SITE_PATH_HEADER_CLASS "header_for_site_path"
 
@@ -30,8 +22,6 @@
 
 #define NUM_OF_FIELDS_TO_PRINT 4
 
-typedef enum {PERMISSIONS,NUM_LINKS,OWNER_NAME,OWNER_GROUP,SIZE, DATE, TIME,FILE_NAME,CATEGORY_ID_MAX}category_id;
-
 static char* category_names[CATEGORY_ID_MAX]={
 			"Permissions",
 			"num_links",
@@ -46,7 +36,7 @@ static char* category_names[CATEGORY_ID_MAX]={
 
 static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
 	SIZE,
-	DATE,
+	DIR_DATE,
 	TIME,
 	FILE_NAME,
 };
@@ -125,7 +115,7 @@ static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listi
 	dprintf(fd,"\n<span class='%s'>| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|</span><br>\n",
 			DIR_LISTING_TABLE_LINE_CLASS,
 			is_directory_this_one?"directory!":curr_listing_argv[SIZE],
-			curr_listing_argv[DATE],
+			curr_listing_argv[DIR_DATE],
 			curr_listing_argv[TIME],
 			is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,
 			dir,

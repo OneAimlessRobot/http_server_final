@@ -9,11 +9,9 @@
 #include <errno.h>
 #include <dirent.h>
 #include <sys/types.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/sock_ops.h"
 void setSocketRecvBuffSize(int sd,int size){
 
 setsockopt(sd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));

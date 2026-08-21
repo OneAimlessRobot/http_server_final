@@ -1,17 +1,11 @@
 #include "../Includes/preprocessor.h"
-#include <errno.h>
-#include "../Includes/buffSizes.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/server_innards.h"
-#include "../Includes/auxFuncs.h"
 #include "../Includes/resource_consts.h"
 #include "../Includes/io_ops.h"
-#include "../Includes/handlecustom.h"
-#include "../Includes/sock_ops.h"
 #include "../Includes/txt_sending.h"
 #include "../Includes/template_funcs.h"
-#include <sys/wait.h>
 
 #define TXT_PRETTIFY_BODY_CLASS "txt_prettify_body"
 #define TXT_PRETTIFY_PRE_CLASS TXT_PRETTIFY_BODY_CLASS
