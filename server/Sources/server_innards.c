@@ -216,6 +216,8 @@ void initializeConstants(void){
 	
 	bigtimeoutusecs=atoi(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
 	
+	lower_security_for_compat=atoi(find_value_in_cfg_arr("lower_security_for_compat",cfgs));
+	
 	port=atoi(find_value_in_cfg_arr("port",cfgs));
 	
 	use_compression=atoi(find_value_in_cfg_arr("use_compression",cfgs));

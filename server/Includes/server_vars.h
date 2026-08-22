@@ -31,6 +31,7 @@ extern u_int8_t logging,
 	use_exit_func,
 	use_chunked,
 	use_compression,
+	lower_security_for_compat,
 	compression_level;
 
 

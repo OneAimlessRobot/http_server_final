@@ -156,16 +156,25 @@ void lower_security_func(void){
 		}
 	#endif
 
-	SSL_CTX_set_security_level(global_server_ctx, 0);	
-	printf("Cypher list: %s\n",OSSL_default_cipher_list());
+	SSL_CTX_set_security_level(global_server_ctx, 0);
+	if(logging>40){
+		fprintf(logstream,"Cypher list: %s\n",OSSL_default_cipher_list());
+	}
 	if(SSL_CTX_set_cipher_list(global_server_ctx, "SSLv3:ALL:COMPLEMENTOFDEFAULT")!=1){
 		fprintf(stderr,"SSL ERROR ON SETTING CYPHERS TO LOWER SECURITY!\n");
 		ERR_print_errors_fp(stderr);
 	}
-	STACK_OF(SSL_CIPHER) *sk = SSL_CTX_get_ciphers(global_server_ctx);
-	for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
-		SSL_CIPHER *c = (SSL_CIPHER *)sk_SSL_CIPHER_value(sk, i);
-		printf("Active Context Cipher [%d]: %s\n", i, SSL_CIPHER_get_name(c));
+	
+	if(logging>40){
+		
+		STACK_OF(SSL_CIPHER) *sk = SSL_CTX_get_ciphers(global_server_ctx);
+		
+		for (int i = 0; i < sk_SSL_CIPHER_num(sk); i++) {
+			
+			SSL_CIPHER *c = (SSL_CIPHER *)sk_SSL_CIPHER_value(sk, i);
+			fprintf(logstream,"Active Context Cipher [%d]: %s\n", i, SSL_CIPHER_get_name(c));
+		
+		}
 	}
 }
 void init_openssl_libs_server_side(void){
@@ -211,10 +220,13 @@ void init_openssl_libs_server_side(void){
 					return;	
 				}
                 //SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_PEER , verify_callback);
-                
-
+				if(lower_security_for_compat){
+					
+					lower_security_func();
+				
+				}
 				SSL_CTX_set_verify(global_server_ctx, SSL_VERIFY_NONE , NULL);
-
+				
 
                 /* Load client certificate */
                 if (!SSL_CTX_use_certificate_chain_file(global_server_ctx, host_cert_file_path)) {
