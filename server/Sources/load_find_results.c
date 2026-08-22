@@ -1,12 +1,8 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/server_innards.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/send_resource_func.h"
 #include "../Includes/template_funcs.h"
-
-#define FIND_CMD_TO_USE (exec_find_arr[use_fancy_find])
 
 #define FIND_LISTING_HEADER_CLASS "header_for_find_listing"
 
@@ -16,11 +12,13 @@
 
 #define FIND_LISTING_BODY_CLASS "find_listing"
 
+#define DEF_FIND_REXEXP "*"
+
+#define FIND_CMD_TO_USE (exec_find_arr[use_fancy_find])
 
 
 #define DEF_FIND_ROOTDIR defaultTarget
 
-#define DEF_FIND_REXEXP "*"
 
 static const char* find_listing_css_file_path= "/webcrookedstuff/.find_listing_style.css";
 
@@ -192,8 +190,6 @@ static void generateFindResultPrimitive(char* the_request_parameters){
 }
 void generateFindResult(char* the_request_parameters){
 
-	logging=1;
-    logstream=stderr;
 
 	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneFIND_HTML , request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');

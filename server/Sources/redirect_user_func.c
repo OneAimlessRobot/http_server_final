@@ -1,9 +1,6 @@
 #include "../Includes/preprocessor.h"
-#include "../Includes/resource_consts.h"
 #include "../Includes/http_response_aux.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/redirect_user_func.h"
-#include "../Includes/server_innards.h"
 
 int redirectUser(client* c,char* target){
 

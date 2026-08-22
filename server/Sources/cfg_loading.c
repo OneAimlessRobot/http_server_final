@@ -1,10 +1,6 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/cfg_loading.h"
 #include "../Includes/server_vars.h"
-#include <sys/socket.h>
-#include <errno.h>
-#include <dirent.h>
-#include <sys/types.h>
 
 
 

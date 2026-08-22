@@ -3,6 +3,7 @@
 //custom requests
 #define RCON_REQUEST "/rcon.rcon"
 #define FIND_REQUEST "/find.find"
+
 #define UPLOAD_SPECIFIC_REQUEST_STRING "upload"
 
 extern char* custompostreqs[],

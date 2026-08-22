@@ -102,6 +102,7 @@ typedef struct client{
 			is_directory;
 	SSL* ctx_if_ssl;
 	struct sockaddr_in client_addr;
+	generating_func_t generating_func;
 	
 }client;
 

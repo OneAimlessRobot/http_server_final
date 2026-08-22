@@ -1,12 +1,7 @@
 #include "../Includes/preprocessor.h"
-#include <errno.h>
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/server_innards.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/io_ops.h"
-#include "../Includes/php_proxy.h"
-#include <sys/wait.h>
 
 
 
@@ -112,8 +107,6 @@ void generatePHPResult(char* request){
 		query="";
 	}
 
-	logging=1;
-        logstream=stderr;
         
 	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOnePHP_HTML , request, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');

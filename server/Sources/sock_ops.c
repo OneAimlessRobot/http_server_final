@@ -1,17 +1,6 @@
 #include "../Includes/preprocessor.h"
-#include <sys/socket.h>
-#include <fcntl.h>
-#include <time.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <arpa/inet.h>
-#include <errno.h>
-#include <dirent.h>
-#include <sys/types.h>
-#include "../Includes/resource_consts.h"
-#include "../Includes/client.h"
 #include "../Includes/server_vars.h"
+
 void setSocketRecvBuffSize(int sd,int size){
 
 setsockopt(sd, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));

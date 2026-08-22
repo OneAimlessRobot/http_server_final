@@ -3,7 +3,6 @@
 #include "../Includes/resource_consts.h"
 #include "../Includes/http_response_aux.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/rcon_proxy.h"
 #include "../Includes/send_resource_func.h"
 #include "../Includes/io_ops.h"
 

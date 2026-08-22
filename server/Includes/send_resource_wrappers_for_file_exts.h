@@ -36,7 +36,9 @@ static void final_cleanup(int notfound){
 	close(comp_fd);
 
 	if(comp_enable&&!notfound){
-		printf("Trying to delete %s...\n",outpathbuff);
+		if(logging>3){
+			fprintf(logstream,"Trying to delete %s...\n",outpathbuff);
+		}
 		remove(outpathbuff);
 	}
 

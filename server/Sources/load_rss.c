@@ -1,12 +1,8 @@
 #include "../Includes/preprocessor.h"
-#include <errno.h>
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/server_innards.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/io_ops.h"
 #include "../Includes/load_rss.h"
-#include <sys/wait.h>
 
 static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss",
 		
@@ -120,8 +116,6 @@ static int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const c
 
 void generateRss(char* dir){
 
-	logging=1;
-        logstream=stderr;
 	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneRSS_XML,dir, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
 	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoRSS_XML,dir, request_id);

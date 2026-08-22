@@ -7,4 +7,5 @@ extern char tmpFile[PATHSIZE*3],
 	
 void runClientConnection(u_int8_t is_tls, int32_t sock);
 
+
 #endif

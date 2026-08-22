@@ -1,6 +1,5 @@
 #include "../Includes/preprocessor.h"
-#include "../Includes/http_req_parser.h"
-#include <ctype.h>
+
 
 int url_decode(char *src, char *dst, char** reserved_characters_arr) {
     int result=0;
@@ -158,28 +157,6 @@ void* tmp=*var1;
 }
 
 
-int64_t min(int64_t arg1, int64_t arg2){
-
-	if(arg1<arg2){
-
-		return arg1;
-
-	}
-	return arg2;
-
-
-}
-int64_t max(int64_t arg1, int64_t arg2){
-
-	if(arg1>arg2){
-
-		return arg1;
-
-	}
-	return arg2;
-
-
-}
 char *get_file_extension(const char *path) {
     char *extension = strrchr(path, '.');
 

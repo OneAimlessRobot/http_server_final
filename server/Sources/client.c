@@ -9,6 +9,7 @@
 #include "../Includes/load_html.h"
 #include "../Includes/ssl_things.h"
 #include "../Includes/load_rss.h"
+#include "../Includes/load_date.h"
 #include "../Includes/php_proxy.h"
 #include "../Includes/rcon_proxy.h"
 #include "../Includes/send_resource_func.h"
@@ -20,7 +21,6 @@
 
 static http_header header = {0};
 static http_request req = {0};
-static void (*generating_func)(char*) = NULL;
 
 client curr_client = {0};
 char tmpFile[PATHSIZE*3]={0},
@@ -47,14 +47,14 @@ void exit_function_client(void){
 	exit(-1);
 }
 
-static int generating_func_wrapper(void (*generating_func)(char*), char* arg){
-	generating_func(arg);
+static int generating_func_wrapper( char* arg){
+	curr_client.generating_func(arg);
 	return 0;
 }
 
-static void head_and_get_wrapper(void (*generating_func)(char*)){
-	(generating_func!=NULL)?
-			generating_func_wrapper(generating_func, curr_client.target)
+static void head_and_get_wrapper(void){
+	(curr_client.generating_func!=NULL)?
+			generating_func_wrapper(curr_client.target)
 			:
 			snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 						"%s%s",currDir,curr_client.target);
@@ -77,15 +77,15 @@ static void process_header_target(void){
 		fprintf(logstream,"The relative file path here is: %s\n", curr_client.relative_file_path);
 	}
 }
-static void process_req_switch_block(void (*generating_func)(char*)){
+static void process_req_switch_block(void){
 	
 
 	switch(curr_client.req->header->type){
 		case GET:
-			head_and_get_wrapper(generating_func);
+			head_and_get_wrapper();
 		break;
 		case HEAD:
-			head_and_get_wrapper(generating_func);
+			head_and_get_wrapper();
 		break;
 		case POST:
 			if(isCustomPostReq(curr_client.req)){
@@ -100,8 +100,8 @@ static void process_req_switch_block(void (*generating_func)(char*)){
 				}
 			}
 			
-			(generating_func!=NULL)?
-				generating_func_wrapper(generating_func, curr_client.req->final_form):
+			(curr_client.generating_func!=NULL)?
+				generating_func_wrapper(curr_client.req->final_form):
 				snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 							"%s%s",currDir,curr_client.relative_file_path);
 			
@@ -137,31 +137,34 @@ static void handleCurrentActivity(void){
 	
 	if(curr_client.req->is_a_form){
 		if((curr_client.is_directory=isDirectory(curr_client.target))){
-			generating_func = generateDirListing;
+			curr_client.generating_func = generateDirListing;
 		}
 		else if(isRssFeed(curr_client.target)){
-			generating_func = generateRss;
+			curr_client.generating_func = generateRss;
+		}
+		else if(isDateReq(curr_client.target)){
+			curr_client.generating_func = the_time_func;
 		}
 		else if(isPHPRequest(curr_client.target)){
-			generating_func = generatePHPResult;
+			curr_client.generating_func = generatePHPResult;
 		}
 		else if(isText(curr_client.target)){
-			generating_func = generateText;
+			curr_client.generating_func = generateText;
 		}
 		else if(isRconRequest(curr_client.target)){
 			
-			generating_func = generateRconResult;
+			curr_client.generating_func = generateRconResult;
 		}
 		else if(isFindRequest(curr_client.target)){
 			
-			generating_func = generateFindResult;
+			curr_client.generating_func = generateFindResult;
 		}
 	}
-	process_req_switch_block(generating_func);
+	process_req_switch_block();
 	
 	if(curr_client.req->is_a_form){
 		sendResource(is_head);
-		if(generating_func){
+		if(curr_client.generating_func){
 			remove(curr_client.filepath);
 		}
 	}

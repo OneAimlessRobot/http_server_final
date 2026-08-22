@@ -138,19 +138,21 @@ http_header_field* make_http_header_field_arr(char *strarr[ARGVMAX]) {
 
 static void spawnHTTPHeader(void){
 	curr_client.req->header->type=INVALID;
-	memset(curr_client.req->header->target,0,FIELDSIZE);
-	memset(curr_client.req->header->origin,0,FIELDSIZE);
-	memset(curr_client.req->header->content_length,0,FIELDSIZE);
-	memset(curr_client.req->header->host,0,FIELDSIZE);
-	memset(curr_client.req->header->mimetype,0,FIELDSIZE);
-	memset(curr_client.req->header->specific,0,FIELDSIZE);
-	memset(curr_client.req->header->is_mobile,0,FIELDSIZE);
-	memset(curr_client.req->header->version,0,FIELDSIZE);
-	memset(curr_client.req->header->os,0,FIELDSIZE);
-	memset(curr_client.req->header->user_agent,0,FIELDSIZE);
-	memset(curr_client.req->header->range,0,FIELDSIZE);
-	memset(curr_client.req->header->range_string,0,FIELDSIZE);
-	memset(curr_client.req->header->cloudfare_ip,0, FIELDSIZE);
+	b_zero(curr_client.req->header->target);
+	b_zero(curr_client.req->header->content_length);
+	b_zero(curr_client.req->header->origin);
+	b_zero(curr_client.req->header->host);
+	b_zero(curr_client.req->header->mimetype);
+	b_zero(curr_client.req->header->specific);
+	
+	b_zero(curr_client.req->header->is_mobile);
+	b_zero(curr_client.req->header->version);
+	b_zero(curr_client.req->header->os);
+	b_zero(curr_client.req->header->user_agent);
+	b_zero(curr_client.req->header->range);
+	b_zero(curr_client.req->header->range_string);
+	b_zero(curr_client.req->header->cloudfare_ip);
+	
 	char* headerArr[ARGVMAX] = {0};
 	char* firstHeaderArr[ARGVMAX] = {0};
 	char test[sizeof(curr_client.peerbuff)+1] = {0};

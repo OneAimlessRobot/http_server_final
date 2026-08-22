@@ -1,15 +1,10 @@
 #include "../Includes/preprocessor.h"
-#include <errno.h>
 #include "../Includes/client.h"
-#include "../Includes/server_vars.h"
 #include "../Includes/http_req_parser.h"
-#include "../Includes/server_innards.h"
-#include "../Includes/resource_consts.h"
-#include "../Includes/io_ops.h"
 #include "../Includes/handlecustom.h"
 
 
-char* custompostreqs[]={RCON_REQUEST,FIND_REQUEST,NULL},
+char* custompostreqs[]={RCON_REQUEST,FIND_REQUEST, NULL},
 	* custom_specificpostreqs[]={UPLOAD_SPECIFIC_REQUEST_STRING,NULL};
 
 
@@ -47,10 +42,6 @@ static void handleFindRequest(http_request* req){
 		}
 	}
 }
-static void handleUploadRequest(http_request* req){
-	printf("Unimplemented function (%s)\n",req->header->specific);
-}
-
 
 int isCustomPostReq(http_request* req){
 	int result=0;
@@ -68,11 +59,6 @@ void handleCustomPostReq(http_request* req){
 			handleFindRequest(req);
 
 		}
-	}
-	else if(!strncmp(req->header->specific,UPLOAD_SPECIFIC_REQUEST_STRING,sizeof(req->header->specific))){
-		
-		handleUploadRequest(req);
-
 	}
 }
 

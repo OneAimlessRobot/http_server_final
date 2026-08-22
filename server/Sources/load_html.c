@@ -1,11 +1,7 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/server_innards.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/io_ops.h"
-#include "../Includes/send_resource_func.h"
-#include "../Includes/load_html.h"
 #include "../Includes/template_funcs.h"
 
 #define SITE_PATH_HEADER_CLASS "header_for_site_path"
@@ -219,8 +215,6 @@ static void generateDirListingPrimitive(char* path){
 }
 void generateDirListing(char* dir){
 
-	logging=1;
-    logstream=stderr;
 
 	resolve_canonical_path_relative(dir,resolved_rel_path);
 	resolve_canonical_path_relative(defaultTarget,resolved_default_path);

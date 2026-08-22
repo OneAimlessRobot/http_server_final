@@ -1,7 +1,5 @@
 #include "../Includes/preprocessor.h"
-#include "../Includes/resource_consts.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/server_innards.h"
 #include "../Includes/filePaths.h"
 #include "../Includes/ssl_things.h"
 

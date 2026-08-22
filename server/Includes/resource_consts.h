@@ -24,6 +24,9 @@
 #define tmpOneRCON_HTML "/.tmp%lx.rcon"
 #define tmpTwoRCON_HTML "/.tmp1%lx.rcon"
 
+#define tmpOneDATE_HTML "/.tmp%lx.date"
+#define tmpTwoDATE_HTML "/.tmp1%lx.date"
+
 extern char* excluded_xtensions[];
 
 

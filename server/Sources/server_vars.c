@@ -1,9 +1,4 @@
 #include "../Includes/preprocessor.h"
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <pthread.h>
-#include "../Includes/client.h"
-#include "../Includes/cfg_loading.h"
 #include "../Includes/server_vars.h"
 
 

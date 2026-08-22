@@ -1,12 +1,7 @@
 #include "../Includes/preprocessor.h"
-#include <errno.h>
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/server_innards.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/io_ops.h"
-#include "../Includes/rcon_proxy.h"
-#include <sys/wait.h>
 
 
 

@@ -1,10 +1,7 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/server_innards.h"
 #include "../Includes/resource_consts.h"
-#include "../Includes/io_ops.h"
-#include "../Includes/txt_sending.h"
 #include "../Includes/template_funcs.h"
 
 #define TXT_PRETTIFY_BODY_CLASS "txt_prettify_body"
@@ -67,8 +64,6 @@ static void generateTextPrimitive(char* path){
 
 void generateText(char* dir){
 
-	logging=1;
-	logstream=stderr;
 	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneTXT_HTML,dir, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
 	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoTXT_HTML,dir, request_id);

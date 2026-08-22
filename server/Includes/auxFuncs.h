@@ -13,8 +13,8 @@ int does_dir_exist_aux(char* path);
 double genRanddouble(double min, double max);
 int genRandInt(int min, int max);
 void swap(void** var1, void** var2);
-int64_t min(int64_t arg1, int64_t arg2);
-int64_t max(int64_t arg1, int64_t arg2);
+
+
 char *get_file_extension(const char *path);
 
 int makeargv(char *s, char *argv[ARGVMAX], int n_max);
