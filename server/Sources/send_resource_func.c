@@ -59,7 +59,7 @@ static int compressFile(char* target){
 				comp_enable = 0;
 				return -1;
 		}
-		snprintf(cmd,sizeof(cmd)-1,compressionCmd,servComp.cmdTool,compression_level,ptr);
+		snprintf(cmd,sizeof(cmd)-1,servComp.comp_cmd,servComp.cmdTool,compression_level,ptr);
 		
 		if(logging){
 		
@@ -180,11 +180,6 @@ void sendResource(int is_head){
 		return;
 	}
 	close(curr_client.fd);
-	u_int8_t we_in_csgo_mode= (!strcmp(servComp.fileExt,bzip2.fileExt));
-	if(we_in_csgo_mode&&!curr_client.is_directory){
-		curr_client.filepath[strlen(curr_client.filepath)-strlen(servComp.fileExt)-1]=0;
-		curr_client.target[strlen(curr_client.target)-strlen(servComp.fileExt)-1]=0;
-	}
 	if(logging > 5){
 		fprintf(logstream,"Fetching %s...\n",curr_client.filepath);
 	}

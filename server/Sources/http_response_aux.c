@@ -200,7 +200,7 @@ void fillUploadHeader(char headerBuff[PATHSIZE],const char* mimetype, char* targ
 
 
 
-char* redirectHeader= "HTTP/2 301 See Other\r\n"
+char* redirectHeader= "HTTP/1.1 301 See Other\r\n"
 				"Accept-Ranges: bytes\r\n"
 				"Location: %s\r\n"
 			  	//"Origin: localhost\r\n"
@@ -216,7 +216,7 @@ void fillUpRedirectHeader(char headerBuff[PATHSIZE],char* path){
 
 }
 
-char* notFoundHeader= "HTTP/2 404 Not Found\r\n"
+char* notFoundHeader= "HTTP/1.1 404 Not Found\r\n"
 						"Accept-Ranges: bytes\r\n"
                                 "Content-Type: %s\r\n"
 			  	//"Origin: localhost\r\n"

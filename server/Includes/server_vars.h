@@ -49,6 +49,7 @@ extern FILE* logstream;
 extern compMethod br,
 		gzip,
 		bzip2,
+		deflate,
 		servComp;
 
 

@@ -46,9 +46,10 @@ char currDir[PATHSIZE] = {0},
 
 FILE* logstream=NULL;
 
-compMethod br = {"brotli","br"," br"},
-		gzip = {"gzip","gzip"," gzip"},
-		bzip2 = {"bzip2","bz2"," bzip2"},
+compMethod br = {"brotli","br"," br", "%s -c -%hhu %s"},
+		gzip = {"gzip","gzip"," gzip", "%s -c -%hhu %s"},
+		bzip2 = {"bzip2","bz2"," bzip2", "\"%s -c -%hhu %s\""},
+		deflate = {"deflate","deflate", " deflate", "./deflate/build/%s -c -%hhu %s"},
 		servComp = {0};
 
 

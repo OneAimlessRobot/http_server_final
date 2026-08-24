@@ -8,7 +8,6 @@ int comp_fd = -1;
 static void push_bytes(void);
 
 
-static char* compressionCmd = "%s -c -%d %s";
 
 static char inpathbuff[PATHSIZE*6]={0},
 		outpathbuff[PATHSIZE*6+10]={0},
