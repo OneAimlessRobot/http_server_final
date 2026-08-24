@@ -32,6 +32,11 @@ int isText(char* resourceTarget){
 
 }
 
+int isRobotsText(char* resourceTarget){
+    return stringsAreEqual(resourceTarget,robotsTarget);
+
+}
+
 static void generateTextPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);

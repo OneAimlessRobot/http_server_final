@@ -100,7 +100,8 @@ typedef struct client{
 	u_int8_t is_tls,
 			enable_first_time_in_upload,
 			compress,
-			is_directory;
+			is_directory,
+			is_robots;
 	SSL* ctx_if_ssl;
 	struct sockaddr_in client_addr;
 	generating_func_t generating_func;

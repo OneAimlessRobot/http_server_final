@@ -169,6 +169,7 @@ void initializeConstants(void){
 	strncpy(host_cert_file_path,find_value_in_cfg_arr("host_cert_file_path",cfgs),FIELDSIZE-1);
 	strncpy(host_pkey_file_path,find_value_in_cfg_arr("host_pkey_file_path",cfgs),FIELDSIZE-1);
 	strncpy(uploadTarget,find_value_in_cfg_arr("uploadTarget",cfgs),FIELDSIZE-1);
+	strncpy(robotsTarget,find_value_in_cfg_arr("robotsTarget",cfgs),FIELDSIZE-1);
 	int invalid_string_confs=
 				!((stringsAreEqual(defaultTarget,NO_SUCH_SETTING)
 				||

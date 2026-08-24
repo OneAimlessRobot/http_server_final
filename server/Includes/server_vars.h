@@ -40,8 +40,10 @@ extern char currDir[PATHSIZE],
 	notFoundDefaultTarget[FIELDSIZE],
 	mainRssFeed[FIELDSIZE],
 	uploadTarget[FIELDSIZE],
+	robotsTarget[FIELDSIZE],
 	*tmp_file_dir,
-	*defaultMimetype;
+	*defaultMimetype,
+	*robotsMimetype;
 
 
 extern FILE* logstream;

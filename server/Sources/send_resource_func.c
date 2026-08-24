@@ -105,7 +105,15 @@ static int compressFile(char* target){
 static void send_header(int notfound){
 
 	int64_t fileSize=0;
-	const char* the_mime_type= get_mime_type(notfound?notFoundDefaultTarget:curr_client.relative_file_path);
+	const char* the_mime_type= curr_client.is_robots
+								?
+								robotsMimetype
+								:
+								get_mime_type(notfound
+											?
+											notFoundDefaultTarget
+											:
+											curr_client.relative_file_path);
 	
 	lseek(comp_fd,0,SEEK_END);
 	

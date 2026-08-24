@@ -156,7 +156,10 @@ static void handleCurrentActivity(void){
 			curr_client.generating_func = generatePHPResult;
 		}
 		else if(isText(curr_client.target)){
-			curr_client.generating_func = generateText;
+			
+			curr_client.is_robots = isRobotsText(curr_client.target);
+			curr_client.generating_func = curr_client.is_robots?NULL:generateText;
+		
 		}
 		else if(isRconRequest(curr_client.target)){
 			
