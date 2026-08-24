@@ -19,7 +19,7 @@ typedef struct cfg_field{
 
 
 typedef struct compMethod{
-	char * cmdTool,
+	char *cmdTool,
 		*fileExt,
 		*encodingExt,
 		*comp_cmd;

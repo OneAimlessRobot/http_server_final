@@ -269,7 +269,6 @@ void clientBootstrap(void){
 	if(logging){
 		fprintf(logstream,"Request id: %lu\n",request_id);
 	}
-	servComp=bzip2;
 	cleanup();
 	
 }

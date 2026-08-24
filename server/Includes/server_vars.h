@@ -46,11 +46,10 @@ extern char currDir[PATHSIZE],
 
 extern FILE* logstream;
 
-extern compMethod br,
-		gzip,
-		bzip2,
-		deflate,
-		servComp;
+extern compMethod 
+		* servComp,
+		methods_for_compression[];
+
 
 
 #endif

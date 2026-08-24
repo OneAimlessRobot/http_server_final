@@ -3,7 +3,6 @@
 #include "../Includes/http_req_parser.h"
 #include "../Includes/http_response_aux.h"
 #include "../Includes/handlecustom.h"
-#include "../Includes/server_vars.h"
 #include "../Includes/client.h"
 #include "../Includes/load_find_results.h"
 #include "../Includes/load_html.h"
@@ -113,7 +112,17 @@ static void process_req_switch_block(void){
 		break;
 	}	
 }
-
+static void figure_out_compression(void){
+	
+	for(int i=0;methods_for_compression[i].encodingExt;i++){
+			
+		if(findInStringArr(curr_client.req->header->split_encoding,methods_for_compression[i].encodingExt)>=0){
+			servComp = &methods_for_compression[i];
+			curr_client.compress=use_compression;
+			break;
+		}
+	}
+}
 static void handleCurrentActivity(void){
 	
 	if(curr_client.req->header->type==INVALID){
@@ -125,12 +134,10 @@ static void handleCurrentActivity(void){
 
 		strcpy(curr_client.req->header->target,defaultTarget);
 	}
+	figure_out_compression();
 	
 	process_header_target();
 	
-	if(findInStringArr(curr_client.req->header->split_encoding,servComp.encodingExt)>=0){
-		curr_client.compress=use_compression;
-	}
 	u_int8_t is_head = (curr_client.req->header->type==HEAD);
 	
 	
