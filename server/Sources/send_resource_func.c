@@ -189,7 +189,7 @@ void sendResource(int is_head){
 	}
 	close(curr_client.fd);
 	if(logging > 5){
-		fprintf(logstream,"Fetching %s...\nRecurso pedido por cliente de:\n%s:%hu\nNumero de recurso: %lu",curr_client.filepath,
+		fprintf(logstream,"Fetching %s...\nRecurso pedido por cliente de:\n%s:%hu\nNumero de request: %lu\n\n",curr_client.filepath,
 								inet_ntoa(curr_client.client_addr.sin_addr) ,
 								ntohs(curr_client.client_addr.sin_port),
 								request_id);
