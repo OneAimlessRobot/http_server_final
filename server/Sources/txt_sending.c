@@ -8,7 +8,6 @@
 #define TXT_PRETTIFY_PRE_CLASS TXT_PRETTIFY_BODY_CLASS
 #define TXT_PRETTIFY_DIV_CLASS TXT_PRETTIFY_BODY_CLASS
 
-static u_int64_t curr_line_number = 1;
     
 static const char* txt_prettify_css_file_path= "/webcrookedstuff/.styles_file_exts/.stylesheet_txt_files.css";
 
@@ -130,8 +129,7 @@ void generateText(char* dir){
 
 	char currLine[PATHSIZE*2]={0};
 	while(fgets(currLine,PATHSIZE,fstream)){
-		dprintf(curr_client.fd,"%lu  %s",curr_line_number,currLine);
-		curr_line_number++;
+		dprintf(curr_client.fd,"%s",currLine);
 	}
 	dprintf(curr_client.fd,"\n</pre>\n</div>\n\n<br>\n<br>\n"
 				"</body>\n</html>\n");
