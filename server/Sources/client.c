@@ -245,9 +245,9 @@ void runClientConnection(u_int8_t is_tls, int32_t sock){
 	}
 	req.header=&header;
 	curr_client.req= &req;
+	getpeername(curr_client.socket , (struct sockaddr*)&curr_client.client_addr , (socklen_t*)&socklenpointer);
 	handleConnection();
 
-	getpeername(curr_client.socket , (struct sockaddr*)&curr_client.client_addr , (socklen_t*)&socklenpointer);
 	if(logging>0){
 		fprintf(logstream,"Disconnexao cliente de:\n%s:%d\n" ,
 					inet_ntoa(curr_client.client_addr.sin_addr) ,
