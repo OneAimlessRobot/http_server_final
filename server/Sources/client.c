@@ -20,6 +20,8 @@
 
 static http_header header = {0};
 static http_request req = {0};
+static struct stat the_stat_struct_here = {0};
+
 
 client curr_client = {0};
 char tmpFile[PATHSIZE*3]={0},
@@ -174,7 +176,7 @@ static void handleCurrentActivity(void){
 	
 	if(curr_client.req->is_a_form){
 		sendResource(is_head);
-		if(curr_client.generating_func){
+		if(curr_client.generating_func&&!curr_client.is_not_found){
 			remove(curr_client.filepath);
 		}
 	}
@@ -245,6 +247,8 @@ void runClientConnection(u_int8_t is_tls, int32_t sock){
 	}
 	req.header=&header;
 	curr_client.req= &req;
+	curr_client.the_stat_struct= &the_stat_struct_here;
+	
 	getpeername(curr_client.socket , (struct sockaddr*)&curr_client.client_addr , (socklen_t*)&socklenpointer);
 	handleConnection();
 

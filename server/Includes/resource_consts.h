@@ -36,4 +36,7 @@ u_int8_t get_mime_type_compressibility(const char *filename);
 
 const char* get_mime_type(const char *filename);
 
+int check_stat_of_file(const char* full_file_path,struct stat * statbuf,u_int8_t logging,FILE*logstream);
+
+
 #endif

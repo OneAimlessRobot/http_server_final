@@ -102,14 +102,14 @@ static int compressFile(char* target){
 	return 0;
 }
 
-static void send_header(int notfound){
+static void send_header(void){
 
 	int64_t fileSize=0;
 	const char* the_mime_type= curr_client.is_robots
 								?
 								robotsMimetype
 								:
-								get_mime_type(notfound
+								get_mime_type(curr_client.is_not_found
 											?
 											notFoundDefaultTarget
 											:
@@ -121,7 +121,7 @@ static void send_header(int notfound){
 	
 	lseek(comp_fd,0,SEEK_SET);
 	
-	(!notfound)?
+	(!curr_client.is_not_found)?
 		((comp_enable)?
 			((use_chunked)?
 				((!curr_client.req->header->is_partial)?
@@ -198,8 +198,7 @@ void sendResource(int is_head){
 	if(logging>0){
 			   
 	}
-	u_int8_t notfound=0,
-			compressibility_selected=curr_client.compress;
+	u_int8_t compressibility_selected=curr_client.compress;
 
 	if(compressibility_selected){
 		curr_client.compress = (curr_client.compress && get_mime_type_compressibility(curr_client.filepath));
@@ -230,7 +229,7 @@ void sendResource(int is_head){
 			}
 		}
 		else{
-			notfound=1;
+			curr_client.is_not_found=1;
 			use_chunked=0;
 			
 			if(logging){
@@ -240,11 +239,11 @@ void sendResource(int is_head){
 			}
 		}
 	}
-	send_header(notfound);
+	send_header();
 	if(!is_head){
 		push_bytes();
 	}
-	final_cleanup(notfound);
+	final_cleanup();
 	
 	if(logging){
 		fprintf(logstream,"Done!\n");

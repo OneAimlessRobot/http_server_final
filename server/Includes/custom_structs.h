@@ -101,7 +101,9 @@ typedef struct client{
 			enable_first_time_in_upload,
 			compress,
 			is_directory,
-			is_robots;
+			is_robots,
+			is_not_found;
+	struct stat * the_stat_struct;
 	SSL* ctx_if_ssl;
 	struct sockaddr_in client_addr;
 	generating_func_t generating_func;

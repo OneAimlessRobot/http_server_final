@@ -113,3 +113,16 @@ u_int8_t get_mime_type_compressibility(const char *filename) {
     }
     return 1;
 }
+
+int check_stat_of_file(const char* full_file_path,struct stat * statbuf,u_int8_t logging, FILE*logstream){
+		
+	int result= stat(full_file_path,statbuf);
+	if(result <0){
+		if(logging){
+				fprintf(logstream,"The file |%s| could not be stat-ed!\nError string: %s\n",
+								full_file_path,
+								strerror(errno));
+		}
+	}
+	return result;
+}

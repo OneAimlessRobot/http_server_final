@@ -80,7 +80,7 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 	make_rcon_arg_arr(the_separated_parameters,parameters_arr,MAX_NUM_RCON_ARGS+1);
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
-
+		
         snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s%s", currDir,the_rcon_script);
 
         char* args_cmd[]={"bash",currFetchedRCON,

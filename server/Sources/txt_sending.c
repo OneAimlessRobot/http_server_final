@@ -8,7 +8,7 @@
 #define TXT_PRETTIFY_PRE_CLASS TXT_PRETTIFY_BODY_CLASS
 #define TXT_PRETTIFY_DIV_CLASS TXT_PRETTIFY_BODY_CLASS
 
-
+static u_int64_t curr_line_number = 1;
     
 static const char* txt_prettify_css_file_path= "/webcrookedstuff/.styles_file_exts/.stylesheet_txt_files.css";
 
@@ -40,8 +40,19 @@ int isRobotsText(char* resourceTarget){
 static void generateTextPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
+		
         snprintf(currFetchedText,sizeof(currFetchedText)-1,"%s%s",currDir,path);
-
+		int stat_result = check_stat_of_file(currFetchedText,curr_client.the_stat_struct,logging,logstream);
+		if(stat_result<0){
+			if(logging){
+			fprintf(logstream,"ERRO NO TXT SENDING %s\nErro: %s\n",
+															tmpDir,
+															strerror(errno));
+			}
+			curr_client.is_not_found = 1;
+			return;
+			
+		}
         char* args_cmd[]={"cat", currFetchedText,NULL};
         pid_t pid_fork_find_cmd=fork();
         switch(pid_fork_find_cmd){
@@ -79,7 +90,7 @@ void generateText(char* dir){
 	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
 	if(curr_client.fd <0){
 			if(logging){
-			fprintf(logstream,"ERRO NAS DIRETORIAS %s\nErro: %s\n",
+			fprintf(logstream,"ERRO NO TXT SENDING %s\nErro: %s\n",
 															curr_client.filepath,
 															strerror(errno));
 			}
@@ -90,10 +101,16 @@ void generateText(char* dir){
 		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
 	generateTextPrimitive(dir);
+	
+	if(curr_client.is_not_found){
+		remove(curr_client.filepath);
+		return;
+		
+	}
 	FILE* fstream;
 	if(!(fstream=fopen(tmpDir,"r"))){
 			if(logging){
-			fprintf(logstream,"ERRO NO RSS FEED %s\n",tmpDir);
+			fprintf(logstream,"ERRO NO TEXT SENDING %s\n",tmpDir);
 			}
 			close(curr_client.fd);
 			curr_client.fd = -1;
@@ -113,7 +130,8 @@ void generateText(char* dir){
 
 	char currLine[PATHSIZE*2]={0};
 	while(fgets(currLine,PATHSIZE,fstream)){
-		dprintf(curr_client.fd,"%s",currLine);
+		dprintf(curr_client.fd,"%lu  %s",curr_line_number,currLine);
+		curr_line_number++;
 	}
 	dprintf(curr_client.fd,"\n</pre>\n</div>\n\n<br>\n<br>\n"
 				"</body>\n</html>\n");

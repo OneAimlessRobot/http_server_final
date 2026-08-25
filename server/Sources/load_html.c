@@ -188,6 +188,7 @@ static void generateDirListingPrimitive(char* path){
 
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
+	
     snprintf(currSearchedDir,PATHSIZE*2-1,"%s%s",currDir,path);
 
 	resolve_canonical_path(currSearchedDir,resolved_abs_path);

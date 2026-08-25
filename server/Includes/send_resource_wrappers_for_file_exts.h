@@ -30,11 +30,11 @@ static void push_bytes(void){
 	
 }
 
-static void final_cleanup(int notfound){
+static void final_cleanup(void){
 	
 	close(comp_fd);
 
-	if(comp_enable&&!notfound){
+	if(comp_enable&&!curr_client.is_not_found){
 		if(logging>3){
 			fprintf(logstream,"Trying to delete %s...\n",outpathbuff);
 		}

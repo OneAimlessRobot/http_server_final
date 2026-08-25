@@ -73,6 +73,7 @@ int isRssFeed(char* resourceTarget){
 static void generateRssPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
+		
         snprintf(currFetchedRSS,PATHSIZE*2-1,"%s%s",currDir,path);
 
         char* args_cmd[]={"cat", currFetchedRSS,NULL};
