@@ -116,12 +116,12 @@ static void handleIncommingConnections(void){
 			serverOn=0;
 			return;
 		}
+        request_id_here++;
 		setNonBlocking(client_socket);
 		getpeername(client_socket , (struct sockaddr*)&clientAddress , (socklen_t*)&socklenpointer);
         if(logging){
-			fprintf(logstream,"Client connected , ip %s , port %hu\n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port));
+			fprintf(logstream,"Client connected , ip %s , port %hu\nRequest number: %lu\n" ,inet_ntoa(clientAddress.sin_addr) , ntohs(clientAddress.sin_port),request_id_here);
         }
-        request_id_here++;
         
         memset(buff_sock,0, sizeof(buff_sock));
         memset(buff_tls,0, sizeof(buff_tls));
