@@ -2,6 +2,7 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/template_funcs.h"
 #include "../Includes/load_date.h"
 
 char LE_TIMEUREUR[MICROTIMESIZESTRINGTHING] = {0};
@@ -41,7 +42,7 @@ void the_time_func(char* unused){
 
 	strftime(LE_TIMEUREUR, sizeof(LE_TIMEUREUR), "+%a, %d %b %Y %H:%M:%S %Z", time_struct);
     
-    dprintf(curr_client.fd,"%s\n",LE_TIMEUREUR);
+    dprintf(curr_client.fd,LOAD_DATE_PREFIX,(u_int64_t)1000,LE_TIMEUREUR);
     
 	lseek(curr_client.fd,0,SEEK_SET);
     

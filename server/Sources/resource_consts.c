@@ -59,7 +59,7 @@ MimeEntry mime_types[] = {
     {".vdf", "text/plain", 1},
     {".gam", "text/plain", 1},
     {".py", "text/x-python", 1},
-    {".date", "text/plain", 1},
+    {".date", "text/html", 1},
     {".bmp", "image/bmp", 1},
     {".log", "text/plain", 1},
     {".tga", "image/x-targa", 1},
