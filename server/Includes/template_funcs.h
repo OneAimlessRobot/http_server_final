@@ -44,11 +44,11 @@ window.setTimeout( function() {
 			"\n<link rel='stylesheet' type='text/css' href=''>" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
 			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
-			"\n</head><br>\n<body>\n" \
+			"\n</head>\n<body>\n" \
 			"<script>\nwindow.setTimeout( function() {\n" \
 			"window.location.reload();\n" \
 			"}, %lu);\n</script>\n" \
 			"<div>%s</div>\n<br>\n" \
-			"</body><br>" \
+			"</body>" \
 			"\n</html>\n"
 #endif
