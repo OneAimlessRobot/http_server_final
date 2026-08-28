@@ -31,8 +31,11 @@ int isText(char* resourceTarget){
 
 }
 
-int isRobotsText(char* resourceTarget){
-    return stringsAreEqual(resourceTarget,robotsTarget);
+int isNonPrettifiable(char* resourceTarget){
+    u_int8_t result1 = stringsAreEqual(resourceTarget,robotsTarget);
+	char * result2 = strstr(resourceTarget,excludePrettifyTarget);
+			
+	return result1 || result2;
 
 }
 

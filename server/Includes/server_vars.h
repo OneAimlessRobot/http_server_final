@@ -41,6 +41,7 @@ extern char currDir[PATHSIZE],
 	mainRssFeed[FIELDSIZE],
 	uploadTarget[FIELDSIZE],
 	robotsTarget[FIELDSIZE],
+	excludePrettifyTarget[FIELDSIZE],
 	*tmp_file_dir,
 	*defaultMimetype,
 	*robotsMimetype;

@@ -105,7 +105,7 @@ static int compressFile(char* target){
 static void send_header(void){
 
 	int64_t fileSize=0;
-	const char* the_mime_type= curr_client.is_robots
+	const char* the_mime_type= curr_client.is_non_prettifyable
 								?
 								robotsMimetype
 								:

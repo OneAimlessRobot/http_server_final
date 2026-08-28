@@ -170,6 +170,7 @@ void initializeConstants(void){
 	strncpy(host_pkey_file_path,find_value_in_cfg_arr("host_pkey_file_path",cfgs),FIELDSIZE-1);
 	strncpy(uploadTarget,find_value_in_cfg_arr("uploadTarget",cfgs),FIELDSIZE-1);
 	strncpy(robotsTarget,find_value_in_cfg_arr("robotsTarget",cfgs),FIELDSIZE-1);
+	strncpy(excludePrettifyTarget,find_value_in_cfg_arr("excludePrettifyTarget",cfgs),FIELDSIZE-1);
 	int invalid_string_confs=
 				!((stringsAreEqual(defaultTarget,NO_SUCH_SETTING)
 				||
@@ -193,7 +194,11 @@ void initializeConstants(void){
 				&&
 				(stringsAreEqual(uploadTarget,NO_SUCH_SETTING)
 				||
-				stringsAreEqual(uploadTarget,NO_SETTINGS_LOADED)));
+				stringsAreEqual(uploadTarget,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(excludePrettifyTarget,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(excludePrettifyTarget,NO_SETTINGS_LOADED)));
 	
 	if(!invalid_string_confs){
 

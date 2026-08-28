@@ -249,7 +249,7 @@ void print_string_arr(FILE* fstream,char * args[]){
 void splitString(char *input, char *delimiter, char *pair[2]) {
     char *delimiterPos = strstr(input, delimiter);
 
-    if (delimiterPos != NULL) {
+    if (delimiterPos) {
         size_t firstPartLength = delimiterPos - input;
 
         pair[0] = input;

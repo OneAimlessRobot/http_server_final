@@ -101,7 +101,7 @@ typedef struct client{
 			enable_first_time_in_upload,
 			compress,
 			is_directory,
-			is_robots,
+			is_non_prettifyable,
 			is_not_found;
 	struct stat * the_stat_struct;
 	SSL* ctx_if_ssl;

@@ -159,8 +159,17 @@ static void handleCurrentActivity(void){
 		}
 		else if(isText(curr_client.target)){
 			
-			curr_client.is_robots = isRobotsText(curr_client.target);
-			curr_client.generating_func = curr_client.is_robots?NULL:generateText;
+			curr_client.is_non_prettifyable = isNonPrettifiable(curr_client.target);
+			if(logging > 6){
+					fprintf(logstream,"%s is %s\n",
+								curr_client.target,
+								curr_client.is_non_prettifyable?
+										"non prettifyable"
+										:
+										"prettifyable!"
+										);
+			}
+			curr_client.generating_func = curr_client.is_non_prettifyable?NULL:generateText;
 		
 		}
 		else if(isRconRequest(curr_client.target)){

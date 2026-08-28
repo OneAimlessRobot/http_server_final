@@ -42,6 +42,7 @@ char currDir[PATHSIZE] = {0},
 	uploadTarget[FIELDSIZE] = {0},
 	robotsTarget[FIELDSIZE] = {0},
 	tmp_directory_name[PATHSIZE] = {0},
+	excludePrettifyTarget[PATHSIZE] = {0},
 	*tmp_file_dir= NULL,
 	*defaultMimetype = "*/*",
 	*robotsMimetype = "text/plain";
