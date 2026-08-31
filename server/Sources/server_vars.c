@@ -50,9 +50,9 @@ char currDir[PATHSIZE] = {0},
 FILE* logstream=NULL;
 
 compMethod methods_for_compression[] = {
+					{"zstd","zstd"," zstd", "%s -c -%hhu %s"},
 					{"brotli","br"," br", "%s -c -%hhu %s"},
 					{"gzip","gzip"," gzip", "%s -c -%hhu %s"},
-					{"bzip2","bz2"," bzip2", "\"%s -c -%hhu %s\""},
 					{"deflate","deflate", " deflate", "./deflate/build/%s -c -%hhu %s"},
 					{0}
 					},
