@@ -43,6 +43,14 @@ int does_dir_exist_aux(char* path){
 	errno=0;
 	return (directory!=NULL);
 }
+int strcicmp(char const *a, char const *b)
+{
+    for (;; a++, b++) {
+        int d = tolower((unsigned char)*a) - tolower((unsigned char)*b);
+        if (d != 0 || !*a)
+            return d;
+    }
+}
 void super_mkdir(const char *dir) {
     char tmp[256];
     char *p = NULL;

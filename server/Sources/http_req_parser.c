@@ -70,8 +70,19 @@ void print_http_req_header(FILE* fstream){
 					"Version: %s\n"
 					"Host: %s\n"
 					"User-Agent: %s\n"
+					
+					"Referer: %s\n"
+					"Accept: %s\n"
+					"Accept-Language: %s\n"
+					"Sec-Fetch-Site: %s\n"
+					"Sec-Fetch-Mode: %s\n"
+					"Sec-Fetch-Dest: %s\n"
+					"Sec-Fetch-User: %s\n"
+					"Sec-CH-Ua: %s\n"
+					"Sec-CH-Ua-Platform: %s\n"
+					"Cookie: %s\n"
+					
 					"mimetype: %s\n"
-					"OS: %s\n"
 					"Mobile? (raw): %s\n"
 					"Mobile? (captured value): %hhu\n"
 					"Range (string): |%s|\n"
@@ -87,8 +98,19 @@ void print_http_req_header(FILE* fstream){
 							curr_client.req->header->version,
 							curr_client.req->header->host,
 							curr_client.req->header->user_agent,
+							curr_client.req->header->refer,
+							curr_client.req->header->accept,
+							curr_client.req->header->accept_language,
+							curr_client.req->header->sec_fetch_site,
+							curr_client.req->header->sec_fetch_mode,
+							curr_client.req->header->sec_fetch_dest,
+							curr_client.req->header->sec_fetch_user,
+							
+							curr_client.req->header->sec_ch_ua,
+							curr_client.req->header->sec_ch_ua_platform,
+							
+							curr_client.req->header->cookie,
 							curr_client.req->header->mimetype,
-							curr_client.req->header->os,
 							curr_client.req->header->is_mobile,
 							curr_client.req->header->is_mobile_value,
 							curr_client.req->header->range_string,
@@ -114,7 +136,7 @@ static char* find_field_value_in_field_arr(char* fieldName,http_header_field* fi
 
 	for (int i=0;fields[i].field[0];i++){
 		
-		if(!strcmp(fields[i].field[0],fieldName)){
+		if(!strcicmp(fields[i].field[0],fieldName)){
 			return fields[i].field[1];
 		}
 	}
@@ -147,11 +169,21 @@ static void spawnHTTPHeader(void){
 	
 	b_zero(curr_client.req->header->is_mobile);
 	b_zero(curr_client.req->header->version);
-	b_zero(curr_client.req->header->os);
 	b_zero(curr_client.req->header->user_agent);
 	b_zero(curr_client.req->header->range);
 	b_zero(curr_client.req->header->range_string);
 	b_zero(curr_client.req->header->cloudfare_ip);
+	
+	b_zero(curr_client.req->header->refer);
+	b_zero(curr_client.req->header->accept);
+	b_zero(curr_client.req->header->accept_language);
+	b_zero(curr_client.req->header->sec_fetch_site);
+	b_zero(curr_client.req->header->sec_fetch_mode);
+	b_zero(curr_client.req->header->sec_fetch_dest);
+	b_zero(curr_client.req->header->sec_fetch_user);
+	b_zero(curr_client.req->header->sec_ch_ua);
+	b_zero(curr_client.req->header->sec_ch_ua_platform);
+	b_zero(curr_client.req->header->cookie);
 	
 	char* headerArr[ARGVMAX] = {0};
 	char* firstHeaderArr[ARGVMAX] = {0};
@@ -177,20 +209,34 @@ static void spawnHTTPHeader(void){
 		strcpy(curr_client.req->header->host,find_field_value_in_field_arr("Host",fieldarr));
 		strcpy(curr_client.req->header->origin,find_field_value_in_field_arr("Origin",fieldarr));
 		strcpy(curr_client.req->header->mimetype,defaultMimetype);
-		strcpy(curr_client.req->header->os,find_field_value_in_field_arr("sec-ch-ua-platform",fieldarr));
 		strcpy(curr_client.req->header->is_mobile,find_field_value_in_field_arr("sec-ch-ua-mobile",fieldarr));
 		if(strnlen(curr_client.req->header->is_mobile,FIELDSIZE)>0){
 			
 			sscanf(curr_client.req->header->is_mobile,"?%hhu",&curr_client.req->header->is_mobile_value);
 			
 		}
+
 		strcpy(curr_client.req->header->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
 		strcpy(curr_client.req->header->content_length,find_field_value_in_field_arr("Content-Length",fieldarr));
 		strcpy(curr_client.req->header->user_agent,find_field_value_in_field_arr("User-Agent",fieldarr));
 		strcpy(curr_client.req->header->cloudfare_ip,find_field_value_in_field_arr("CF-Connecting-IP",fieldarr));
+		
+		strcpy(curr_client.req->header->refer,find_field_value_in_field_arr("Referer",fieldarr));
+		strcpy(curr_client.req->header->accept,find_field_value_in_field_arr("Accept",fieldarr));
+		strcpy(curr_client.req->header->accept_language,find_field_value_in_field_arr("Accept-Language",fieldarr));
+		strcpy(curr_client.req->header->sec_fetch_site,find_field_value_in_field_arr("Sec-Fetch-Site",fieldarr));
+		strcpy(curr_client.req->header->sec_fetch_mode,find_field_value_in_field_arr("Sec-Fetch-Mode",fieldarr));
+		strcpy(curr_client.req->header->sec_fetch_dest,find_field_value_in_field_arr("Sec-Fetch-Dest",fieldarr));
+		strcpy(curr_client.req->header->sec_fetch_user,find_field_value_in_field_arr("Sec-Fetch-User",fieldarr));
+		strcpy(curr_client.req->header->sec_ch_ua,find_field_value_in_field_arr("Sec-CH-Ua",fieldarr));
+		strcpy(curr_client.req->header->sec_ch_ua_platform,find_field_value_in_field_arr("Sec-CH-Ua-Platform",fieldarr));
+		strcpy(curr_client.req->header->cookie,find_field_value_in_field_arr("Cookie",fieldarr));
+		
 		strcpy(curr_client.req->header->specific,find_field_value_in_field_arr("Specific",fieldarr));
+		
 		strcpy(curr_client.req->header->encodingcopy,curr_client.req->header->encoding);
 		make_str_arr(curr_client.req->header->encoding,",",curr_client.req->header->split_encoding,ARGVMAX);
+		
 		strcpy(curr_client.req->header->content_type_raw,find_field_value_in_field_arr("Content-Type",fieldarr));
 		
 		

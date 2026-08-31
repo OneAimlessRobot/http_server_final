@@ -64,7 +64,17 @@ typedef struct http_header{
 		*form_boundary_split[2],
 		form_boundary[FIELDSIZE],
 		cloudfare_ip[FIELDSIZE],
-		os[FIELDSIZE];
+		refer[FIELDSIZE],
+		accept[FIELDSIZE],
+		accept_language[FIELDSIZE],
+		sec_fetch_site[FIELDSIZE],
+		sec_fetch_mode[FIELDSIZE],
+		sec_fetch_dest[FIELDSIZE],
+		sec_fetch_user[FIELDSIZE],
+		sec_ch_ua[FIELDSIZE],
+		sec_ch_ua_platform[FIELDSIZE],
+		cookie[FIELDSIZE];
+		
 	u_int8_t is_partial,
 			is_mobile_value;
 	int64_t range_number;

@@ -4,6 +4,11 @@
 
 char* randStr(int size);
 char** randStrArr(int sizeOfStrs,int size);
+/*
+ 
+ https://stackoverflow.com/questions/5820810/case-insensitive-string-comparison-in-c
+*/
+int strcicmp(char const *a, char const *b);
 
 void freeStrArr(char** arr,int size);
 int* getRandIntArr(int min,int max,int size);
