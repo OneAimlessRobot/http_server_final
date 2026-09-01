@@ -20,7 +20,7 @@
 					"%s" \
 					"://" \
 					DOMAIN_NAME \
-					":%hu/" \
+					":%hu%s" \
 					"%s\r\n" \
 					"\r\n"
 					
@@ -178,11 +178,12 @@ void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimety
 void fillUploadHeader(char headerBuff[PATHSIZE],const char* mimetype, char* target){
 
 	snprintf(headerBuff,
-				PATHSIZE,
+				PATHSIZE*2,
 				UPLOAD_HEADER,
 				mimetype,
 				curr_client.is_tls?"https":"http",
 				port,
+				uploadTarget,
 				target);
 }
 
