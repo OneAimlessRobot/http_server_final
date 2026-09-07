@@ -206,41 +206,45 @@ void initializeConstants(void){
 		cleanup();
 
 	}
-	smalltimeoutsecs=atoi(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
+	recv_req_buff_size=ato_ull(find_value_in_cfg_arr("recv_req_buff_size",cfgs));
 	
-	smalltimeoutusecs=atoi(find_value_in_cfg_arr("smalltimeoutusecs",cfgs));
+	smalltimeoutsecs=ato_ull(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
 	
-	bigtimeoutsecs=atoi(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
+	smalltimeoutsecs=ato_ull(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
 	
-	tls_shake_timeout_usecs=atoi(find_value_in_cfg_arr("tls_shake_timeout_usecs",cfgs));
+	smalltimeoutusecs=ato_ull(find_value_in_cfg_arr("smalltimeoutusecs",cfgs));
 	
-	tls_shake_timeout_secs=atoi(find_value_in_cfg_arr("tls_shake_timeout_secs",cfgs));
+	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
 	
-	tls_data_timeout_usecs=atoi(find_value_in_cfg_arr("tls_data_timeout_usecs",cfgs));
+	tls_shake_timeout_usecs=ato_ull(find_value_in_cfg_arr("tls_shake_timeout_usecs",cfgs));
 	
-	tls_data_timeout_secs=atoi(find_value_in_cfg_arr("tls_data_timeout_secs",cfgs));
+	tls_shake_timeout_secs=ato_ull(find_value_in_cfg_arr("tls_shake_timeout_secs",cfgs));
 	
-	bigtimeoutusecs=atoi(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
+	tls_data_timeout_usecs=ato_ull(find_value_in_cfg_arr("tls_data_timeout_usecs",cfgs));
 	
-	lower_security_for_compat=atoi(find_value_in_cfg_arr("lower_security_for_compat",cfgs));
+	tls_data_timeout_secs=ato_ull(find_value_in_cfg_arr("tls_data_timeout_secs",cfgs));
 	
-	port=atoi(find_value_in_cfg_arr("port",cfgs));
+	bigtimeoutusecs=ato_ull(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
 	
-	use_compression=atoi(find_value_in_cfg_arr("use_compression",cfgs));
+	lower_security_for_compat=ato_ull(find_value_in_cfg_arr("lower_security_for_compat",cfgs));
 	
-	compression_level=atoi(find_value_in_cfg_arr("compression_level",cfgs));
+	port=ato_ull(find_value_in_cfg_arr("port",cfgs));
 	
-	use_chunked=atoi(find_value_in_cfg_arr("use_chunked",cfgs));
+	use_compression=ato_ull(find_value_in_cfg_arr("use_compression",cfgs));
 	
-	ignore_partial=atoi(find_value_in_cfg_arr("ignore_partial",cfgs));
+	compression_level=ato_ull(find_value_in_cfg_arr("compression_level",cfgs));
 	
-	logging=atoi(find_value_in_cfg_arr("logging",cfgs));
+	use_chunked=ato_ull(find_value_in_cfg_arr("use_chunked",cfgs));
 	
-	use_tls=atoi(find_value_in_cfg_arr("use_tls",cfgs));
+	ignore_partial=ato_ull(find_value_in_cfg_arr("ignore_partial",cfgs));
 	
-	use_valgrind=atoi(find_value_in_cfg_arr("use_valgrind",cfgs));
+	logging=ato_ull(find_value_in_cfg_arr("logging",cfgs));
 	
-	use_fancy_find=atoi(find_value_in_cfg_arr("use_fancy_find",cfgs));
+	use_tls=ato_ull(find_value_in_cfg_arr("use_tls",cfgs));
+	
+	use_valgrind=ato_ull(find_value_in_cfg_arr("use_valgrind",cfgs));
+	
+	use_fancy_find=ato_ull(find_value_in_cfg_arr("use_fancy_find",cfgs));
 	
 	if(compression_level > 9){
 		printf("Config error: compression level must be an integer between 0 and 9!\n");

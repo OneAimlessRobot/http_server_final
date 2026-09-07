@@ -2,7 +2,7 @@
 #include "../Includes/server_vars.h"
 
 
-u_int32_t smalltimeoutsecs,
+u_int64_t smalltimeoutsecs,
 	smalltimeoutusecs,
 
 	bigtimeoutsecs,
@@ -15,8 +15,8 @@ u_int32_t smalltimeoutsecs,
 	tls_data_timeout_usecs,
 	
 	recv_socket_size,
-	send_socket_size;
-
+	send_socket_size,
+	recv_req_buff_size;
 
 u_int16_t port = 0;
 

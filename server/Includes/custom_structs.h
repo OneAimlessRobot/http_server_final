@@ -83,10 +83,10 @@ typedef struct http_header{
 
 typedef struct http_request{
 
-	char form[BUFFSIZE],
-		processed_form[BUFFSIZE],
-		final_form[BUFFSIZE];
-	char begin_data[BUFFSIZE];
+	char form[MAX_RECV_REQ_BUFFSIZE],
+		processed_form[MAX_RECV_REQ_BUFFSIZE],
+		final_form[MAX_RECV_REQ_BUFFSIZE];
+	char begin_data[MAX_RECV_REQ_BUFFSIZE];
 	int64_t data_size,
 			begin_data_size,
 			form_size;
@@ -99,7 +99,7 @@ typedef struct http_request{
 
 typedef struct client{
 	
-	char peerbuff[BUFFSIZE],
+	char peerbuff[MAX_RECV_REQ_BUFFSIZE],
 		filepath[PATHSIZE*5],
 		target[PATHSIZE*3],
 		relative_file_path[PATHSIZE*3],

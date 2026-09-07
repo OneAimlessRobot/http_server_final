@@ -2,7 +2,7 @@
 #define SERVER_VARS_H
 
 
-extern u_int32_t smalltimeoutsecs,
+extern u_int64_t smalltimeoutsecs,
 	smalltimeoutusecs,
 
 	bigtimeoutsecs,
@@ -15,8 +15,8 @@ extern u_int32_t smalltimeoutsecs,
 	tls_data_timeout_usecs,
 	
 	recv_socket_size,
-	send_socket_size;
-
+	send_socket_size,
+	recv_req_buff_size;
 
 extern u_int16_t port;
 

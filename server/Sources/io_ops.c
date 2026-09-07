@@ -6,6 +6,10 @@
 
 exit_func_t  exit_func_for_this_module=NULL;
 
+char pull_buff[MAX_RECV_REQ_BUFFSIZE]={0},
+	send_buff[MAX_RECV_REQ_BUFFSIZE]={0},
+	send_chunkbuff[2 * MAX_RECV_REQ_BUFFSIZE + 10]={0};
+
 int64_t sendsome(int sd,char* buff,u_int64_t size, int flags){
 		if(sd < 0){
 			return -1;
@@ -338,10 +342,10 @@ int64_t pullallfd(int fd){
     int64_t len=(curr_client.enable_first_time_in_upload?curr_client.req->begin_data_size:1);
 	int64_t total=0;
 	u_int8_t first_time = curr_client.enable_first_time_in_upload;
-	char buff[BUFFSIZE]={0};
+	
 	for(;(len==-2||len>0)&&(total<curr_client.req->data_size);){
 		if(first_time){
-			memcpy(buff,curr_client.req->begin_data, curr_client.req->begin_data_size);
+			memcpy(pull_buff,curr_client.req->begin_data, curr_client.req->begin_data_size);
 			
 			if(logging> 50){
 				fprintf(logstream,"pullallfd appended %ld to file in first time read!\n",len);
@@ -350,7 +354,7 @@ int64_t pullallfd(int fd){
 			
 		}
 		else{
-			len= readall(&curr_client,buff);
+			len= readall(&curr_client,pull_buff);
 			if(logging > 50){
 				fprintf(logstream,"pullallfd subread devolve resultado de %ld!\n%ld out of %ld bytes accumulated!\n",len,
 								total+(len>=0?len:0),
@@ -361,7 +365,7 @@ int64_t pullallfd(int fd){
 		if(len > 0){
 			size_t written_total = 0;
 			while(written_total < (size_t)len){
-				ssize_t w = write(fd, buff + written_total, len - written_total);
+				ssize_t w = write(fd, pull_buff + written_total, len - written_total);
 				if(w > 0){
 					written_total += w;
 					total += w;
@@ -431,24 +435,22 @@ int64_t pullallfd(int fd){
 }
 int64_t sendallchunkedfd(client*c,int fd, int64_t start_point){
 
-char buff[BUFFSIZE];
-char chunkbuff[2 * BUFFSIZE + 10];
 int64_t numread;
 int64_t sent=0;
 int64_t num_bytes_sent=0;
 lseek(fd,start_point,SEEK_SET);
 dprintf(1,"Beginning to send from %ld\n",start_point);
-while ((numread = read(fd,buff, BUFFSIZE)) > 0) {
-    int64_t truesize = snprintf(chunkbuff, sizeof(chunkbuff), "%lx\r\n", numread);
-    memcpy(chunkbuff + truesize, buff, numread);
-    memcpy(chunkbuff + truesize + numread, "\r\n", 2);
+while ((numread = read(fd,send_buff, BUFFSIZE)) > 0) {
+    int64_t truesize = snprintf(send_chunkbuff, sizeof(send_chunkbuff), "%lx\r\n", numread);
+    memcpy(send_chunkbuff + truesize, send_buff, numread);
+    memcpy(send_chunkbuff + truesize + numread, "\r\n", 2);
 
     int64_t totalsent = 0;
     while (totalsent < truesize + numread + 2) {
         errno=0;
-	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, chunkbuff + totalsent, truesize + numread + 2 - totalsent)
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, send_chunkbuff + totalsent, truesize + numread + 2 - totalsent)
 					:
-					sendsome(c->socket, chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
+					sendsome(c->socket, send_chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
 	if(sent==-2){
 		continue;
 	}
@@ -494,20 +496,19 @@ return 0;
 
 int64_t sendallfd(client*c,int fd, int64_t start_point){
 
-char buff[BUFFSIZE];
 int64_t numread;
 int64_t sent=0;
 int64_t num_bytes_sent=0;
 
 lseek(fd,start_point,SEEK_SET);
 dprintf(1,"Beginning to send from %ld\n",start_point);
-while ((numread = read(fd,buff,BUFFSIZE)) > 0) {
+while ((numread = read(fd,send_buff,BUFFSIZE)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;
-	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, buff + totalsent,  numread - totalsent)
+	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, send_buff + totalsent,  numread - totalsent)
 					:
-					sendsome(c->socket, buff + totalsent,  numread - totalsent, 0);
+					sendsome(c->socket, send_buff + totalsent,  numread - totalsent, 0);
 	if(sent==-2){
 
 		continue;
