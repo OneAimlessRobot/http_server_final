@@ -1,7 +1,7 @@
 #ifndef HTTP_REQ_PARSER_H
 #define HTTP_REQ_PARSER_H
 
-#define ALLOWED_HTTP_REQUESTS_STRING "GET, HEAD, POST"
+
 #define REQUEST_SECTION_DELIMITER_STRING "\r\n\r\n"
 #define DOMAIN_NAME "lenasattic.ddns.net"
 

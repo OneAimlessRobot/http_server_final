@@ -74,8 +74,12 @@ static void generateRssPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
-        snprintf(currFetchedRSS,PATHSIZE*2-1,"%s%s",currDir,path);
+        snprintf(currFetchedRSS,sizeof(currFetchedRSS)-1,"%s%s",currDir,path);
 
+		snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRSS);
+		
+		build_last_modified_buff(curr_client.og_filepath);
+		
         char* args_cmd[]={"cat", currFetchedRSS,NULL};
         pid_t pid_fork_find_cmd=fork();
         switch(pid_fork_find_cmd){

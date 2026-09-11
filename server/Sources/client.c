@@ -8,7 +8,6 @@
 #include "../Includes/load_html.h"
 #include "../Includes/ssl_things.h"
 #include "../Includes/load_rss.h"
-#include "../Includes/load_date.h"
 #include "../Includes/php_proxy.h"
 #include "../Includes/rcon_proxy.h"
 #include "../Includes/send_resource_func.h"
@@ -26,7 +25,8 @@ static struct stat the_stat_struct_here = {0};
 client curr_client = {0};
 char tmpFile[PATHSIZE*3]={0},
 	tmpFile2[PATHSIZE*3]={0},
-	tmpDir[PATHSIZE*5]={0};
+	tmpDir[PATHSIZE*5]={0},
+	allowed_requests_string_buff[PATHSIZE*5]={0};
 	
 static socklen_t socklenpointer;
 
@@ -54,6 +54,8 @@ static int generating_func_wrapper( char* arg){
 }
 
 static void head_and_get_wrapper(void){
+	
+	curr_client.should_cache=!curr_client.generating_func;
 	(curr_client.generating_func!=NULL)?
 			generating_func_wrapper(curr_client.target)
 			:
@@ -125,12 +127,44 @@ static void figure_out_compression(void){
 		}
 	}
 }
+static void send_valid_requests_string(void){
+	
+	char *ptr=&allowed_requests_string_buff[0];
+	u_int64_t written=0,
+			written2=0,
+			curr_request_index=0;
+	
+	for(;
+			written<sizeof(allowed_requests_string_buff)&&curr_request_index<INVALID;
+				curr_request_index++){
+		
+		written=snprintf(ptr,
+				sizeof(allowed_requests_string_buff)-written,
+					"%s%s",
+						request_const_name_arr[curr_request_index],
+						curr_request_index>=(INVALID-1)?"":", ");
+		
+		ptr+=written;
+		
+	}
+	written2=snprintf((char*)curr_client.sent_header_buff,
+				sizeof(curr_client.sent_header_buff)-written,
+				HTTP_METHOD_ERR_HEADER,LE_TIMEUREUR_DATE,allowed_requests_string_buff);
+				
+				
+	
+	print_response_header(curr_client.sent_header_buff);
+	send_wrapper((char*)curr_client.sent_header_buff,written2);
+		
+}
 static void handleCurrentActivity(void){
 	
 	if(curr_client.req->header->type==INVALID){
-		send_wrapper((char*)HTTP_METHOD_ERR_HEADER,strlen(HTTP_METHOD_ERR_HEADER));
+		send_valid_requests_string();
 		return;
 	}
+	
+	build_date_buff();
 
 	if(!strcmp(curr_client.req->header->target,"/")){
 

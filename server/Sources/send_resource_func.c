@@ -109,11 +109,12 @@ static void send_header(void){
 								?
 								robotsMimetype
 								:
-								get_mime_type(curr_client.is_not_found
-											?
-											notFoundDefaultTarget
+								curr_client.is_not_found?
+										get_mime_type(notFoundDefaultTarget,&curr_client.mimetype_table_cell)
 											:
-											curr_client.relative_file_path);
+											curr_client.response_mimetype;
+	
+	curr_client.should_cache = get_mime_type_cacheability(curr_client.mimetype_table_cell);
 	
 	lseek(comp_fd,0,SEEK_END);
 	
@@ -125,26 +126,21 @@ static void send_header(void){
 		((comp_enable)?
 			((use_chunked)?
 				((!curr_client.req->header->is_partial)?
-					fillUpChunkedHeaderComp(
-											curr_client.sent_header_buff,
-											the_mime_type,
+					fillUpChunkedHeaderComp(the_mime_type,
 											servComp->fileExt)
 					:
-					fillUpChunkedPartialHeaderComp(curr_client.sent_header_buff,
-													the_mime_type,
+					fillUpChunkedPartialHeaderComp(the_mime_type,
 													servComp->fileExt,
 													curr_client.req->header->range_number,
 													fileSize)
 				)
 				:
 				((!curr_client.req->header->is_partial)?
-					fillUpNormalHeaderComp(curr_client.sent_header_buff,
-												the_mime_type,
+					fillUpNormalHeaderComp(the_mime_type,
 												servComp->fileExt,
 												fileSize)
 					:
-					fillUpNormalPartialHeaderComp(curr_client.sent_header_buff,
-													the_mime_type,
+					fillUpNormalPartialHeaderComp(the_mime_type,
 													servComp->fileExt,
 													curr_client.req->header->range_number,
 													fileSize)
@@ -153,39 +149,40 @@ static void send_header(void){
 			:
 			((use_chunked)?
 				((!curr_client.req->header->is_partial)?
-					fillUpChunkedHeader(curr_client.sent_header_buff,
-										the_mime_type)		
+					fillUpChunkedHeader(the_mime_type)		
 					:
-					fillUpChunkedPartialHeader(curr_client.sent_header_buff,
-												the_mime_type,
+					fillUpChunkedPartialHeader(the_mime_type,
 												curr_client.req->header->range_number,
 												fileSize)
 				)
 				:
 				((!curr_client.req->header->is_partial)?
-					fillUpNormalHeader(curr_client.sent_header_buff,
-										the_mime_type,
+					fillUpNormalHeader(the_mime_type,
 										fileSize)		
 					:
-					fillUpNormalPartialHeader(curr_client.sent_header_buff,
-												the_mime_type,
+					fillUpNormalPartialHeader(the_mime_type,
 												curr_client.req->header->range_number,
 												fileSize)
 				)
 			)
 		)
 		:
-		fillUpFileNotFoundHeader(curr_client.sent_header_buff,fileSize,the_mime_type);
+		fillUpFileNotFoundHeader(fileSize,the_mime_type);
 	int header_size=strlen(curr_client.sent_header_buff);
-	if(logging>50){
+	//if(logging>50){
 		print_response_header(curr_client.sent_header_buff);
-	}
+	//}
 	send_wrapper(curr_client.sent_header_buff,header_size);
 
 }
 void sendResource(int is_head){
 	if(curr_client.fd<0){
 		return;
+	}
+	if(!strlen(curr_client.og_filepath)){
+		
+		build_last_modified_buff(curr_client.filepath);
+		
 	}
 	close(curr_client.fd);
 	if(logging > 5){
@@ -195,13 +192,15 @@ void sendResource(int is_head){
 								request_id);
 		
 	}
-	if(logging>0){
-			   
-	}
+	snprintf(curr_client.response_mimetype,
+						sizeof(curr_client.response_mimetype)-1,
+						"%s",
+						get_mime_type(curr_client.filepath,&curr_client.mimetype_table_cell));
+						
 	u_int8_t compressibility_selected=curr_client.compress;
 
 	if(compressibility_selected){
-		curr_client.compress = (curr_client.compress && get_mime_type_compressibility(curr_client.filepath));
+		curr_client.compress = (curr_client.compress && get_mime_type_compressibility(curr_client.mimetype_table_cell));
 
 		if(logging > 5){
 			fprintf(logstream,"Server will use compression!\n"

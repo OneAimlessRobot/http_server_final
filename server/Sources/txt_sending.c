@@ -43,37 +43,42 @@ static void generateTextPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
-        snprintf(currFetchedText,sizeof(currFetchedText)-1,"%s%s",currDir,path);
-		int stat_result = check_stat_of_file(currFetchedText,curr_client.the_stat_struct,logging,logstream);
-		if(stat_result<0){
-			if(logging){
-			fprintf(logstream,"ERRO NO TXT SENDING %s\nErro: %s\n",
-															tmpDir,
-															strerror(errno));
-			}
-			curr_client.is_not_found = 1;
-			return;
-			
+	snprintf(currFetchedText,sizeof(currFetchedText)-1,"%s%s",currDir,path);
+	
+    snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedText);
+	
+    build_last_modified_buff(curr_client.og_filepath);
+    
+	int stat_result = check_stat_of_file(currFetchedText,curr_client.the_stat_struct,logging,logstream);
+	if(stat_result<0){
+		if(logging){
+		fprintf(logstream,"ERRO NO TXT SENDING %s\nErro: %s\n",
+														tmpDir,
+														strerror(errno));
 		}
-        char* args_cmd[]={"cat", currFetchedText,NULL};
-        pid_t pid_fork_find_cmd=fork();
-        switch(pid_fork_find_cmd){
+		curr_client.is_not_found = 1;
+		return;
+		
+	}
+	char* args_cmd[]={"cat", currFetchedText,NULL};
+	pid_t pid_fork_find_cmd=fork();
+	switch(pid_fork_find_cmd){
 
-                case -1:
-                        close(outfd);
-                        exit(-1);
-                break;
-                case 0:
-                        dup2(outfd,STDOUT_FILENO);
-                        close(outfd);
-                        execvp(args_cmd[0],args_cmd);
-                break;
-                default:
-                        wait(NULL);
-                break;
+			case -1:
+					close(outfd);
+					exit(-1);
+			break;
+			case 0:
+					dup2(outfd,STDOUT_FILENO);
+					close(outfd);
+					execvp(args_cmd[0],args_cmd);
+			break;
+			default:
+					wait(NULL);
+			break;
 
-        }
-        chdir("..");
+	}
+	chdir("..");
 	close(outfd);
 
 }

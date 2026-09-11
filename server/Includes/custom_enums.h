@@ -15,6 +15,4 @@ typedef enum {CH_TITLE=0,CH_LINK,CH_LANGUAGE,CH_UPDATE_PERIOD,CH_UPDATE_FREQUENC
 
 typedef enum {REGEXP,MAX_NUM_FIND_ARGS}find_args;
 
-
-
 #endif

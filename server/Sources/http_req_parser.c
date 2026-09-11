@@ -38,7 +38,7 @@ static http_req_type getREQtypeFromString(char* str){
 	if(!strnlen(str,FIELDSIZE)){
 		return INVALID;
 	}
-	for(http_req_type i=GET;i<sizeof(request_const_name_arr);i++){
+	for(http_req_type i=GET;i<MAX_REQUEST_TYPE ;i++){
 		
 		if(!strncmp(str,request_const_name_arr[i],FIELDSIZE)){
 				

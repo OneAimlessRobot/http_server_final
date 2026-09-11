@@ -27,14 +27,20 @@
 #define tmpOneDATE_HTML "/.tmp%lx.date"
 #define tmpTwoDATE_HTML "/.tmp1%lx.date"
 
+
+#define DEFAULT_COMPRESS_RESOURCE 0
+#define DEFAULT_CACHE_RESOURCE 0
+
 extern char* excluded_xtensions[];
 
 
 extern MimeEntry mime_types[];
 
-u_int8_t get_mime_type_compressibility(const char *filename);
+u_int8_t get_mime_type_compressibility(u_int64_t table_index);
 
-const char* get_mime_type(const char *filename);
+u_int8_t get_mime_type_cacheability(u_int64_t table_index);
+
+const char* get_mime_type(const char *filename, u_int64_t* index_obtained);
 
 int check_stat_of_file(const char* full_file_path,struct stat * statbuf,u_int8_t logging,FILE*logstream);
 

@@ -2,33 +2,8 @@
 #include "../Includes/http_response_aux.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/client.h"
+#include "../Includes/load_date.h"
 
-#define EMBEDDER_POLICY "require-corp"
-
-#define STD_HEADER_START_OK HTTP_OK_HEADER \
-						"Accept-Ranges: bytes\r\n" \
-						"Content-Type: %s\r\n"
-
-#define STD_HEADER_START_PARTIAL HTTP_PARTIAL_CONTENT_OK_HEADER \
-								"Accept-Ranges: bytes\r\n" \
-								"Content-Type: %s\r\n"
-
-
-#define UPLOAD_HEADER HTTP_CREATED_OK_HEADER \
-					"Content-Type: %s\r\n" \
-					"Location: " \
-					"%s" \
-					"://" \
-					DOMAIN_NAME \
-					":%hu%s%s" \
-					"%s\r\n" \
-					"\r\n"
-					
-/*
-"Cross-Origin-Embedder-Policy: "
-			  //EMBEDDER_POLICY
-			   "\r\n"
-*/
 
 
 /*
@@ -41,58 +16,54 @@
 -----------------------------------------------------------------------------------
 */
 
-char* normalHeader= STD_HEADER_START_OK
-			"Content-Length: %ld\r\n"
-			  //"Origin: localhost\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY  "\r\n"
- 			  "\r\n";
 
-void fillUpNormalHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t size){
+void fillUpNormalHeader(const char* mimetype,int64_t size){
 
-	snprintf(headerBuff,PATHSIZE,normalHeader,mimetype,size);
-
-}
-
-char* normalHeaderComp= STD_HEADER_START_OK
-				"Content-Length: %ld\r\n"
-			  //"Origin: localhost\r\n"
-			  "Content-encoding: %s\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY "\r\n"
-			   "\r\n";
-void fillUpNormalHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t size){
-
-	snprintf(headerBuff,PATHSIZE,normalHeaderComp,mimetype,size,method);
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						NORMAL_HEADER,
+						LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype,
+						size);
 
 }
 
-char* chunkedHeader= STD_HEADER_START_OK
-			  //"Origin: localhost\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: require-corp\r\n"*/
-			  /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY  "\r\n"
-			  "Transfer-Encoding: chunked\r\n"
-                          "\r\n";
+void fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size){
 
-void fillUpChunkedHeader(char headerBuff[PATHSIZE],const char* mimetype){
-	snprintf(headerBuff,PATHSIZE,chunkedHeader,mimetype);
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						NORMAL_HEADER_COMP,
+						LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype,
+						size,
+						method);
 
 }
 
-char* chunkedHeaderComp= STD_HEADER_START_OK
-			  //"Origin: localhost\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY "\r\n"
-                          "Transfer-Encoding: %s, chunked\r\n"
-                          "\r\n";
 
-void fillUpChunkedHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method){
-	snprintf(headerBuff,PATHSIZE,chunkedHeaderComp,mimetype,method);
+void fillUpChunkedHeader(const char* mimetype){
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						CHUNKED_HEADER,LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype);
+
+}
+
+void fillUpChunkedHeaderComp(const char* mimetype,char* method){
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						CHUNKED_HEADER_COMP,
+						LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype,
+						method);
 
 }
 
@@ -108,59 +79,60 @@ void fillUpChunkedHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char
 */
 
 
-
-
-char* normalPartialHeader= STD_HEADER_START_PARTIAL
-						"Content-Length: %ld\r\n"
-						"Content-Range: bytes %ld-%ld/%ld\r\n"
-			  //"Origin: localhost\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY  "\r\n"
- 			  "\r\n";
-void fillUpNormalPartialHeader(char headerBuff[PATHSIZE],const char* mimetype, int64_t start_point,int64_t size){
-	snprintf(headerBuff,PATHSIZE,normalPartialHeader,mimetype,size-start_point,start_point,size-1,size);
+void fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,int64_t size){
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						NORMAL_PARTIAL_HEADER,
+						LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype,
+						size-start_point,
+						start_point,
+						size-1,
+						size);
 }
-
-
-char* normalPartialHeaderComp= STD_HEADER_START_PARTIAL
-						"Content-Length: %ld\r\n"
-						"Content-Range: bytes %ld-%ld/%ld\r\n"
-			  //"Origin: localhost\r\n"
-			  "Content-encoding: %s\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY "\r\n"
-			   "\r\n";
 			   
-void fillUpNormalPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method, int64_t start_point,int64_t size){
-	snprintf(headerBuff,PATHSIZE,normalPartialHeaderComp,mimetype,size-start_point,start_point,start_point+size-1,size,method);
+void fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t start_point,int64_t size){
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						NORMAL_PARTIAL_HEADER_COMP,
+						LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype,
+						size-start_point,
+						start_point,
+						start_point+size-1,
+						size,method);
 }
 		   
-char* chunkedPartialHeader= STD_HEADER_START_PARTIAL
-						"Content-Range: bytes %ld-%ld/%ld\r\n"
-			  //"Origin: localhost\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: require-corp\r\n"*/
-			  /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY  "\r\n"
-			  "Transfer-Encoding: chunked\r\n"
-                          "\r\n";
-void fillUpChunkedPartialHeader(char headerBuff[PATHSIZE],const char* mimetype,int64_t start_point,int64_t size){
-	snprintf(headerBuff,PATHSIZE,chunkedPartialHeader,mimetype,start_point,start_point+size-1,size);
+
+void fillUpChunkedPartialHeader(const char* mimetype,int64_t start_point,int64_t size){
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						CHUNKED_PARTIAL_HEADER,
+						LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype,
+						start_point,
+						start_point+size-1,
+						size);
 }
 
-char* chunkedPartialHeaderComp= STD_HEADER_START_PARTIAL
-						"Content-Range: bytes %ld-%ld/%ld\r\n"
-			  //"Origin: localhost\r\n"
-			  /*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          /*"Cross-Origin-Embedder-Policy: "*/
-			  //EMBEDDER_POLICY "\r\n"
-                          "Transfer-Encoding: %s, chunked\r\n"
-                          "\r\n";
-
-void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimetype,char* method,int64_t start_point,int64_t size){
-	snprintf(headerBuff,PATHSIZE,chunkedPartialHeaderComp,mimetype,start_point,start_point+size-1,size,method);
+void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,int64_t start_point,int64_t size){
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+						CHUNKED_PARTIAL_HEADER_COMP,
+						LE_TIMEUREUR_DATE,
+						LE_TIMEUREUR_LAST_MODIFIED_DATE,
+						ETag,
+						curr_client.should_cache?"must-revalidate":"no-cache",
+						mimetype,
+						start_point,
+						start_point+size-1,
+						size,
+						method);
 }
 
 
@@ -175,11 +147,11 @@ void fillUpChunkedPartialHeaderComp(char headerBuff[PATHSIZE],const char* mimety
 */
 
 
-void fillUploadHeader(char headerBuff[PATHSIZE],const char* mimetype, char* target){
+void fillUploadHeader(const char* mimetype, char* target){
 
-	snprintf(headerBuff,
-				PATHSIZE*3,
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 				UPLOAD_HEADER,
+				LE_TIMEUREUR_DATE,
 				mimetype,
 				curr_client.is_tls?"https":"http",
 				port,
@@ -201,36 +173,22 @@ void fillUploadHeader(char headerBuff[PATHSIZE],const char* mimetype, char* targ
 
 
 
+void fillUpRedirectHeader(char* path){
 
-char* redirectHeader= "HTTP/1.1 301 See Other\r\n"
-				"Accept-Ranges: bytes\r\n"
-				"Location: %s\r\n"
-			  	//"Origin: localhost\r\n"
-			  	"Content-Length: 0\r\n"
-			  	/*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          	/*"Cross-Origin-Embedder-Policy: "*/
-			  	//EMBEDDER_POLICY "\r\n"
-			   	"\r\n";
-
-void fillUpRedirectHeader(char headerBuff[PATHSIZE],char* path){
-
-	snprintf(headerBuff,PATHSIZE,redirectHeader,path);
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+							REDIRECT_HEADER,
+							LE_TIMEUREUR_DATE,
+							path);
 
 }
 
-char* notFoundHeader= "HTTP/1.1 404 Not Found\r\n"
-						"Accept-Ranges: bytes\r\n"
-                                "Content-Type: %s\r\n"
-			  	//"Origin: localhost\r\n"
-			  	"Content-Length: %ld\r\n"
-			  	/*"Cross-Origin-Embedder-Policy: "*/
-			  	//EMBEDDER_POLICY "\r\n"
-			   	/*"Cross-Origin-Opener-Policy: same-origin\r\n"*/
-                          	"\r\n";
+void fillUpFileNotFoundHeader(int64_t size,const char* mimetype){
 
-void fillUpFileNotFoundHeader(char headerBuff[PATHSIZE],int64_t size,const char* mimetype){
-
-	snprintf(headerBuff,PATHSIZE,notFoundHeader,mimetype,size);
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+							NOT_FOUND_HEADER,
+							LE_TIMEUREUR_DATE,
+							mimetype,
+							size);
 
 }
 

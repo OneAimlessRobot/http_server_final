@@ -31,7 +31,8 @@ typedef struct compMethod{
 typedef struct {
     const char *extension,
 				*mime_type;
-	u_int8_t allows_compression;
+	u_int8_t allows_compression,
+			to_be_cached;
 
 } MimeEntry;
 
@@ -100,10 +101,12 @@ typedef struct http_request{
 typedef struct client{
 	
 	char peerbuff[MAX_RECV_REQ_BUFFSIZE],
+		og_filepath[PATHSIZE*5],
 		filepath[PATHSIZE*5],
 		target[PATHSIZE*3],
 		relative_file_path[PATHSIZE*3],
-		sent_header_buff[PATHSIZE];
+		response_mimetype[128],
+		sent_header_buff[HEADER_SEND_SIZE];
 	http_request* req; 
 	int32_t socket, fd;
 	int64_t recv_size;
@@ -112,7 +115,9 @@ typedef struct client{
 			compress,
 			is_directory,
 			is_non_prettifyable,
-			is_not_found;
+			is_not_found,
+			should_cache;
+	u_int64_t mimetype_table_cell;
 	struct stat * the_stat_struct;
 	SSL* ctx_if_ssl;
 	struct sockaddr_in client_addr;

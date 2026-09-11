@@ -5,15 +5,63 @@
 #include "../Includes/template_funcs.h"
 #include "../Includes/load_date.h"
 
-char LE_TIMEUREUR[MICROTIMESIZESTRINGTHING] = {0};
+char LE_TIMEUREUR_DATE[MICROTIMESIZESTRINGTHING] = {0},
 
-static time_t timeur = {0};
-static struct tm* time_struct =  NULL;
+		LE_TIMEUREUR_LAST_MODIFIED_DATE[MICROTIMESIZESTRINGTHING] = {0},
+		
+		ETag[MICROTIMESIZESTRINGTHING] = {0};
+
+	
+static time_t date_timeur = {0};
+static struct stat last_modified_stat_struct = {0};
+static struct tm* time_struct_for_date =  NULL;
 
 int isDateReq(char* target){
 	
 	return stringsAreEqual(target,"/date.date");
 		
+}
+
+void build_date_buff(void){
+	
+	
+	time(&date_timeur);
+
+	time_struct_for_date= localtime(&date_timeur);	
+
+	strftime(LE_TIMEUREUR_DATE, sizeof(LE_TIMEUREUR_DATE), "%a, %d %b %Y %H:%M:%S %Z", time_struct_for_date);
+
+}
+void build_last_modified_buff(char* full_file_path){
+	
+	if(!full_file_path){
+		
+		return;
+		
+	}
+	int ret = lstat(full_file_path, &last_modified_stat_struct);
+	if (ret == -1) {
+		perror("lstat");
+		return;
+	}
+    
+    
+    ctime_r( &last_modified_stat_struct.st_mtim.tv_sec , LE_TIMEUREUR_LAST_MODIFIED_DATE);
+	LE_TIMEUREUR_LAST_MODIFIED_DATE[strnlen(LE_TIMEUREUR_LAST_MODIFIED_DATE,sizeof(LE_TIMEUREUR_LAST_MODIFIED_DATE)-1)-1]=0;
+	
+	/*
+	 
+	 https://stackoverflow.com/questions/4533/http-generating-etag-header
+	
+	*/
+	
+	snprintf(ETag,sizeof(ETag)-1, "%ld-%ld-%ld", last_modified_stat_struct.st_mtime,
+			last_modified_stat_struct.st_size,
+			last_modified_stat_struct.st_ino);
+    
+	printf("The path to be dated: %s\n", full_file_path);
+	printf("The date: %s\n", LE_TIMEUREUR_LAST_MODIFIED_DATE);
+	
 }
 void the_time_func(char* unused){
 	
@@ -36,13 +84,8 @@ void the_time_func(char* unused){
 	else if(logging){
 		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
-	time(&timeur);
-
-	time_struct= localtime(&timeur);	
-
-	strftime(LE_TIMEUREUR, sizeof(LE_TIMEUREUR), "+%a, %d %b %Y %H:%M:%S %Z", time_struct);
     
-    dprintf(curr_client.fd,LOAD_DATE_PREFIX,(u_int64_t)1000,LE_TIMEUREUR);
+    dprintf(curr_client.fd,LOAD_DATE_PREFIX,(u_int64_t)1000,LE_TIMEUREUR_DATE);
     
 	lseek(curr_client.fd,0,SEEK_SET);
     

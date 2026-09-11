@@ -10,8 +10,8 @@
 
 static void send_header(void){
 
-	const char* the_mime_type= get_mime_type(curr_client.target);
-	fillUploadHeader(curr_client.sent_header_buff,the_mime_type,curr_client.target);
+	const char* the_mime_type= get_mime_type(curr_client.target,NULL);
+	fillUploadHeader(the_mime_type,curr_client.target);
 	int header_size=strlen(curr_client.sent_header_buff);
 	if(logging){
 		print_response_header(curr_client.sent_header_buff);

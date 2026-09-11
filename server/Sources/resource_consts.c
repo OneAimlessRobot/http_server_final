@@ -21,97 +21,144 @@ char* excluded_xtensions[]={
 
 
 MimeEntry mime_types[] = {
-    {".html", "text/html", 1},
-    {".css", "text/css", 1},
-    {".js", "application/javascript", 1},
-    {".png", "image/png", 1},
-    {".PNG", "image/png", 1},
-    {".jpg", "image/jpeg", 1},
-    {".jpeg", "image/jpeg", 1},
-    {".webp", "image/webp", 1},
-    {".mp4", "video/mp4", 0},
-    {".yml", "text/yaml", 1},
-    {".yaml", "text/yaml", 1},
-    {".mp3", "audio/mp3", 0},
-    {".wasm", "application/wasm", 1},
-    {".webmanifest", "application/manifest+json", 1},
-    {".gif", "image/gif", 1},
-    {".jfif", "image/jpeg", 1},
-    {".avif", "image/avif", 1},
-    {".java", "text/x-java-source", 1},
-    {".ico", "image/x-icon", 1},
-    {".icon", "image/x-icon", 1},
-    {".json", "application/json", 1},
-    {".svg", "image/svg+xml", 1},
-    {".txt", "text/html", 1},
-    {".webm", "audio/webm", 0},
-    {".wav", "audio/wav", 0},
-    {".m4a", "audio/mp4", 0},
-    {".sp", "text/x-sourcepawn", 1},
-    {".sma", "text/x-sourcepawn", 1},
-    {".inc", "text/x-sourcepawn", 1},
-    {".cpp", "text/x-c++", 1},
-    {".c", "text/x-c++", 1},
-    {".h", "text/x-c++", 1},
-    {".hpp", "text/x-cpp", 1},
-    {".cfg", "text/x-config", 1},
-    {".php", "text/html", 1},
-    {".vdf", "text/plain", 1},
-    {".gam", "text/plain", 1},
-    {".py", "text/x-python", 1},
-    {".date", "text/html", 1},
-    {".bmp", "image/bmp", 1},
-    {".log", "text/plain", 1},
-    {".tga", "image/x-targa", 1},
-    {".tga", "image/x-targa", 1},
-    {".dds","image/x-dds", 1},
-    {".vtf","image/x-vtf", 1},
-    {".vmt","text/x-vmt", 1},
-    {".ogg","audio/ogg", 0},
-    {".flv","video/x-flv", 0},
-    {".flac","audio/flac", 0},
-    {".avi","video/x-msvideo", 0},
-    {".pl","text/plain", 1},
-    {".wad","application/x-doom-wad", 1},
-    {".lst","text/plain", 1},
-    {".db","text/plain", 1},
-    {".md","text/markdown", 1},
-    {".php","application/x-httpd-php", 1},
-    {".php2","application/json", 1},
-    {".pdf","application/pdf", 1},
-    {".sh","text/plain", 1},
-    {".rss","application/rss+xml", 1},
-    {".rcon","text/html", 1},
-    {".find","text/html", 1},
-    {".xml","application/xml", 1},
-    {".3gp","video/3gpp", 0},
-    {NULL, "application/octet-stream", 1}
+	
+	/*
+	 
+	 IMAGE MIMETYPES
+    
+    */
+    
+    
+    {".png", "image/png", 1,1},
+    {".PNG", "image/png", 1,1},
+    {".jpg", "image/jpeg", 1,1},
+    {".jpeg", "image/jpeg", 1,1},
+    {".webp", "image/webp", 1,1},
+    {".gif", "image/gif", 1,1},
+    {".jfif", "image/jpeg", 1,1},
+    {".avif", "image/avif", 1,1},
+    {".bmp", "image/bmp", 1,1},
+    {".tga", "image/x-targa", 1,1},
+    {".tga", "image/x-targa", 1,1},
+    {".dds","image/x-dds", 1,1},
+    {".vtf","image/x-vtf", 1,1},
+    {".ico", "image/x-icon", 1,1},
+    {".icon", "image/x-icon", 1,1},
+    {".svg", "image/svg+xml", 1,1},
+    
+    /*
+	 
+	 AUDIO MIMETYPES
+    
+    */
+    
+    {".wav", "audio/wav", 0,1},
+    {".webm", "audio/webm", 0,1},
+    {".m4a", "audio/mp4", 0,1},
+    {".mp3", "audio/mp3", 0,1},
+    {".ogg","audio/ogg", 0,1},
+    {".flac","audio/flac", 0,1},
+      
+    /*
+	 
+	 VIDEO MIMETYPES
+    
+    */
+    
+    {".mp4", "video/mp4", 0,1},
+    {".flv","video/x-flv", 0,1},
+    {".avi","video/x-msvideo",0,1},
+    {".3gp","video/3gpp", 0,1},
+    
+    /*
+     
+		DOCUMENT MIMETYPES
+     
+    */
+    
+    
+    {".html", "text/html", 1,0},
+    {".css", "text/css", 1,0},
+    {".yml", "text/yaml", 1,0},
+    {".yaml", "text/yaml", 1,0},
+    {".txt", "text/html", 1,0},
+    {".sp", "text/x-sourcepawn", 1,0},
+    {".sma", "text/x-sourcepawn", 1,0},
+    {".inc", "text/x-sourcepawn", 1,0},
+    {".cpp", "text/x-c++", 1,0},
+    {".c", "text/x-c++", 1,0},
+    {".h", "text/x-c++", 1,0},
+    {".hpp", "text/x-cpp", 1,0},
+    {".cfg", "text/x-config", 1,0},
+    {".php", "text/html", 1,0},
+    {".vdf", "text/plain", 1,0},
+    {".gam", "text/plain", 1,0},
+    {".py", "text/x-python", 1,0},
+    {".sh","text/plain", 1,0},
+    {".rcon","text/html", 1,0},
+    {".find","text/html", 1,0},
+    {".lst","text/plain", 1,0},
+    {".db","text/plain", 1,0},
+    {".md","text/markdown", 1,0},
+    {".date", "text/html", 1,0},
+    {".log", "text/plain", 1,0},
+    {".vmt","text/x-vmt", 1,0},
+    {".pl","text/plain", 1,0},
+    {".java", "text/x-java-source", 1,0},
+    
+    /*
+     
+		APPLICATION MIMETYPES
+     
+    */
+    
+    {".js", "application/javascript", 1,0},
+    {".wasm", "application/wasm", 1,0},
+    {".webmanifest", "application/manifest+json", 1,0},
+    {".json", "application/json", 1,0},
+    {".wad", "application/x-doom-wad", 1,0},
+    {".php", "application/x-httpd-php", 1,0},
+    {".php2", "application/json", 1,0},
+    {".pdf", "application/pdf", 1,0},
+    {".rss", "application/rss+xml", 1,0},
+    {".xml", "application/xml", 1,0},
+    
+    /*
+     
+		FALLBACK MIMETYPE
+     
+    */
+    
+    {NULL, "application/octet-stream", 1,0},
 };
 
-const char* get_mime_type(const char *filename) {
+const char* get_mime_type(const char *filename, u_int64_t* index_obtained){
+    u_int64_t safeguard_ptr = 0;
+    
+    index_obtained = ((index_obtained!=NULL)?index_obtained:&safeguard_ptr);
+	*index_obtained=-1;
+    
     const char *dot = strrchr(filename, '.');
+    
     if (!dot){
 		return "application/octet-stream";
 	}
-    for (int i = 0; mime_types[i].extension != NULL; i++) {
-        if (strcmp(dot, mime_types[i].extension) == 0) {
-            return mime_types[i].mime_type;
+    for ( (*index_obtained) = 0;
+		  mime_types[(*index_obtained)].extension != NULL;
+		  (*index_obtained)++ ) {
+
+        if (strcmp(dot, mime_types[(*index_obtained)].extension) == 0) {
+            return mime_types[(*index_obtained)].mime_type;
         }
     }
     return "application/octet-stream";
 }
 
-u_int8_t get_mime_type_compressibility(const char *filename) {
-    const char *dot = strrchr(filename, '.');
-    if (!dot){
-		return 1;
-	}
-    for (int i = 0; mime_types[i].extension != NULL; i++) {
-        if (strcmp(dot, mime_types[i].extension) == 0) {
-            return mime_types[i].allows_compression;
-        }
-    }
-    return 1;
+u_int8_t get_mime_type_compressibility(u_int64_t table_index) {
+    return ((table_index<0)?DEFAULT_COMPRESS_RESOURCE:mime_types[table_index].allows_compression);
+}
+u_int8_t get_mime_type_cacheability(u_int64_t table_index) {
+    return ((table_index<0)?DEFAULT_CACHE_RESOURCE:mime_types[table_index].to_be_cached);
 }
 
 int check_stat_of_file(const char* full_file_path,struct stat * statbuf,u_int8_t logging, FILE*logstream){

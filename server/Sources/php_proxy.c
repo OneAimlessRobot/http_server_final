@@ -48,12 +48,16 @@ int isPHPRequest(char* resourceTarget){
 void generatePHPResultPrimitive(char* target){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
-		
-        snprintf(currFetchedPHP,sizeof(currFetchedPHP)-1,"%s%s",currDir,target);
+	
+	snprintf(currFetchedPHP,sizeof(currFetchedPHP)-1,"%s%s",currDir,target);
 
-        snprintf(full_php_target,sizeof(full_php_target)-1,"%s%s",target,query);
+	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedPHP);
+	
+	build_last_modified_buff(curr_client.og_filepath);
+	
+	snprintf(full_php_target,sizeof(full_php_target)-1,"%s%s",target,query);
 
-        snprintf(full_php_root,sizeof(full_php_root)-1,"%s/",defaultTarget);
+	snprintf(full_php_root,sizeof(full_php_root)-1,"%s/",defaultTarget);
 
 
 	printf("(PHP) Output file path: %s\n",currFetchedPHP);

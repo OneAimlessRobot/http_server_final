@@ -81,36 +81,40 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
-        snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s%s", currDir,the_rcon_script);
+	snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s%s", currDir,the_rcon_script);
 
-        char* args_cmd[]={"bash",currFetchedRCON,
-						parameters_arr[ADDR].the_actual_value,
-						parameters_arr[PORT].the_actual_value,
-						parameters_arr[PASS].the_actual_value,
-						parameters_arr[CMD].the_actual_value,
-						NULL};
-		if(logging>6){
-			
-			print_string_arr(logstream,args_cmd);
-        }
-        pid_t pid_fork_find_cmd=fork();
-        switch(pid_fork_find_cmd){
+	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRCON);
+	
+	build_last_modified_buff(curr_client.og_filepath);
+	
+	char* args_cmd[]={"bash",currFetchedRCON,
+					parameters_arr[ADDR].the_actual_value,
+					parameters_arr[PORT].the_actual_value,
+					parameters_arr[PASS].the_actual_value,
+					parameters_arr[CMD].the_actual_value,
+					NULL};
+	if(logging>6){
+		
+		print_string_arr(logstream,args_cmd);
+	}
+	pid_t pid_fork_find_cmd=fork();
+	switch(pid_fork_find_cmd){
 
-                case -1:
-                        close(outfd);
-                        exit(-1);
-                break;
-                case 0:
-                        dup2(outfd,STDOUT_FILENO);
-                        close(outfd);
-                        execvp(args_cmd[0],args_cmd);
-                break;
-                default:
-                        wait(NULL);
-                break;
+			case -1:
+					close(outfd);
+					exit(-1);
+			break;
+			case 0:
+					dup2(outfd,STDOUT_FILENO);
+					close(outfd);
+					execvp(args_cmd[0],args_cmd);
+			break;
+			default:
+					wait(NULL);
+			break;
 
-        }
-        close(outfd);
+	}
+	close(outfd);
 
 }
 void generateRconResult(char* the_request_parameters){

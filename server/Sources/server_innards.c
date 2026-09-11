@@ -319,6 +319,7 @@ void initializeServer(void){
 	server_address.sin_family=AF_INET;
 	server_address.sin_port= htons(port);
 	server_address.sin_addr.s_addr = INADDR_ANY;
+	inet_addr("127.0.0.1");
 	socklen_t socklength=sizeof(server_address);
         
 	int bind_result = bind(server_socket,(struct sockaddr*)(&server_address),socklength);

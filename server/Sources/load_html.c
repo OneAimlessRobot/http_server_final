@@ -189,11 +189,14 @@ static void generateDirListingPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 	
-    snprintf(currSearchedDir,PATHSIZE*2-1,"%s%s",currDir,path);
-
+    snprintf(currSearchedDir,sizeof(currSearchedDir)-1,"%s%s",currDir,path);
+	
 	resolve_canonical_path(currSearchedDir,resolved_abs_path);
 	
-        
+    snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",resolved_abs_path);
+	
+    build_last_modified_buff(curr_client.og_filepath);
+    
 	pid_t pid_fork_find_cmd=fork();
 	switch(pid_fork_find_cmd){
 

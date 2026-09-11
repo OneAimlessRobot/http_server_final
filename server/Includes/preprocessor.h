@@ -3,6 +3,7 @@
 
 #define _GNU_SOURCE
 
+
 #include <ncurses.h>
 #include <stdio.h>
 #include <arpa/inet.h>
@@ -20,6 +21,7 @@
 #include <limits.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sched.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/ioctl.h>
@@ -40,9 +42,8 @@
 #include "buffSizes.h"
 #include "custom_types.h"
 #include "auxFuncs.h"
-
-#define FREE_ALL_APPS_COUNTDOWN "<script src=\"/webcrookedstuff/.keep_android_open_please.js\"></script>"
-
+#include "misc_preproc_consts.h"
+#include "../Includes/load_date.h"
 
 
 

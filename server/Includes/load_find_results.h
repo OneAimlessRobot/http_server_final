@@ -6,3 +6,4 @@ int isFindRequest(char* resourceTarget);
 void generateFindResult(char* dir);
 
 #endif
+
