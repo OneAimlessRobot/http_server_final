@@ -182,9 +182,10 @@ static void resolve_canonical_path_relative(char raw_path[PATH_MAX],char dst_for
 		}
 	}
 }
-
+/*
+	returns whether or not file has changed!
+*/
 static void generateDirListingPrimitive(char* path){
-
 
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
@@ -259,7 +260,10 @@ void generateDirListing(char* dir){
 	else if(logging){
 		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
+	
 	generateDirListingPrimitive(dir);
+	
+	
 	FILE* fstream;
 	if(!(fstream=fopen(tmpDir,"r"))){
 			if(logging){

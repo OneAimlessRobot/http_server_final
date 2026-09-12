@@ -55,12 +55,13 @@ static int generating_func_wrapper( char* arg){
 
 static void head_and_get_wrapper(void){
 	
-	curr_client.should_cache=!curr_client.generating_func;
 	(curr_client.generating_func!=NULL)?
 			generating_func_wrapper(curr_client.target)
 			:
 			snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,
 						"%s%s",currDir,curr_client.target);
+						
+	
 }
 static void process_req_data(void){
 	

@@ -11,7 +11,7 @@ char LE_TIMEUREUR_DATE[MICROTIMESIZESTRINGTHING] = {0},
 
 		LE_TIMEUREUR_LAST_ACCESS_DATE[MICROTIMESIZESTRINGTHING] = {0},
 		
-		ETag[MICROTIMESIZESTRINGTHING] = {0};
+		ETag[ETAG_SIZE] = {0};
 
 timer_struct_t struct_for_date = {0},
 				struct_for_mod_date = {0},

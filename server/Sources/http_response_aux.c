@@ -5,7 +5,20 @@
 #include "../Includes/load_date.h"
 
 
+#define FILL_UP_BORING_CRAP  LE_TIMEUREUR_DATE, \
+						KEEP_ALIVE_STRING, \
+						LE_TIMEUREUR_LAST_MODIFIED_DATE, \
+						LE_TIMEUREUR_LAST_ACCESS_DATE, \
+						ETag, \
+						curr_client.should_cache?"no-cache":"no-store", \
+						s_maxage
 
+#define FILL_UP_BORING_CRAP_NOT_MODIFIED LE_TIMEUREUR_DATE, \
+						KEEP_ALIVE_STRING, \
+						LE_TIMEUREUR_LAST_MODIFIED_DATE, \
+						ETag, \
+						curr_client.should_cache?"no-cache":"no-store", \
+						s_maxage
 /*
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
@@ -21,13 +34,7 @@ void fillUpNormalHeader(const char* mimetype,int64_t size){
 
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_HEADER,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype,
 						size);
 
@@ -37,13 +44,7 @@ void fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size){
 
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_HEADER_COMP,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype,
 						size,
 						method);
@@ -54,13 +55,7 @@ void fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size){
 void fillUpChunkedHeader(const char* mimetype){
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_HEADER,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype);
 
 }
@@ -68,13 +63,7 @@ void fillUpChunkedHeader(const char* mimetype){
 void fillUpChunkedHeaderComp(const char* mimetype,char* method){
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_HEADER_COMP,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype,
 						method);
 
@@ -95,13 +84,7 @@ void fillUpChunkedHeaderComp(const char* mimetype,char* method){
 void fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,int64_t size){
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_PARTIAL_HEADER,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype,
 						size-start_point,
 						start_point,
@@ -112,13 +95,7 @@ void fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,int64_t
 void fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t start_point,int64_t size){
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_PARTIAL_HEADER_COMP,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype,
 						size-start_point,
 						start_point,
@@ -130,13 +107,7 @@ void fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t st
 void fillUpChunkedPartialHeader(const char* mimetype,int64_t start_point,int64_t size){
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_PARTIAL_HEADER,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype,
 						start_point,
 						start_point+size-1,
@@ -146,13 +117,7 @@ void fillUpChunkedPartialHeader(const char* mimetype,int64_t start_point,int64_t
 void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,int64_t start_point,int64_t size){
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_PARTIAL_HEADER_COMP,
-						LE_TIMEUREUR_DATE,
-						KEEP_ALIVE_STRING,
-						LE_TIMEUREUR_LAST_MODIFIED_DATE,
-						LE_TIMEUREUR_LAST_ACCESS_DATE,
-						ETag,
-						DIFF_TIME(struct_for_date.timeur, struct_for_access_date.timeur),
-						curr_client.should_cache?"must-revalidate":"no-cache",
+						FILL_UP_BORING_CRAP,
 						mimetype,
 						start_point,
 						start_point+size-1,
@@ -212,7 +177,7 @@ void fillUpRedirectHeader(char* path){
 void fillUpFileNotFoundHeader(int64_t size,const char* mimetype){
 
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
-							NOT_FOUND_HEADER,
+							HTTP_NOT_FOUND_HEADER,
 							LE_TIMEUREUR_DATE,
 							KEEP_ALIVE_STRING,
 							mimetype,
@@ -220,7 +185,13 @@ void fillUpFileNotFoundHeader(int64_t size,const char* mimetype){
 
 }
 
-
+void fillUpNotModifiedHeader(void){
+	
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+							HTTP_NOT_MODIFIED_HEADER,
+							FILL_UP_BORING_CRAP_NOT_MODIFIED);
+	
+}
 
 /*
 -----------------------------------------------------------------------------------

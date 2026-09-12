@@ -110,11 +110,9 @@ static void send_header(void){
 								robotsMimetype
 								:
 								curr_client.is_not_found?
-										get_mime_type(notFoundDefaultTarget,&curr_client.mimetype_table_cell)
+										get_mime_type(notFoundDefaultTarget,NULL)
 											:
 											curr_client.response_mimetype;
-	
-	curr_client.should_cache = get_mime_type_cacheability(curr_client.mimetype_table_cell);
 	
 	lseek(comp_fd,0,SEEK_END);
 	
@@ -169,9 +167,9 @@ static void send_header(void){
 		:
 		fillUpFileNotFoundHeader(fileSize,the_mime_type);
 	int header_size=strlen(curr_client.sent_header_buff);
-	//if(logging>50){
+	if(logging>2){
 		print_response_header(curr_client.sent_header_buff);
-	//}
+	}
 	send_wrapper(curr_client.sent_header_buff,header_size);
 
 }
@@ -179,11 +177,13 @@ void sendResource(int is_head){
 	if(curr_client.fd<0){
 		return;
 	}
+	
 	if(!strlen(curr_client.og_filepath)){
 		
 		build_last_modified_buff(curr_client.filepath);
 		
 	}
+	
 	close(curr_client.fd);
 	if(logging > 5){
 		fprintf(logstream,"Fetching %s...\nRecurso pedido por cliente de:\n%s:%hu\nNumero de request: %lu\n\n",curr_client.filepath,
@@ -196,7 +196,28 @@ void sendResource(int is_head){
 						sizeof(curr_client.response_mimetype)-1,
 						"%s",
 						get_mime_type(curr_client.filepath,&curr_client.mimetype_table_cell));
-						
+	printf("The mimetype is: %s\nOur ETag: %s\nTheir ETag: %s\n",curr_client.response_mimetype,ETag,curr_client.req->header->if_none_match);
+	curr_client.should_cache = (!curr_client.generating_func && get_mime_type_cacheability(curr_client.mimetype_table_cell));
+	curr_client.would_cache=!strncmp(ETag,curr_client.req->header->if_none_match,sizeof(ETag)-1);
+	if(WILL_CACHE){
+		if(logging){
+			fprintf(logstream,"WILL cache!\n");
+		}
+		fillUpNotModifiedHeader();
+		int header_size=strlen(curr_client.sent_header_buff);
+		if(logging>2){
+			print_response_header(curr_client.sent_header_buff);
+		}
+		send_wrapper(curr_client.sent_header_buff,header_size);
+		close(curr_client.fd);
+		if(logging){
+			fprintf(logstream,"Done!\n");
+		}
+		return;
+	}
+	else if(logging){
+		fprintf(logstream,"Will NOT cache!\n");
+	}			
 	u_int8_t compressibility_selected=curr_client.compress;
 
 	if(compressibility_selected){

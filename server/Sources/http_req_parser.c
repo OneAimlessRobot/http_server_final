@@ -78,9 +78,13 @@ void print_http_req_header(FILE* fstream){
 					"Sec-Fetch-Mode: %s\n"
 					"Sec-Fetch-Dest: %s\n"
 					"Sec-Fetch-User: %s\n"
+					
 					"Sec-CH-Ua: %s\n"
 					"Sec-CH-Ua-Platform: %s\n"
+					
 					"Cookie: %s\n"
+					
+					"if-none-match: |%s|\n"
 					
 					"mimetype: %s\n"
 					"Mobile? (raw): %s\n"
@@ -110,6 +114,9 @@ void print_http_req_header(FILE* fstream){
 							curr_client.req->header->sec_ch_ua_platform,
 							
 							curr_client.req->header->cookie,
+							
+							curr_client.req->header->if_none_match,
+							
 							curr_client.req->header->mimetype,
 							curr_client.req->header->is_mobile,
 							curr_client.req->header->is_mobile_value,
@@ -184,6 +191,7 @@ static void spawnHTTPHeader(void){
 	b_zero(curr_client.req->header->sec_ch_ua);
 	b_zero(curr_client.req->header->sec_ch_ua_platform);
 	b_zero(curr_client.req->header->cookie);
+	b_zero(curr_client.req->header->if_none_match);
 	
 	char* headerArr[ARGVMAX] = {0};
 	char* firstHeaderArr[ARGVMAX] = {0};
@@ -231,9 +239,17 @@ static void spawnHTTPHeader(void){
 		strcpy(curr_client.req->header->sec_ch_ua,find_field_value_in_field_arr("Sec-CH-Ua",fieldarr));
 		strcpy(curr_client.req->header->sec_ch_ua_platform,find_field_value_in_field_arr("Sec-CH-Ua-Platform",fieldarr));
 		strcpy(curr_client.req->header->cookie,find_field_value_in_field_arr("Cookie",fieldarr));
+		strcpy(curr_client.req->header->if_none_match,find_field_value_in_field_arr("if-none-match",fieldarr));
 		
+		u_int64_t the_incomming_etag_len = 
+				strnlen(curr_client.req->header->if_none_match,sizeof(curr_client.req->header->if_none_match));
+		
+		if(the_incomming_etag_len>=3){
+			memmove(curr_client.req->header->if_none_match,&curr_client.req->header->if_none_match[2],
+						the_incomming_etag_len-3);
+			curr_client.req->header->if_none_match[the_incomming_etag_len-3]=0;
+		}
 		strcpy(curr_client.req->header->specific,find_field_value_in_field_arr("Specific",fieldarr));
-		
 		strcpy(curr_client.req->header->encodingcopy,curr_client.req->header->encoding);
 		make_str_arr(curr_client.req->header->encoding,",",curr_client.req->header->split_encoding,ARGVMAX);
 		

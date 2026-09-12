@@ -59,6 +59,7 @@ typedef struct http_header{
 		encoding[FIELDSIZE],
 		encodingcopy[FIELDSIZE],
 		origin[FIELDSIZE],
+		if_none_match[ETAG_SIZE],
 		mimetype[FIELDSIZE],
 		is_mobile[FIELDSIZE],
 		user_agent[FIELDSIZE],
@@ -122,6 +123,7 @@ typedef struct client{
 			is_directory,
 			is_non_prettifyable,
 			is_not_found,
+			would_cache,
 			should_cache;
 	u_int64_t mimetype_table_cell;
 	struct stat * the_stat_struct;

@@ -15,5 +15,6 @@
 
 #define KEEP_ALIVE_STRING (keep_alive?"keep-alive":"close")
 
+#define WILL_CACHE (curr_client.would_cache && curr_client.should_cache)
 
 #endif

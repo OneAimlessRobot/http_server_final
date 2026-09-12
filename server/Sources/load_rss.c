@@ -74,31 +74,31 @@ static void generateRssPrimitive(char* path){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
-        snprintf(currFetchedRSS,sizeof(currFetchedRSS)-1,"%s%s",currDir,path);
+	snprintf(currFetchedRSS,sizeof(currFetchedRSS)-1,"%s%s",currDir,path);
 
-		snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRSS);
-		
-		build_last_modified_buff(curr_client.og_filepath);
-		
-        char* args_cmd[]={"cat", currFetchedRSS,NULL};
-        pid_t pid_fork_find_cmd=fork();
-        switch(pid_fork_find_cmd){
+	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRSS);
+	
+	build_last_modified_buff(curr_client.og_filepath);
+	
+	char* args_cmd[]={"cat", currFetchedRSS,NULL};
+	pid_t pid_fork_find_cmd=fork();
+	switch(pid_fork_find_cmd){
 
-                case -1:
-                        close(outfd);
-                        exit(-1);
-                break;
-                case 0:
-                        dup2(outfd,STDOUT_FILENO);
-                        close(outfd);
-                        execvp(args_cmd[0],args_cmd);
-                break;
-                default:
-                        wait(NULL);
-                break;
+			case -1:
+					close(outfd);
+					exit(-1);
+			break;
+			case 0:
+					dup2(outfd,STDOUT_FILENO);
+					close(outfd);
+					execvp(args_cmd[0],args_cmd);
+			break;
+			default:
+					wait(NULL);
+			break;
 
-        }
-        chdir("..");
+	}
+	chdir("..");
 	close(outfd);
 
 }
@@ -142,6 +142,7 @@ void generateRss(char* dir){
 		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
 	generateRssPrimitive(dir);
+	
 	FILE* fstream;
 	if(!(fstream=fopen(tmpDir,"r"))){
 			if(logging){

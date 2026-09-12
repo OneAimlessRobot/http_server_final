@@ -45,7 +45,7 @@ int isPHPRequest(char* resourceTarget){
 
 }
 
-void generatePHPResultPrimitive(char* target){
+static void generatePHPResultPrimitive(char* target){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 	
@@ -91,7 +91,7 @@ void generatePHPResultPrimitive(char* target){
 
 
 	}
-        chdir("..");
+    chdir("..");
 	close(outfd);
 }
 

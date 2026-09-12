@@ -47,8 +47,7 @@ static void generateTextPrimitive(char* path){
 	
     snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedText);
 	
-    build_last_modified_buff(curr_client.og_filepath);
-    
+	
 	int stat_result = check_stat_of_file(currFetchedText,curr_client.the_stat_struct,logging,logstream);
 	if(stat_result<0){
 		if(logging){
@@ -60,6 +59,9 @@ static void generateTextPrimitive(char* path){
 		return;
 		
 	}
+	
+    build_last_modified_buff(curr_client.og_filepath);
+    
 	char* args_cmd[]={"cat", currFetchedText,NULL};
 	pid_t pid_fork_find_cmd=fork();
 	switch(pid_fork_find_cmd){
@@ -80,7 +82,6 @@ static void generateTextPrimitive(char* path){
 	}
 	chdir("..");
 	close(outfd);
-
 }
 
 
@@ -109,11 +110,6 @@ void generateText(char* dir){
 	}
 	generateTextPrimitive(dir);
 	
-	if(curr_client.is_not_found){
-		remove(curr_client.filepath);
-		return;
-		
-	}
 	FILE* fstream;
 	if(!(fstream=fopen(tmpDir,"r"))){
 			if(logging){

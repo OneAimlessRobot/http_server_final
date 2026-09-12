@@ -16,7 +16,9 @@ u_int64_t smalltimeoutsecs,
 	
 	recv_socket_size,
 	send_socket_size,
-	recv_req_buff_size;
+	recv_req_buff_size,
+	
+	s_maxage;
 
 u_int16_t port = 0;
 

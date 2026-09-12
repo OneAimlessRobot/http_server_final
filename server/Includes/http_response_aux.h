@@ -12,6 +12,18 @@
 									"Connection: %s\r\n"
 
 
+#define HTTP_SERVER_FILE_AGE_HEADERS HTTP_SERVER_INTRO_HEADERS \
+									"Last-Modified: %s\r\n" \
+									"Last-Accessed: %s\r\n" \
+									"ETag: \"%s\"\r\n" \
+									"Cache-Control: %s, s-maxage=%lu\r\n"
+
+
+
+#define HTTP_SERVER_FILE_AGE_HEADERS_NOT_MODIFIED HTTP_SERVER_INTRO_HEADERS \
+									"Last-Modified: %s\r\n" \
+									"ETag: \"%s\"\r\n" \
+									"Cache-Control: %s, s-maxage=%lu\r\n"
 /*
 -----------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------
@@ -22,13 +34,8 @@
 -----------------------------------------------------------------------------------
 */
 
-#define HTTP_OK_HEADER  HTTP_VERSION_STRING " 200 OK\r\n" \
-											HTTP_SERVER_INTRO_HEADERS \
-												"Last-Modified: %s\r\n" \
-												"Last-Accessed: %s\r\n" \
-												"ETag: %s\r\n" \
-												"Age: %ld\r\n" \
-												"Cache-Control: %s\r\n"
+#define HTTP_OK_HEADER  HTTP_VERSION_STRING OK_RESPONSE \
+											HTTP_SERVER_FILE_AGE_HEADERS
 											
 #define STD_HEADER_START_OK HTTP_OK_HEADER \
 						"Accept-Ranges: bytes\r\n" \
@@ -72,13 +79,8 @@ void fillUpChunkedHeaderComp(const char* mimetype,char* method);
 */
 
 
-#define HTTP_PARTIAL_CONTENT_OK_HEADER HTTP_VERSION_STRING " 206 Partial-Content\r\n" \
-															HTTP_SERVER_INTRO_HEADERS \
-															"Last-Modified: %s\r\n" \
-															"Last-Accessed: %s\r\n" \
-															"ETag: %s\r\n" \
-															"Age: %ld\r\n" \
-															"Cache-Control: %s\r\n"
+#define HTTP_PARTIAL_CONTENT_OK_HEADER HTTP_VERSION_STRING PARTIAL_RESPONSE \
+															HTTP_SERVER_FILE_AGE_HEADERS
 																
 												
 #define STD_HEADER_START_PARTIAL HTTP_PARTIAL_CONTENT_OK_HEADER \
@@ -126,7 +128,7 @@ void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,int64_t st
 */
 
 									
-#define HTTP_CREATED_OK_HEADER HTTP_VERSION_STRING " 201 Created\r\n" \
+#define HTTP_CREATED_OK_HEADER HTTP_VERSION_STRING CREATED_RESPONSE \
 													HTTP_SERVER_INTRO_HEADERS
 
 #define UPLOAD_HEADER HTTP_CREATED_OK_HEADER \
@@ -157,7 +159,7 @@ void fillUploadHeader(const char* mimetype, char* target);
 
 
 
-#define REDIRECT_HEADER HTTP_VERSION_STRING " 301 See Other\r\n" \
+#define REDIRECT_HEADER HTTP_VERSION_STRING SEE_OTHER_RESPONSE \
 						HTTP_SERVER_INTRO_HEADERS \
 						"Accept-Ranges: bytes\r\n" \
 						"Location: %s\r\n" \
@@ -166,7 +168,7 @@ void fillUploadHeader(const char* mimetype, char* target);
 
 
 
-#define NOT_FOUND_HEADER HTTP_VERSION_STRING " 404 Not Found\r\n" \
+#define HTTP_NOT_FOUND_HEADER HTTP_VERSION_STRING NOT_FOUND_RESPONSE \
 						HTTP_SERVER_INTRO_HEADERS \
 						"Accept-Ranges: bytes\r\n" \
 						"Content-Type: %s\r\n" \
@@ -174,10 +176,14 @@ void fillUploadHeader(const char* mimetype, char* target);
                           	"\r\n"
 
 
-#define HTTP_METHOD_ERR_HEADER  HTTP_VERSION_STRING " 405 Method Not Allowed\r\n" \
+#define HTTP_METHOD_ERR_HEADER  HTTP_VERSION_STRING METHOD_NOT_ALLOWED_RESPONSE \
 								HTTP_SERVER_INTRO_HEADERS \
 								"Content-Length: 0\r\n" \
 								"Allow: %s\r\n" \
+								"\r\n"
+								
+#define HTTP_NOT_MODIFIED_HEADER  HTTP_VERSION_STRING NOT_MODIFIED_RESPONSE \
+								HTTP_SERVER_FILE_AGE_HEADERS_NOT_MODIFIED \
 								"\r\n"
 
 void fillUpRedirectHeader(char* path);
@@ -185,6 +191,8 @@ void fillUpRedirectHeader(char* path);
 void fillUpFileNotFoundHeader(int64_t size,const char* mimetype);
 
 void fillUpRequestErrorHeader(void);
+
+void fillUpNotModifiedHeader(void);
 
 /*
 -----------------------------------------------------------------------------------
