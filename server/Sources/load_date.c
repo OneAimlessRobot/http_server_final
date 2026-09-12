@@ -8,13 +8,16 @@
 char LE_TIMEUREUR_DATE[MICROTIMESIZESTRINGTHING] = {0},
 
 		LE_TIMEUREUR_LAST_MODIFIED_DATE[MICROTIMESIZESTRINGTHING] = {0},
+
+		LE_TIMEUREUR_LAST_ACCESS_DATE[MICROTIMESIZESTRINGTHING] = {0},
 		
 		ETag[MICROTIMESIZESTRINGTHING] = {0};
 
-	
-static time_t date_timeur = {0};
+timer_struct_t struct_for_date = {0},
+				struct_for_mod_date = {0},
+				struct_for_access_date = {0};
+
 static struct stat last_modified_stat_struct = {0};
-static struct tm* time_struct_for_date =  NULL;
 
 int isDateReq(char* target){
 	
@@ -25,11 +28,11 @@ int isDateReq(char* target){
 void build_date_buff(void){
 	
 	
-	time(&date_timeur);
+	time(&struct_for_date.timeur);
 
-	time_struct_for_date= localtime(&date_timeur);	
+	struct_for_date.time_struct_ptr = gmtime(&struct_for_date.timeur);	
 
-	strftime(LE_TIMEUREUR_DATE, sizeof(LE_TIMEUREUR_DATE), "%a, %d %b %Y %H:%M:%S %Z", time_struct_for_date);
+	strftime(LE_TIMEUREUR_DATE, sizeof(LE_TIMEUREUR_DATE), "%a, %d %b %Y %H:%M:%S %Z", struct_for_date.time_struct_ptr);
 
 }
 void build_last_modified_buff(char* full_file_path){
@@ -45,22 +48,30 @@ void build_last_modified_buff(char* full_file_path){
 		return;
 	}
     
+    struct_for_mod_date.timeur = last_modified_stat_struct.st_mtime;
     
-    ctime_r( &last_modified_stat_struct.st_mtim.tv_sec , LE_TIMEUREUR_LAST_MODIFIED_DATE);
-	LE_TIMEUREUR_LAST_MODIFIED_DATE[strnlen(LE_TIMEUREUR_LAST_MODIFIED_DATE,sizeof(LE_TIMEUREUR_LAST_MODIFIED_DATE)-1)-1]=0;
+	struct_for_mod_date.time_struct_ptr = gmtime(&struct_for_mod_date.timeur);	
 	
+	strftime(LE_TIMEUREUR_LAST_MODIFIED_DATE, sizeof(LE_TIMEUREUR_LAST_MODIFIED_DATE), 
+				"%a, %d %b %Y %H:%M:%S %Z", struct_for_mod_date.time_struct_ptr);
+
+	
+    struct_for_access_date.timeur = last_modified_stat_struct.st_atime;
+    
+	struct_for_access_date.time_struct_ptr = gmtime(&struct_for_access_date.timeur);	
+	
+	strftime(LE_TIMEUREUR_LAST_ACCESS_DATE, sizeof(LE_TIMEUREUR_LAST_ACCESS_DATE), 
+				"%a, %d %b %Y %H:%M:%S %Z", struct_for_access_date.time_struct_ptr);
+
 	/*
 	 
 	 https://stackoverflow.com/questions/4533/http-generating-etag-header
 	
 	*/
 	
-	snprintf(ETag,sizeof(ETag)-1, "%ld-%ld-%ld", last_modified_stat_struct.st_mtime,
+	snprintf(ETag,sizeof(ETag)-1, "%lx%lx%lx", last_modified_stat_struct.st_mtime,
 			last_modified_stat_struct.st_size,
 			last_modified_stat_struct.st_ino);
-    
-	printf("The path to be dated: %s\n", full_file_path);
-	printf("The date: %s\n", LE_TIMEUREUR_LAST_MODIFIED_DATE);
 	
 }
 void the_time_func(char* unused){

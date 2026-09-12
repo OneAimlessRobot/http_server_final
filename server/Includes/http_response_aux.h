@@ -8,7 +8,8 @@
 #define HTTP_SERVER_INTRO_HEADERS "Date: %s\r\n" \
 									"Server: " \
 									SERVER_NAME \
-									"\r\n"
+									"\r\n" \
+									"Connection: %s\r\n"
 
 
 /*
@@ -24,7 +25,9 @@
 #define HTTP_OK_HEADER  HTTP_VERSION_STRING " 200 OK\r\n" \
 											HTTP_SERVER_INTRO_HEADERS \
 												"Last-Modified: %s\r\n" \
+												"Last-Accessed: %s\r\n" \
 												"ETag: %s\r\n" \
+												"Age: %ld\r\n" \
 												"Cache-Control: %s\r\n"
 											
 #define STD_HEADER_START_OK HTTP_OK_HEADER \
@@ -72,7 +75,9 @@ void fillUpChunkedHeaderComp(const char* mimetype,char* method);
 #define HTTP_PARTIAL_CONTENT_OK_HEADER HTTP_VERSION_STRING " 206 Partial-Content\r\n" \
 															HTTP_SERVER_INTRO_HEADERS \
 															"Last-Modified: %s\r\n" \
+															"Last-Accessed: %s\r\n" \
 															"ETag: %s\r\n" \
+															"Age: %ld\r\n" \
 															"Cache-Control: %s\r\n"
 																
 												

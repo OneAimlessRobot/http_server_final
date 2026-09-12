@@ -149,7 +149,10 @@ static void send_valid_requests_string(void){
 	}
 	written2=snprintf((char*)curr_client.sent_header_buff,
 				sizeof(curr_client.sent_header_buff)-written,
-				HTTP_METHOD_ERR_HEADER,LE_TIMEUREUR_DATE,allowed_requests_string_buff);
+				HTTP_METHOD_ERR_HEADER,
+				LE_TIMEUREUR_DATE,
+				KEEP_ALIVE_STRING,
+				allowed_requests_string_buff);
 				
 				
 	

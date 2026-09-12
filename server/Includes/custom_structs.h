@@ -13,6 +13,7 @@ typedef struct rcon_arg_line{
 typedef struct cfg_field{
         char* mem;
         char* field[2];
+        u_int8_t is_accessed;
 
 }cfg_field;
 
@@ -27,6 +28,11 @@ typedef struct compMethod{
 
 }compMethod;
 
+typedef struct timer_struct_t{
+	time_t timeur;
+	struct tm* time_struct_ptr;
+
+}timer_struct_t;
 
 typedef struct {
     const char *extension,

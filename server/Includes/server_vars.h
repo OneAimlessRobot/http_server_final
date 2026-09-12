@@ -32,7 +32,8 @@ extern u_int8_t logging,
 	use_chunked,
 	use_compression,
 	lower_security_for_compat,
-	compression_level;
+	compression_level,
+	keep_alive;
 
 
 extern char currDir[PATHSIZE],

@@ -5,12 +5,16 @@
 
 
 cfg_field** cfgs=NULL;
+
 static void print_cfg_arr(FILE* fstream,cfg_field** cfgs){
 
 	for (int i=0;cfgs[i];i++){
-		
-		fprintf(fstream,"CFG no. %d:\nCFG name: %s\nCFG value: %s\n",i,cfgs[i]->field[0],cfgs[i]->field[1]);
-
+		if(cfgs[i]->is_accessed){
+			fprintf(fstream,"CFG no. %d:\nCFG name: %s\nCFG value: %s\n",
+									i,
+									cfgs[i]->field[0],
+									cfgs[i]->field[1]);
+		}
 	}
 
 }
@@ -26,6 +30,7 @@ char* find_value_in_cfg_arr(char* setting,cfg_field** cfgs){
 	for (int i=0;cfgs[i];i++){
 		
 		if(stringsAreEqual(cfgs[i]->field[0],setting)){
+			cfgs[i]->is_accessed=1;
 			return cfgs[i]->field[1];
 		}
 	}
@@ -68,6 +73,7 @@ void loadCfg(void)
 		
 		cfgs[i]=malloc(sizeof(cfg_field));
 		cfgs[i]->mem=strdup(buff);
+		cfgs[i]->is_accessed=0;
 		splitString(cfgs[i]->mem,"=",cfgs[i]->field);
 		int valueLength=strlen(cfgs[i]->field[1]);
 		cfgs[i]->field[1][valueLength-1]=0;

@@ -31,6 +31,7 @@ u_int8_t logging=0,
 	use_exit_func=0,
 	use_chunked=0,
 	use_compression=0,
+	keep_alive=0,
 	compression_level=0,
 	lower_security_for_compat=0;
 

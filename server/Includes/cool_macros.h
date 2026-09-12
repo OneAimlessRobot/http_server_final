@@ -11,5 +11,9 @@
 
 #define BUFFSIZE (min(MAX_RECV_REQ_BUFFSIZE,recv_req_buff_size))
 
+#define DIFF_TIME(a,b) (lround(difftime( a, b )))
+
+#define KEEP_ALIVE_STRING (keep_alive?"keep-alive":"close")
+
 
 #endif

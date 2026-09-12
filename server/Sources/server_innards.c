@@ -161,7 +161,7 @@ static void mainLoop(void){
 	
 	}
 }
-void initializeConstants(void){
+void initializeClientConstants(void){
 
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
@@ -214,8 +214,6 @@ void initializeConstants(void){
 	
 	smalltimeoutusecs=ato_ull(find_value_in_cfg_arr("smalltimeoutusecs",cfgs));
 	
-	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
-	
 	tls_shake_timeout_usecs=ato_ull(find_value_in_cfg_arr("tls_shake_timeout_usecs",cfgs));
 	
 	tls_shake_timeout_secs=ato_ull(find_value_in_cfg_arr("tls_shake_timeout_secs",cfgs));
@@ -224,11 +222,11 @@ void initializeConstants(void){
 	
 	tls_data_timeout_secs=ato_ull(find_value_in_cfg_arr("tls_data_timeout_secs",cfgs));
 	
+	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));	
+	
 	bigtimeoutusecs=ato_ull(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
 	
 	lower_security_for_compat=ato_ull(find_value_in_cfg_arr("lower_security_for_compat",cfgs));
-	
-	port=ato_ull(find_value_in_cfg_arr("port",cfgs));
 	
 	use_compression=ato_ull(find_value_in_cfg_arr("use_compression",cfgs));
 	
@@ -242,14 +240,36 @@ void initializeConstants(void){
 	
 	use_tls=ato_ull(find_value_in_cfg_arr("use_tls",cfgs));
 	
-	use_valgrind=ato_ull(find_value_in_cfg_arr("use_valgrind",cfgs));
-	
 	use_fancy_find=ato_ull(find_value_in_cfg_arr("use_fancy_find",cfgs));
 	
 	if(compression_level > 9){
 		printf("Config error: compression level must be an integer between 0 and 9!\n");
 		cleanup();
 	}
+	tmp_file_dir = getenv("tmp_file_dir");
+	if(!tmp_file_dir){
+		printf("the value from the tmp_file_dir environment variable could not be obtained!\n"
+				"Please execute the server\n"
+				"Using \"server_start.sh\"\n"
+				"exiting...\n");
+		cleanup();
+		
+	}
+}
+void initializeServerConstants(void){
+	
+	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
+	
+	bigtimeoutusecs=ato_ull(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
+	
+	port=ato_ull(find_value_in_cfg_arr("port",cfgs));
+	
+	logging=ato_ull(find_value_in_cfg_arr("logging",cfgs));
+	
+	use_tls=ato_ull(find_value_in_cfg_arr("use_tls",cfgs));
+	
+	use_valgrind=ato_ull(find_value_in_cfg_arr("use_valgrind",cfgs));
+	
 	if(use_valgrind > 2){
 		printf("Config error: use_valgrind must be an integer between 0 and 2!\n");
 		cleanup();
@@ -274,7 +294,7 @@ void clientBootstrap(void){
 	getcwd(currDir,PATHSIZE);
 	logstream=stdout;
 	loadCfg();
-	initializeConstants();
+	initializeClientConstants();
 	socklenpointer=sizeof(clientAddress);
 	if(logging){
 		fprintf(logstream,"Request id: %lu\n",request_id);
@@ -295,7 +315,7 @@ void initializeServer(void){
 	getcwd(currDir,PATHSIZE);
 	logstream=stdout;
 	loadCfg();
-	initializeConstants();
+	initializeServerConstants();
 	if(cfgs){
 		print_loaded_cfgs(logstream);
 	}
@@ -319,7 +339,6 @@ void initializeServer(void){
 	server_address.sin_family=AF_INET;
 	server_address.sin_port= htons(port);
 	server_address.sin_addr.s_addr = INADDR_ANY;
-	inet_addr("127.0.0.1");
 	socklen_t socklength=sizeof(server_address);
         
 	int bind_result = bind(server_socket,(struct sockaddr*)(&server_address),socklength);

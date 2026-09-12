@@ -5,8 +5,13 @@
 
 extern char LE_TIMEUREUR_DATE[MICROTIMESIZESTRINGTHING],
 	LE_TIMEUREUR_LAST_MODIFIED_DATE[MICROTIMESIZESTRINGTHING],
+	LE_TIMEUREUR_LAST_ACCESS_DATE[MICROTIMESIZESTRINGTHING],
 	ETag[MICROTIMESIZESTRINGTHING];
-	
+
+extern timer_struct_t struct_for_date,
+				struct_for_mod_date,
+				struct_for_access_date;
+				
 int isDateReq(char* target);
 
 void build_date_buff(void);
