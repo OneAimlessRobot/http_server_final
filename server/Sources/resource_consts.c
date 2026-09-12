@@ -52,12 +52,12 @@ MimeEntry mime_types[] = {
     
     */
     
-    {".wav", "audio/wav", 0,0},
-    {".webm", "audio/webm", 0,0},
-    {".m4a", "audio/mp4", 0,0},
-    {".mp3", "audio/mp3", 0,0},
-    {".ogg","audio/ogg", 0,0},
-    {".flac","audio/flac", 0,0},
+    {".wav", "audio/wav", 0,1},
+    {".webm", "audio/webm", 0,1},
+    {".m4a", "audio/mp4", 0,1},
+    {".mp3", "audio/mp3", 0,1},
+    {".ogg","audio/ogg", 0,1},
+    {".flac","audio/flac", 0,1},
       
     /*
 	 
@@ -65,10 +65,10 @@ MimeEntry mime_types[] = {
     
     */
     
-    {".mp4", "video/mp4", 0,0},
-    {".flv","video/x-flv", 0,0},
-    {".avi","video/x-msvideo",0,0},
-    {".3gp","video/3gpp", 0,0},
+    {".mp4", "video/mp4", 0,1},
+    {".flv","video/x-flv", 0,1},
+    {".avi","video/x-msvideo",0,1},
+    {".3gp","video/3gpp", 0,1},
     
     /*
      
@@ -155,10 +155,10 @@ const char* get_mime_type(const char *filename, u_int64_t* index_obtained){
 }
 
 u_int8_t get_mime_type_compressibility(u_int64_t table_index) {
-    return ((table_index<0)?DEFAULT_COMPRESS_RESOURCE:mime_types[table_index].allows_compression);
+    return (mime_types[table_index].allows_compression);
 }
 u_int8_t get_mime_type_cacheability(u_int64_t table_index) {
-    return ((table_index<0)?DEFAULT_CACHE_RESOURCE:mime_types[table_index].to_be_cached);
+    return (mime_types[table_index].to_be_cached);
 }
 
 int check_stat_of_file(const char* full_file_path,struct stat * statbuf,u_int8_t logging, FILE*logstream){

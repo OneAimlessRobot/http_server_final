@@ -182,7 +182,7 @@ static void send_header(void){
 		:
 		fillUpFileNotFoundHeader(fileSize,the_mime_type);
 	int header_size=strlen(curr_client.sent_header_buff);
-	if(logging>2){
+	if(logging > 5){
 		print_response_header(curr_client.sent_header_buff);
 	}
 	send_wrapper(curr_client.sent_header_buff,header_size);
@@ -220,7 +220,7 @@ void sendResource(int is_head){
 		}
 		fillUpNotModifiedHeader();
 		int header_size=strlen(curr_client.sent_header_buff);
-		if(logging>2){
+		if(logging > 5){
 			print_response_header(curr_client.sent_header_buff);
 		}
 		send_wrapper(curr_client.sent_header_buff,header_size);

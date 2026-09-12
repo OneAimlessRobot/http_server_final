@@ -208,7 +208,9 @@ void initializeClientConstants(void){
 	}
 	recv_req_buff_size=ato_ull(find_value_in_cfg_arr("recv_req_buff_size",cfgs));
 	
-	s_maxage=ato_ull(find_value_in_cfg_arr("s-maxage",cfgs));
+	keep_alive=ato_ull(find_value_in_cfg_arr("keep_alive",cfgs));
+	
+	s_maxage=ato_ull(find_value_in_cfg_arr("s_maxage",cfgs));
 	
 	smalltimeoutsecs=ato_ull(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
 	

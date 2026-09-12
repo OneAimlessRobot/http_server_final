@@ -156,8 +156,9 @@ static void send_valid_requests_string(void){
 				allowed_requests_string_buff);
 				
 				
-	
-	print_response_header(curr_client.sent_header_buff);
+	if(logging > 5){
+		print_response_header(curr_client.sent_header_buff);
+	}
 	send_wrapper((char*)curr_client.sent_header_buff,written2);
 		
 }

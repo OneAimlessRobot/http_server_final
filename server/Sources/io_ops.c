@@ -450,7 +450,7 @@ while ((numread = read(fd,send_buff, PARTIAL_SIZE_TO_SEND )) > 0) {
         errno=0;
 	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, send_chunkbuff + totalsent, truesize + numread + 2 - totalsent)
 					:
-					sendsome(c->socket, send_chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
+				sendsome(c->socket, send_chunkbuff + totalsent, truesize + numread + 2 - totalsent, 0);
 	if(sent==-2){
 		continue;
 	}
@@ -509,6 +509,7 @@ while ((numread = read(fd,send_buff,PARTIAL_SIZE_TO_SEND)) > 0) {
 	sent = c->is_tls?sendsome_ssl(c->ctx_if_ssl, send_buff + totalsent,  numread - totalsent)
 					:
 					sendsome(c->socket, send_buff + totalsent,  numread - totalsent, 0);
+	
 	if(sent==-2){
 
 		continue;

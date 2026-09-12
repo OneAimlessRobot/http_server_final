@@ -155,7 +155,10 @@ void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
 
 
 void fillUploadHeader(const char* mimetype, char* target){
-
+	
+	
+	char* defaultTarget_ptr=buff_2_ptr(defaultTarget);
+	char* uploadTarget_ptr=buff_2_ptr(uploadTarget);
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 				UPLOAD_HEADER,
 				LE_TIMEUREUR_DATE,
@@ -163,8 +166,8 @@ void fillUploadHeader(const char* mimetype, char* target){
 				mimetype,
 				curr_client.is_tls?"https":"http",
 				port,
-				defaultTarget,
-				uploadTarget,
+				defaultTarget_ptr,
+				uploadTarget_ptr,
 				target);
 }
 

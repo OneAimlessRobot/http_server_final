@@ -18,4 +18,7 @@
 #define WILL_CACHE (curr_client.would_cache && curr_client.should_cache)
 
 #define PARTIAL_SIZE_TO_SEND max(0,min(BUFFSIZE,size_to_send-num_bytes_sent))
+
+#define buff_2_ptr(a) (&a[0])
+
 #endif
