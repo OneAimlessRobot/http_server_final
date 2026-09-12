@@ -81,47 +81,64 @@ void fillUpChunkedHeaderComp(const char* mimetype,char* method){
 */
 
 
-void fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,int64_t size){
+void fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,
+										int64_t end_point,
+										int64_t size,
+										int64_t file_size){
+											
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_PARTIAL_HEADER,
 						FILL_UP_BORING_CRAP,
 						mimetype,
-						size-start_point,
+						size,
 						start_point,
-						size-1,
-						size);
+						end_point,
+						file_size);
 }
 			   
-void fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t start_point,int64_t size){
+void fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t start_point,
+										int64_t end_point,
+										int64_t size,
+										int64_t file_size){
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_PARTIAL_HEADER_COMP,
 						FILL_UP_BORING_CRAP,
 						mimetype,
-						size-start_point,
+						size,
 						start_point,
-						start_point+size-1,
-						size,method);
+						end_point,
+						file_size,
+						method);
 }
 		   
 
-void fillUpChunkedPartialHeader(const char* mimetype,int64_t start_point,int64_t size){
+void fillUpChunkedPartialHeader(const char* mimetype,
+										int64_t start_point,
+										int64_t end_point,
+										int64_t file_size){
+
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_PARTIAL_HEADER,
 						FILL_UP_BORING_CRAP,
 						mimetype,
 						start_point,
-						start_point+size-1,
-						size);
+						end_point,
+						file_size);
 }
 
-void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,int64_t start_point,int64_t size){
+void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
+										int64_t start_point,
+										int64_t end_point,
+										int64_t file_size){
+	
+	
 	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_PARTIAL_HEADER_COMP,
 						FILL_UP_BORING_CRAP,
 						mimetype,
 						start_point,
-						start_point+size-1,
-						size,
+						end_point,
+						file_size,
 						method);
 }
 

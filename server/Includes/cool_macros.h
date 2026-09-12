@@ -1,9 +1,9 @@
 #ifndef COOL_MACROS_H
 #define COOL_MACROS_H
 
-#define min(a,b) (a<b?a:b)
+#define min(a,b) ((int64_t)a<(int64_t)b?(int64_t)a:(int64_t)b)
 
-#define max(a,b) (a>b?a:b)
+#define max(a,b) ((int64_t)a>(int64_t)b?(int64_t)a:(int64_t)b)
 
 #define b_zero(a) (memset(a,0,sizeof(a)))
 
@@ -17,4 +17,5 @@
 
 #define WILL_CACHE (curr_client.would_cache && curr_client.should_cache)
 
+#define PARTIAL_SIZE_TO_SEND max(0,min(BUFFSIZE,size_to_send-num_bytes_sent))
 #endif

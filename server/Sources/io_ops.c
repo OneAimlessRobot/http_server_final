@@ -433,14 +433,14 @@ int64_t pullallfd(int fd){
 	}
     return 0;
 }
-int64_t sendallchunkedfd(client*c,int fd, int64_t start_point){
+int64_t sendallchunkedfd(client*c,int fd, int64_t start_point, int64_t size_to_send){
 
 int64_t numread;
 int64_t sent=0;
 int64_t num_bytes_sent=0;
 lseek(fd,start_point,SEEK_SET);
-dprintf(1,"Beginning to send from %ld\n",start_point);
-while ((numread = read(fd,send_buff, BUFFSIZE)) > 0) {
+dprintf(1,"Beginning to send from %ld to %ld (%ld bytes)\n",start_point,start_point+size_to_send-1,size_to_send);
+while ((numread = read(fd,send_buff, PARTIAL_SIZE_TO_SEND )) > 0) {
     int64_t truesize = snprintf(send_chunkbuff, sizeof(send_chunkbuff), "%lx\r\n", numread);
     memcpy(send_chunkbuff + truesize, send_buff, numread);
     memcpy(send_chunkbuff + truesize + numread, "\r\n", 2);
@@ -494,15 +494,15 @@ return 0;
 
 
 
-int64_t sendallfd(client*c,int fd, int64_t start_point){
+int64_t sendallfd(client*c,int fd, int64_t start_point, int64_t size_to_send){
 
 int64_t numread;
 int64_t sent=0;
 int64_t num_bytes_sent=0;
 
 lseek(fd,start_point,SEEK_SET);
-dprintf(1,"Beginning to send from %ld\n",start_point);
-while ((numread = read(fd,send_buff,BUFFSIZE)) > 0) {
+dprintf(1,"Beginning to send from %ld to %ld (%ld bytes)\n",start_point,start_point+size_to_send-1,size_to_send);
+while ((numread = read(fd,send_buff,PARTIAL_SIZE_TO_SEND)) > 0) {
     int64_t totalsent = 0;
     while (totalsent < numread) {
         errno=0;

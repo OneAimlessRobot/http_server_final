@@ -19,14 +19,16 @@ static void push_bytes(void){
 	
 	((use_chunked)?
 		sendallchunkedfd(&curr_client,comp_fd,curr_client.req->header->is_partial?
-							curr_client.req->header->range_number
+							curr_client.req->header->range_start
 							:
-							0)
+							0,
+							curr_client.send_size)
 		:
 		sendallfd(&curr_client,comp_fd,curr_client.req->header->is_partial?
-							curr_client.req->header->range_number
+							curr_client.req->header->range_start
 							:
-							0));
+							0,
+							curr_client.send_size));
 	
 }
 

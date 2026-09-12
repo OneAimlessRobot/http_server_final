@@ -120,6 +120,15 @@ static void send_header(void){
 	
 	lseek(comp_fd,0,SEEK_SET);
 	
+	curr_client.req->header->range_end = curr_client.req->header->range_end<=0
+					?
+					fileSize-1
+					:
+					curr_client.req->header->range_end;
+	
+	curr_client.send_size = curr_client.req->header->range_end-curr_client.req->header->range_start+1;
+	
+	
 	(!curr_client.is_not_found)?
 		((comp_enable)?
 			((use_chunked)?
@@ -129,7 +138,8 @@ static void send_header(void){
 					:
 					fillUpChunkedPartialHeaderComp(the_mime_type,
 													servComp->fileExt,
-													curr_client.req->header->range_number,
+													curr_client.req->header->range_start,
+													curr_client.req->header->range_end,
 													fileSize)
 				)
 				:
@@ -140,7 +150,9 @@ static void send_header(void){
 					:
 					fillUpNormalPartialHeaderComp(the_mime_type,
 													servComp->fileExt,
-													curr_client.req->header->range_number,
+													curr_client.req->header->range_start,
+													curr_client.req->header->range_end,
+													curr_client.send_size,
 													fileSize)
 				)
 			)
@@ -150,8 +162,9 @@ static void send_header(void){
 					fillUpChunkedHeader(the_mime_type)		
 					:
 					fillUpChunkedPartialHeader(the_mime_type,
-												curr_client.req->header->range_number,
-												fileSize)
+													curr_client.req->header->range_start,
+													curr_client.req->header->range_end,
+													fileSize)
 				)
 				:
 				((!curr_client.req->header->is_partial)?
@@ -159,8 +172,10 @@ static void send_header(void){
 										fileSize)		
 					:
 					fillUpNormalPartialHeader(the_mime_type,
-												curr_client.req->header->range_number,
-												fileSize)
+													curr_client.req->header->range_start,
+													curr_client.req->header->range_end,
+													curr_client.send_size,
+													fileSize)
 				)
 			)
 		)

@@ -90,7 +90,7 @@ void print_http_req_header(FILE* fstream){
 					"Mobile? (raw): %s\n"
 					"Mobile? (captured value): %hhu\n"
 					"Range (string): |%s|\n"
-					"Range: bytes=%s-\n"
+					"Range: bytes=%s\n"
 					"CF-Connecting-IP: %s\n"
 					"Accepted-encoding: %s\n"
 					"Accepted-encoding (split):\n\n",
@@ -279,16 +279,19 @@ static void spawnHTTPHeader(void){
 			memset(curr_client.req->header->content_type,0,FIELDSIZE);
 		}
 	}
-	curr_client.req->header->range_number= 0;
+	curr_client.req->header->range_start = 0;
+	curr_client.req->header->range_end = 0;
 	if((curr_client.req->header->is_partial=(!ignore_partial))){
 		strcpy(curr_client.req->header->range_string,find_field_value_in_field_arr("Range",fieldarr));
-		curr_client.req->header->range_number= 0;
+		curr_client.req->header->range_start= 0;
 		if((curr_client.req->header->is_partial=(strlen(curr_client.req->header->range_string)>0))){
-			sscanf(curr_client.req->header->range_string," bytes=%ld-",&curr_client.req->header->range_number);
+			sscanf(curr_client.req->header->range_string," bytes=%ld-%ld",
+						&curr_client.req->header->range_start,
+						&curr_client.req->header->range_end);
 			
 		}
 	}
-	snprintf(curr_client.req->header->range,FIELDSIZE-1,"%ld",curr_client.req->header->is_partial?curr_client.req->header->range_number:-1);
+	snprintf(curr_client.req->header->range,FIELDSIZE-1,"%ld-%ld",curr_client.req->header->is_partial?curr_client.req->header->range_start:-1,curr_client.req->header->is_partial?(curr_client.req->header->range_end>0?curr_client.req->header->range_end:-1):-1);
 	free(fieldarr);
 	
 }

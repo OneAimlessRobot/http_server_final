@@ -109,12 +109,28 @@ void fillUpChunkedHeaderComp(const char* mimetype,char* method);
 							  "Transfer-Encoding: %s, chunked\r\n" \
 							  "\r\n"
 							  
-void fillUpNormalPartialHeader(const char* mimetype,int64_t start_point,int64_t size);
-void fillUpNormalPartialHeaderComp(const char* mimetype,char* method,int64_t start_point,int64_t size);
+void fillUpNormalPartialHeader(const char* mimetype,
+										int64_t start_point,
+										int64_t end_point,
+										int64_t size,
+										int64_t file_size);
+										
+void fillUpNormalPartialHeaderComp(const char* mimetype,char* method,
+										int64_t start_point,
+										int64_t end_point,
+										int64_t size,
+										int64_t file_size);
 
 
-void fillUpChunkedPartialHeader(const char* mimetype,int64_t start_point,int64_t size);
-void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,int64_t start_point,int64_t size);
+void fillUpChunkedPartialHeader(const char* mimetype,
+										int64_t start_point,
+										int64_t end_point,
+										int64_t file_size);
+										
+void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
+										int64_t start_point,
+										int64_t end_point,
+										int64_t file_size);
 
 
 /*

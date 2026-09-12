@@ -85,7 +85,7 @@ typedef struct http_header{
 		
 	u_int8_t is_partial,
 			is_mobile_value;
-	int64_t range_number;
+	int64_t range_start,range_end;
 
 }http_header;
 
@@ -116,7 +116,7 @@ typedef struct client{
 		sent_header_buff[HEADER_SEND_SIZE];
 	http_request* req; 
 	int32_t socket, fd;
-	int64_t recv_size;
+	int64_t recv_size,send_size;
 	u_int8_t is_tls,
 			enable_first_time_in_upload,
 			compress,

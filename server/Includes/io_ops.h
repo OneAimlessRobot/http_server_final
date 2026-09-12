@@ -9,9 +9,9 @@ int64_t readsome(int sd,char* buff,int64_t size,int flags);
 
 int64_t readall(client* c,char* buff);
 
-int64_t sendallchunkedfd(client* c,int fd, int64_t start_point);
+int64_t sendallchunkedfd(client*c,int fd, int64_t start_point, int64_t size_to_send);
 
-int64_t sendallfd(client* c,int fd, int64_t start_point);
+int64_t sendallfd(client* c,int fd, int64_t start_point, int64_t size_to_send);
 
 int64_t pullallfd(int fd);
 

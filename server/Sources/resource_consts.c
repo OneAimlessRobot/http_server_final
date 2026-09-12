@@ -52,12 +52,12 @@ MimeEntry mime_types[] = {
     
     */
     
-    {".wav", "audio/wav", 0,1},
-    {".webm", "audio/webm", 0,1},
-    {".m4a", "audio/mp4", 0,1},
-    {".mp3", "audio/mp3", 0,1},
-    {".ogg","audio/ogg", 0,1},
-    {".flac","audio/flac", 0,1},
+    {".wav", "audio/wav", 0,0},
+    {".webm", "audio/webm", 0,0},
+    {".m4a", "audio/mp4", 0,0},
+    {".mp3", "audio/mp3", 0,0},
+    {".ogg","audio/ogg", 0,0},
+    {".flac","audio/flac", 0,0},
       
     /*
 	 
@@ -65,10 +65,10 @@ MimeEntry mime_types[] = {
     
     */
     
-    {".mp4", "video/mp4", 0,1},
-    {".flv","video/x-flv", 0,1},
-    {".avi","video/x-msvideo",0,1},
-    {".3gp","video/3gpp", 0,1},
+    {".mp4", "video/mp4", 0,0},
+    {".flv","video/x-flv", 0,0},
+    {".avi","video/x-msvideo",0,0},
+    {".3gp","video/3gpp", 0,0},
     
     /*
      
