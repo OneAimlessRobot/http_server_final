@@ -68,7 +68,7 @@ static int compressFile(char* target){
 		}
 		
 		char* argv[ARGVMAX]={0};
-		makeargv(cmd,argv, 3);
+		makeargvdelim(cmd," \t\n",argv, 3,0);
 		int pid=fork();
 		switch(pid){
 			case -1:
@@ -192,7 +192,24 @@ void sendResource(int is_head){
 	if(curr_client.fd<0){
 		return;
 	}
-	
+	if(curr_client.should_redirect){
+		if(logging){
+			fprintf(logstream,"WILL redirect!\n");
+		}
+		fillUpRedirectHeader(curr_client.redirect_file_path);
+		int header_size=strlen(curr_client.sent_header_buff);
+		if(logging > 5){
+			print_response_header(curr_client.sent_header_buff);
+		}
+		send_wrapper(curr_client.sent_header_buff,header_size);
+		close(curr_client.fd);
+		if(logging){
+			fprintf(logstream,"Done!\n");
+		}
+		return;
+		
+		
+	}
 	if(!strlen(curr_client.og_filepath)){
 		
 		build_last_modified_buff(curr_client.filepath);
@@ -213,7 +230,8 @@ void sendResource(int is_head){
 						get_mime_type(curr_client.filepath,&curr_client.mimetype_table_cell));
 	printf("The mimetype is: %s\nOur ETag: %s\nTheir ETag: %s\n",curr_client.response_mimetype,ETag,curr_client.req->header->if_none_match);
 	curr_client.should_cache = (!curr_client.generating_func && get_mime_type_cacheability(curr_client.mimetype_table_cell));
-	curr_client.would_cache=!strncmp(ETag,curr_client.req->header->if_none_match,sizeof(ETag)-1);
+	u_int64_t strlen_etag = strnlen(ETag,sizeof(ETag)-1);
+	curr_client.would_cache=strlen_etag&&!strncmp(ETag,curr_client.req->header->if_none_match,sizeof(ETag)-1);
 	if(WILL_CACHE){
 		if(logging){
 			fprintf(logstream,"WILL cache!\n");
@@ -229,6 +247,9 @@ void sendResource(int is_head){
 			fprintf(logstream,"Done!\n");
 		}
 		return;
+	}
+	else if(strlen_etag<=0){
+		goto file_not_found;
 	}
 	else if(logging){
 		fprintf(logstream,"Will NOT cache!\n");
@@ -255,24 +276,25 @@ void sendResource(int is_head){
 
 			fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 		}
-		curr_client.compress = 0;
-		if(compressFile(notFoundDefaultTarget)<0){
+		file_not_found:
+			curr_client.compress = 0;
+			if(compressFile(notFoundDefaultTarget)<0){
 
-			if(logging){
+				if(logging){
 
-				fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
+					fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
+				}
 			}
-		}
-		else{
-			curr_client.is_not_found=1;
-			use_chunked=0;
-			
-			if(logging){
-			
-				fprintf(logstream,"Enviando resposta 404...\n");
-			
+			else{
+				curr_client.is_not_found=1;
+				use_chunked=0;
+				
+				if(logging){
+				
+					fprintf(logstream,"Enviando resposta 404...\n");
+				
+				}
 			}
-		}
 	}
 	send_header();
 	if(!is_head){

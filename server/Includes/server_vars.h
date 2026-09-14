@@ -23,6 +23,7 @@ extern u_int64_t smalltimeoutsecs,
 extern u_int16_t port;
 
 
+
 extern u_int8_t logging,
 	serverOn,
 	serverWasOn,
@@ -30,6 +31,7 @@ extern u_int8_t logging,
 	use_fancy_find,
 	ignore_partial,
 	use_tls,
+	want_tls,
 	use_exit_func,
 	use_chunked,
 	use_compression,
@@ -45,6 +47,7 @@ extern char currDir[PATHSIZE],
 	uploadTarget[FIELDSIZE],
 	robotsTarget[FIELDSIZE],
 	excludePrettifyTarget[FIELDSIZE],
+	valgrindSuppressionsFile[FIELDSIZE],
 	*tmp_file_dir,
 	*defaultMimetype,
 	*robotsMimetype;

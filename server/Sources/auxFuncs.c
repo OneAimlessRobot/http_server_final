@@ -33,6 +33,22 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr) {
     result=1;
     return result;
 }
+int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_t max_len){
+	char* argv[ARGVMAX]={0};
+	int num_tags=make_str_arr(the_separated_parameters,"|",argv,max_len);
+	if(num_tags<=0){
+
+		return -1;
+	}
+	printf("Num tags: %d\n",num_tags);
+	if(num_tags > 1){
+		argv[num_tags-1][strlen(argv[num_tags-1])-1]=0;
+	}
+	for(uint64_t i=0;i<max_len;i++){
+		arg_arr[i].the_actual_value=(argv[i] ?( ((strlen(argv[i]))?argv[i]:arg_arr[i].default_value)):arg_arr[i].default_value);
+	}
+	return 0;
+}
 
 int does_dir_exist_aux(char* path){
 	
@@ -185,21 +201,21 @@ void generic_error_print(char* prefix_string){
 
 }
 
-int makeargv(char *s, char *argv[ARGVMAX], int n_max) {
-	int use_nmax= (n_max>0);
+int makeargvdelim(char *s, char* delim, char *argv[ARGVMAX], int n_max, int dir_mode) {
+	int use_nmax= (n_max>0)&&dir_mode;
 	int ntokens = 0;
 
     if (s == NULL || argv == NULL || ARGVMAX == 0){
         return -1;
     }
-    argv[ntokens] = strtok(s, " \t\n");
+    argv[ntokens] = strtok(s, delim);
     while ((argv[ntokens] != NULL) && (ntokens < ARGVMAX)) {
         
 		if(use_nmax && (ntokens >=  (n_max-1))){
 			break;
 		}
 		ntokens++;
-        argv[ntokens] = strtok(NULL, " \t\n");
+        argv[ntokens] = strtok(NULL, delim);
     }
     if(use_nmax && (ntokens < n_max)){
 		ntokens++;
@@ -208,8 +224,7 @@ int makeargv(char *s, char *argv[ARGVMAX], int n_max) {
 		splitString(argv[ntokens], " -> ", pair);
 		argv[ntokens]= pair[0];
 	}
-	ntokens++;
-    argv[ntokens] = NULL;
+    argv[ntokens+1] = NULL;
     return ntokens;
 }
 
@@ -304,23 +319,8 @@ int make_str_arr(char *s,char* delim, char *argv[ARGVMAX],int maxlen) {
 	break;
     	}
     }
-    nheaders++;
     argv[nheaders] = NULL;
     return nheaders;
-}
-
-int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX],int maxlen) {
-    int ntokens = 0;
-
-    if (s == NULL || argv == NULL || ARGVMAX == 0|| maxlen<0 || maxlen >ARGVMAX)
-        return -1;
-    argv[ntokens] = strtok(s, delim);
-    while ((argv[ntokens] != NULL) && (ntokens < (maxlen))) {
-        ntokens++;
-        argv[ntokens] = strtok(NULL, delim);
-    }
-    argv[ntokens] = NULL;
-    return ntokens;
 }
 
 void replaceStringCharacter(char *s,char dirty,char wantthisoneinstead){

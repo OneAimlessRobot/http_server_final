@@ -14,6 +14,9 @@
 
 #define DEF_FIND_REXEXP "*"
 
+#define DEF_SHOULD_WE_AUTOREDIRECT "0"
+
+
 #define FIND_CMD_TO_USE (exec_find_arr[use_fancy_find])
 
 
@@ -22,11 +25,18 @@
 
 static const char* find_listing_css_file_path= "/webcrookedstuff/.find_listing_style.css";
 
-u_int64_t num_files_found=0;
+u_int64_t num_files_found = 0;
+
+u_int8_t user_wants_redirect = 0;
 
 
 
-static char* regexp_arg = DEF_FIND_REXEXP;
+static arg_line parameters_arr[MAX_NUM_FIND_ARGS]={
+
+	{.default_value=DEF_FIND_REXEXP,NULL},
+
+	{.default_value=DEF_SHOULD_WE_AUTOREDIRECT,NULL}
+};
 
 
 static char aux_buff[PATH_MAX*2]={0},
@@ -103,7 +113,13 @@ static void print_dir_entry(int fd, char* curr_listing_arg){
 			curr_listing_arg
 			);
 }
-static void process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
+/*
+ * 
+ * it returns whether or not we should redirect
+ * 
+ * */
+
+static int process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
 
 	
 	memset(curr_listing_buff,0,sizeof(curr_listing_buff));
@@ -131,7 +147,14 @@ static void process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
 		if(extension){
 			
 			if(findInStringArr(excluded_xtensions,extension)<0){
-				
+				if(!num_files_found && user_wants_redirect){
+					
+						snprintf(curr_client.redirect_file_path,
+									sizeof(curr_client.redirect_file_path),
+									"%s/%s",
+									defaultTarget,
+									&curr_listing_buff[2]);
+				}
 				print_dir_entry(fd, &curr_listing_buff[2]);
 				num_files_found++;
 				
@@ -144,19 +167,26 @@ static void process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
 		}
 		memset(curr_listing_buff,0,sizeof(curr_listing_buff));
 	}
+	return (num_files_found == 1)&&user_wants_redirect;
 
 }
 static void generateFindResultPrimitive(char* the_request_parameters){
 
-	regexp_arg=the_request_parameters;
+	
+	build_arg_line_arr(the_request_parameters,parameters_arr,MAX_NUM_FIND_ARGS);
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 	
 
     snprintf(aux_buff,sizeof(aux_buff)-1,"%s%s",currDir,DEF_FIND_ROOTDIR);
-    replaceStringCharacter(regexp_arg,' ','*');
-    snprintf(aux_exp_buff,sizeof(aux_exp_buff)-1,use_fancy_find?"%s":"*%s*",regexp_arg);
+    replaceStringCharacter(parameters_arr[REGEXP].the_actual_value,' ','*');
+    snprintf(aux_exp_buff,sizeof(aux_exp_buff)-1,use_fancy_find?"%s":"*%s*",
+				parameters_arr[REGEXP].the_actual_value);
     
+    user_wants_redirect = (u_int8_t)parameters_arr[SHOULD_WE_AUTOREDIRECT].the_actual_value[0]-48;
+    
+    
+    printf("User wants redirect: %hhu\nCharacter value: %c\n", user_wants_redirect,parameters_arr[SHOULD_WE_AUTOREDIRECT].the_actual_value[0]);
     chdir(aux_buff);
     if(logging>40){
 		
@@ -229,11 +259,12 @@ void generateFindResult(char* the_request_parameters){
 			aux_exp_buff);
 	
 	fseek(fstream,0,SEEK_SET);
-	process_lines_and_print_to_dest_file_find(curr_client.fd,fstream);
-	
-	dprintf(curr_client.fd,"\n<h1>%ld files were found! </h1>\n<br>\n<br>\n"
-			,num_files_found);
-	dprintf(curr_client.fd,"</div>\n</body>\n</html>\n");
+	curr_client.should_redirect = process_lines_and_print_to_dest_file_find(curr_client.fd,fstream);
+	if(!curr_client.should_redirect){
+		dprintf(curr_client.fd,"\n<h1>%ld files were found! </h1>\n<br>\n<br>\n"
+				,num_files_found);
+		dprintf(curr_client.fd,"</div>\n</body>\n</html>\n");
+	}
 	fclose(fstream);
 
 }

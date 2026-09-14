@@ -15,9 +15,9 @@ struct sigaction sa;
 
 static socklen_t socklenpointer;
 static int server_socket = -1;
-
 static char buff_sock[32]={0},
 	buff_tls[32]={0},
+	buff_suppressions_file[FIELDSIZE*2]={0},
 	buff_request_id[128]={0};
 
 static char* super_valgrind_argv[] = {"valgrind",
@@ -25,6 +25,8 @@ static char* super_valgrind_argv[] = {"valgrind",
 					"--leak-check=full",
 					"--show-leak-kinds=all",
 					"--track-fds=yes",
+					/*buff_suppressions_file,*/
+					/*"--show-reachable=no",*/
 					"./server.exe","1",
 					buff_tls,
 					buff_sock,
@@ -35,7 +37,10 @@ static char* super_valgrind_argv[] = {"valgrind",
 					"--leak-check=full",
 					"--show-leak-kinds=all",
 					"--track-fds=yes",
-					"./server.exe","1",
+					/*"--show-reachable=no",*/
+					/*buff_suppressions_file,*/
+					"./server.exe",
+					"1",
 					buff_tls,
 					buff_sock,
 					buff_request_id,
@@ -128,9 +133,9 @@ static void handleIncommingConnections(void){
         memset(buff_request_id,0, sizeof(buff_request_id));
         
 		snprintf(buff_sock,sizeof(buff_sock)-1,"%d",client_socket);
-		snprintf(buff_tls,sizeof(buff_tls)-1,"%hhu",use_tls);
+		snprintf(buff_tls,sizeof(buff_tls)-1,"%hhu",want_tls);
 		snprintf(buff_request_id,sizeof(buff_request_id)-1,"%lx",request_id_here);
-
+		
 		int pid=fork();
 		switch(pid){
 			case -1:
@@ -159,6 +164,25 @@ static void mainLoop(void){
 	
 		handleIncommingConnections();
 	
+	}
+}
+
+void initializeCommonConstants(void){
+	
+	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
+	
+	bigtimeoutusecs=ato_ull(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
+	
+	logging=ato_ull(find_value_in_cfg_arr("logging",cfgs));
+	
+	tmp_file_dir = getenv("tmp_file_dir");
+	if(!tmp_file_dir){
+		printf("the value from the tmp_file_dir environment variable could not be obtained!\n"
+				"Please execute the server\n"
+				"Using \"server_start.sh\"\n"
+				"exiting...\n");
+		cleanup();
+		
 	}
 }
 void initializeClientConstants(void){
@@ -214,8 +238,6 @@ void initializeClientConstants(void){
 	
 	smalltimeoutsecs=ato_ull(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
 	
-	smalltimeoutsecs=ato_ull(find_value_in_cfg_arr("smalltimeoutsecs",cfgs));
-	
 	smalltimeoutusecs=ato_ull(find_value_in_cfg_arr("smalltimeoutusecs",cfgs));
 	
 	tls_shake_timeout_usecs=ato_ull(find_value_in_cfg_arr("tls_shake_timeout_usecs",cfgs));
@@ -226,9 +248,6 @@ void initializeClientConstants(void){
 	
 	tls_data_timeout_secs=ato_ull(find_value_in_cfg_arr("tls_data_timeout_secs",cfgs));
 	
-	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));	
-	
-	bigtimeoutusecs=ato_ull(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
 	
 	lower_security_for_compat=ato_ull(find_value_in_cfg_arr("lower_security_for_compat",cfgs));
 	
@@ -240,9 +259,6 @@ void initializeClientConstants(void){
 	
 	ignore_partial=ato_ull(find_value_in_cfg_arr("ignore_partial",cfgs));
 	
-	logging=ato_ull(find_value_in_cfg_arr("logging",cfgs));
-	
-	use_tls=ato_ull(find_value_in_cfg_arr("use_tls",cfgs));
 	
 	use_fancy_find=ato_ull(find_value_in_cfg_arr("use_fancy_find",cfgs));
 	
@@ -250,27 +266,33 @@ void initializeClientConstants(void){
 		printf("Config error: compression level must be an integer between 0 and 9!\n");
 		cleanup();
 	}
-	tmp_file_dir = getenv("tmp_file_dir");
-	if(!tmp_file_dir){
-		printf("the value from the tmp_file_dir environment variable could not be obtained!\n"
-				"Please execute the server\n"
-				"Using \"server_start.sh\"\n"
-				"exiting...\n");
-		cleanup();
-		
-	}
+	initializeCommonConstants();
 }
 void initializeServerConstants(void){
 	
-	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
+	strncpy(valgrindSuppressionsFile,find_value_in_cfg_arr("valgrindSuppressionsFile",cfgs),FIELDSIZE-1);
 	
-	bigtimeoutusecs=ato_ull(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
+	int invalid_string_confs=
+				!((stringsAreEqual(valgrindSuppressionsFile,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(valgrindSuppressionsFile,NO_SETTINGS_LOADED)));
+				
+	if(!invalid_string_confs){
+
+		printf("Config error: invalid string-type field set!!!!\n");
+		cleanup();
+
+	}
+	
+	snprintf(buff_suppressions_file, sizeof(buff_suppressions_file), 
+			"--suppressions=./%s",
+			valgrindSuppressionsFile);
 	
 	port=ato_ull(find_value_in_cfg_arr("port",cfgs));
 	
 	logging=ato_ull(find_value_in_cfg_arr("logging",cfgs));
 	
-	use_tls=ato_ull(find_value_in_cfg_arr("use_tls",cfgs));
+	want_tls=ato_ull(find_value_in_cfg_arr("want_tls",cfgs));
 	
 	use_valgrind=ato_ull(find_value_in_cfg_arr("use_valgrind",cfgs));
 	
@@ -278,15 +300,8 @@ void initializeServerConstants(void){
 		printf("Config error: use_valgrind must be an integer between 0 and 2!\n");
 		cleanup();
 	}
-	tmp_file_dir = getenv("tmp_file_dir");
-	if(!tmp_file_dir){
-		printf("the value from the tmp_file_dir environment variable could not be obtained!\n"
-				"Please execute the server\n"
-				"Using \"server_start.sh\"\n"
-				"exiting...\n");
-		cleanup();
-		
-	}
+	
+	initializeCommonConstants();
 }
 void the_exit_func(void){
 	serverOn=0;

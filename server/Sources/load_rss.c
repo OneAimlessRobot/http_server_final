@@ -110,8 +110,8 @@ static int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const c
 
 		return -1;
 	}
-	argv[max_len-2][strlen(argv[max_len-2])-1]=0;
-	for(uint64_t i=0;i<max_len-1;i++){
+	argv[num_tags-1][strlen(argv[num_tags-1])-1]=0;
+	for(int64_t i=0;i<num_tags;i++){
 		dprintf(fd,"	<%s>%s</%s>\n",names_for_tag_ids[i],strlen(argv[i])?argv[i]:empty_contents_for_tag_ids[i],names_for_tag_ids[i]);
 	}
 	return 0;

@@ -10,7 +10,7 @@ char* custompostreqs[]={RCON_REQUEST,FIND_REQUEST, NULL},
 
 static void handleRconRequest(http_request* req){
 	char* argv2[ARGVMAX]={0};
-	int size=makeargvdelim(req->form,"&",argv2,ARGVMAX);
+	int size=makeargvdelim(req->form,"&",argv2,ARGVMAX,0);
 	char* the_ptr=req->processed_form;
 	for(int i=0;i<size;i++){
 		char* pair[2]={0};
@@ -29,16 +29,19 @@ static void handleRconRequest(http_request* req){
 
 static void handleFindRequest(http_request* req){
 	char* argv2[ARGVMAX]={0};
-	int size=makeargvdelim(req->form,"&",argv2,ARGVMAX);
+	int size=makeargvdelim(req->form,"&",argv2,ARGVMAX,0);
 	char* the_ptr = req->processed_form;
 	for(int i=0;i<size;i++){
 		char* pair[2]={0};
 		splitString(argv2[i],"=",pair);
-		if(!strcmp(pair[0],"query")){
+		if(!strcmp(pair[0],"query")
+				||
+		   !strcmp(pair[0],"take_me_there")){
+		
 		replaceStringCharacter(pair[1],'+',' ');
 		the_ptr+=snprintf(the_ptr,
 				sizeof(req->processed_form)-1,
-				"%s",pair[1]);
+				"%s%s",pair[1],(i==(size-1))?" ":"|");
 		}
 	}
 }

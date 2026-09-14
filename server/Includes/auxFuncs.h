@@ -22,8 +22,6 @@ void swap(void** var1, void** var2);
 
 char *get_file_extension(const char *path);
 
-int makeargv(char *s, char *argv[ARGVMAX], int n_max);
-
 void replaceStringCharacter(char *s,char dirty,char wantthisoneinstead);
 
 int findInStringArr(char* arr[],char* nullTermStr);
@@ -36,9 +34,11 @@ void splitString(char *input, char *delimiter, char *pair[2]);
 
 void generic_error_print(char* prefix_string);
 
-int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX], int maxlen);
+int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX], int maxlen, int dir_mode);
 
 int make_str_arr(char *s,char*delim, char *argv[ARGVMAX],int maxlen);
+
+int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_t max_len);
 
 void super_mkdir(const char *dir);
 

@@ -46,7 +46,7 @@ int verify_callback(int ok, X509_STORE_CTX *ctx) {
 }
 
 void InitializeSSL(void){
-     if(use_tls){
+    if(want_tls){
 	if(SSL_on_in_process){
 		if(logging>10){
 			fprintf(logstream,"SSL já ativo! Ignorando!\n");
@@ -66,7 +66,7 @@ void InitializeSSL(void){
 }
 
 void DestroySSL(void){
-	if(use_tls){
+	if(want_tls){
 		if(!SSL_on_in_process){
 			if(logging>10){
 				fprintf(logstream,"SSL já desativado! Ignorando!\n");
@@ -179,7 +179,7 @@ void lower_security_func(void){
 }
 void init_openssl_libs_server_side(void){
 		if(logging>10){
-                if(use_tls){
+                if(want_tls){
 
                         fprintf(logstream,"Server's SSL Ativado? inicializando Server's SSL!...\n");
                 }
@@ -190,7 +190,7 @@ void init_openssl_libs_server_side(void){
                 }
         }
 
-        if(use_tls){
+        if(want_tls){
                 if(SERVER_SSL_initted_in_process){
                         if(logging>10){
                                 fprintf(logstream,"SERVER SSL já ativo! Ignorando!\n");
@@ -252,7 +252,7 @@ void end_openssl_libs_server_side(void){
 
                 fprintf(logstream,"Closing server's global ssl context?\n");
         }
-        if(use_tls){
+        if(want_tls){
                 if(!SERVER_SSL_initted_in_process){
                         if(logging>10){
                                 fprintf(logstream,"SERVER SSL já desativado! Ignorando!\n");

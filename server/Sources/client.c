@@ -278,13 +278,12 @@ int is_tls_connection(int client_fd) {
     return 0;
 }
 
-void runClientConnection(u_int8_t is_tls, int32_t sock){
+void runClientConnection(int32_t sock){
 	
 	exit_func_for_this_module = exit_function_client;
-	use_tls=is_tls;
 	socklenpointer=sizeof(curr_client.client_addr);
 	curr_client.socket=sock;
-	curr_client.is_tls=is_tls_connection(curr_client.socket);
+	curr_client.is_tls=is_tls_connection(curr_client.socket) && want_tls;
 	if(curr_client.is_tls){
 		if(logging>0){
 			fprintf(logstream,"Its tls we do eht!\n");

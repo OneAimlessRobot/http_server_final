@@ -20,7 +20,7 @@ static char* the_rcon_script="/webcrookedstuff/cstrike_folder/scripts/.send_comm
 static char currFetchedRCON[PATHSIZE*2]={0};
 
 
-static rcon_arg_line parameters_arr[MAX_NUM_RCON_ARGS]={
+static arg_line parameters_arr[MAX_NUM_RCON_ARGS]={
 
 	{.default_value=DEF_RCON_ADDRESS,NULL},
 
@@ -57,27 +57,10 @@ int isRconRequest(char* resourceTarget){
 
 }
 
-static int make_rcon_arg_arr(char* the_separated_parameters,rcon_arg_line arg_arr[],uint64_t max_len){
-	char* argv[ARGVMAX]={0};
-	int num_tags=make_str_arr(the_separated_parameters,"|",argv,max_len);
-	if(num_tags<=0){
-
-		return -1;
-	}
-	
-	if(max_len - 2 > 0){
-		argv[max_len-2][strlen(argv[max_len-2])-1]=0;
-	}
-	for(uint64_t i=0;i<max_len-1;i++){
-		arg_arr[i].the_actual_value=((strlen(argv[i]))?argv[i]:arg_arr[i].default_value);
-	}
-	return 0;
-}
-
 
 static void generateRconResultPrimitive(char* the_separated_parameters){
 
-	make_rcon_arg_arr(the_separated_parameters,parameters_arr,MAX_NUM_RCON_ARGS+1);
+	build_arg_line_arr(the_separated_parameters,parameters_arr,MAX_NUM_RCON_ARGS);
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		

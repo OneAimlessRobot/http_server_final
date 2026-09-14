@@ -2,12 +2,13 @@
 #define CUSTOM_STRUCTS_H
 
 
-typedef struct rcon_arg_line{
+typedef struct arg_line{
 
 	char* default_value;
 	char* the_actual_value;
 
-}rcon_arg_line;
+}arg_line;
+
 
 
 typedef struct cfg_field{
@@ -112,6 +113,7 @@ typedef struct client{
 		filepath[PATHSIZE*5],
 		target[PATHSIZE*3],
 		relative_file_path[PATHSIZE*3],
+		redirect_file_path[PATHSIZE*4],
 		response_mimetype[128],
 		sent_header_buff[HEADER_SEND_SIZE];
 	http_request* req; 
@@ -124,7 +126,8 @@ typedef struct client{
 			is_non_prettifyable,
 			is_not_found,
 			would_cache,
-			should_cache;
+			should_cache,
+			should_redirect;
 	u_int64_t mimetype_table_cell;
 	struct stat * the_stat_struct;
 	SSL* ctx_if_ssl;

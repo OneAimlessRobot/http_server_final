@@ -78,7 +78,7 @@ static void generate_header_sizes_data(FILE* fstream){
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
 		memset(header_argv,0,ARGVMAX*sizeof(char*));
-		makeargv(curr_listing_buff, header_argv, -1);
+		makeargvdelim(curr_listing_buff," \t\n", header_argv, -1,0);
 		for(uint32_t j=0;j<NUM_OF_FIELDS_TO_PRINT;j++){
 			uint32_t i=print_order[j];
 			category_curr_sizes[i]=header_argv[i]?strnlen(header_argv[i],PATHSIZE-1):0;
@@ -126,7 +126,7 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 	memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
-		makeargv(curr_listing_buff, curr_listing_argv, FILE_NAME);
+		makeargvdelim(curr_listing_buff," \t\n", curr_listing_argv, FILE_NAME,1);
 		
 		char full_path_buff_to_test[PATH_MAX*4]={0};
 		
@@ -287,7 +287,7 @@ void generateDirListing(char* dir){
 		snprintf(prev_dir_to_use,PATHSIZE*2-1,"%s",dir);
 		char* argv_for_slashes[ARGVMAX]={0};
 		uint32_t num_tokens=make_str_arr(prev_dir_rel_path,"/",argv_for_slashes,ARGVMAX)-1;
-		uint32_t wanted_slash_idx=num_tokens-1;
+		uint32_t wanted_slash_idx=num_tokens;
 		uint64_t ptr_to_path_num=(uint64_t)prev_dir_rel_path;
 		uint64_t ptr_to_wanted_slash_num=(uint64_t)argv_for_slashes[wanted_slash_idx];
 		uint64_t subtraction_result=ptr_to_wanted_slash_num-ptr_to_path_num;
