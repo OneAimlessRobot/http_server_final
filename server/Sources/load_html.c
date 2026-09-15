@@ -126,7 +126,7 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 	memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
-		makeargvdelim(curr_listing_buff," \t\n", curr_listing_argv, FILE_NAME+1);
+		makeargvdelim(curr_listing_buff," \t\n", curr_listing_argv, FILE_NAME);
 		
 		char full_path_buff_to_test[PATH_MAX*4]={0};
 		
