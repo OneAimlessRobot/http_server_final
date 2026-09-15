@@ -24,4 +24,10 @@
 
 #define METHOD_NOT_ALLOWED_RESPONSE " 405 Method Not Allowed\r\n"
 
+#define NAVIGATION_SOUND_PATH ".ui.mp3"
+
+#define AUDIO_OBJECT_NAME "the_audio"
+
+#define AUDIO_CLICK_FUNCTION_NAME AUDIO_OBJECT_NAME ".play"
+
 #endif

@@ -108,7 +108,7 @@ static void print_header(int fd){
 static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv,char* dir){
 	
 	
-	dprintf(fd,"\n<span class='%s'>| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s'>%-128s</a>|</span><br>\n",
+	dprintf(fd,"\n<span class='%s'>| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s' >%-128s</a>|</span><br>\n",
 			DIR_LISTING_TABLE_LINE_CLASS,
 			is_directory_this_one?"directory!":curr_listing_argv[SIZE],
 			curr_listing_argv[DIR_DATE],
@@ -275,7 +275,11 @@ void generateDirListing(char* dir){
 	}
 	remove(tmpDir);
 	dprintf(curr_client.fd,STYLESHEET_FORMAT
-		"\n<body class='%s'>\n<br>%s\n\n<div class='%s'>\n<br>\n",dir_listing_css_file_path,DIR_LISTING_BODY_CLASS,FREE_ALL_APPS_COUNTDOWN,DIR_LISTING_BODY_CLASS);
+		"\n<body class='%s'>\n<br>%s\n\n<div class='%s'>\n<br>\n",
+					dir_listing_css_file_path,
+					DIR_LISTING_BODY_CLASS,
+					FREE_ALL_APPS_COUNTDOWN,
+					DIR_LISTING_BODY_CLASS);
 	if(atRoot){
 
 		dprintf(curr_client.fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>\n<br>\n",SITE_PATH_HEADER_CLASS);
@@ -292,7 +296,9 @@ void generateDirListing(char* dir){
 		uint64_t ptr_to_wanted_slash_num=(uint64_t)argv_for_slashes[wanted_slash_idx];
 		uint64_t subtraction_result=ptr_to_wanted_slash_num-ptr_to_path_num;
 		prev_dir_to_use[subtraction_result-1]=0;
-		dprintf(curr_client.fd,"\n<a class='%s' href='%s'>Prev</a><br><br><br>\n",DIR_REF_CLASS,prev_dir_to_use);
+		dprintf(curr_client.fd,"\n<a class='%s' href='%s' >Prev</a><br><br><br>\n",
+									DIR_REF_CLASS,
+									prev_dir_to_use);
 
 	}
 	generate_header_sizes_data(fstream);

@@ -1,6 +1,25 @@
 #ifndef TEMPLATE_FUNCS_H
 #define TEMPLATE_FUNCS_H
 
+
+/*
+
+
+#define STYLESHEET_FORMAT "<!DOCTYPE html>" \
+			"\n<html>" \
+			"\n<head>" \
+			"\n<meta charset=\"UTF-8\">\n" \
+			"\n<base href=\'\'>" \
+			"\n<link rel='stylesheet' type='text/css' href='%s'>" \
+			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
+			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
+			"<script>\nvar %s = new Audio();\n" \
+			"%s.src = \"%s/%s\"\n" \
+			"%s.preload = 'auto';\n</script>\n" \
+			"\n</head>"
+			
+			*/
+
 #define STYLESHEET_FORMAT "<!DOCTYPE html>" \
 			"\n<html>" \
 			"\n<head>" \
@@ -10,7 +29,8 @@
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
 			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
 			"\n</head>"
-
+			
+			
 #define TXT_HTML_PREFIX "<!DOCTYPE html>" \
 			"\n<html>" \
 			"\n<head>" \
@@ -51,4 +71,6 @@ window.setTimeout( function() {
 			"<div>%s</div>\n<br>\n" \
 			"</body>" \
 			"\n</html>\n"
+			
+			
 #endif
