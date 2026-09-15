@@ -201,8 +201,7 @@ void generic_error_print(char* prefix_string){
 
 }
 
-int makeargvdelim(char *s, char* delim, char *argv[ARGVMAX], int n_max, int dir_mode) {
-	int use_nmax= (n_max>0)&&dir_mode;
+int makeargvdelim(char *s, char* delim, char *argv[ARGVMAX], int n_max) {
 	int ntokens = 0;
 
     if (s == NULL || argv == NULL || ARGVMAX == 0){
@@ -211,18 +210,20 @@ int makeargvdelim(char *s, char* delim, char *argv[ARGVMAX], int n_max, int dir_
     argv[ntokens] = strtok(s, delim);
     while ((argv[ntokens] != NULL) && (ntokens < ARGVMAX)) {
         
-		if(use_nmax && (ntokens >=  (n_max-1))){
+		if((n_max>0) && (ntokens >=  (n_max-1))){
 			break;
 		}
 		ntokens++;
         argv[ntokens] = strtok(NULL, delim);
     }
-    if(use_nmax && (ntokens < n_max)){
+    if((ntokens < n_max)){
 		ntokens++;
-		char* pair[2];
         argv[ntokens] = strtok(NULL, "\n");
-		splitString(argv[ntokens], " -> ", pair);
-		argv[ntokens]= pair[0];
+		/*if(second_delim){
+			char* pair[2];
+			splitString(argv[ntokens], second_delim, pair);
+			argv[ntokens]= pair[0];
+		}*/
 	}
     argv[ntokens+1] = NULL;
     return ntokens;

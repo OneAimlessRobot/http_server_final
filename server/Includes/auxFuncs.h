@@ -34,7 +34,7 @@ void splitString(char *input, char *delimiter, char *pair[2]);
 
 void generic_error_print(char* prefix_string);
 
-int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX], int maxlen, int dir_mode);
+int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX], int maxlen);
 
 int make_str_arr(char *s,char*delim, char *argv[ARGVMAX],int maxlen);
 

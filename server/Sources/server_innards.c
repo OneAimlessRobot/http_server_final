@@ -357,7 +357,7 @@ void initializeServer(void){
 
 	server_address.sin_family=AF_INET;
 	server_address.sin_port= htons(port);
-	server_address.sin_addr.s_addr = INADDR_ANY;
+	server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 	socklen_t socklength=sizeof(server_address);
         
 	int bind_result = bind(server_socket,(struct sockaddr*)(&server_address),socklength);

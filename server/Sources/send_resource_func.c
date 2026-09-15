@@ -68,7 +68,7 @@ static int compressFile(char* target){
 		}
 		
 		char* argv[ARGVMAX]={0};
-		makeargvdelim(cmd," \t\n",argv, 3,0);
+		makeargvdelim(cmd," \t\n",argv, 3);
 		int pid=fork();
 		switch(pid){
 			case -1:

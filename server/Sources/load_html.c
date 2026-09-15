@@ -78,7 +78,7 @@ static void generate_header_sizes_data(FILE* fstream){
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
 		memset(header_argv,0,ARGVMAX*sizeof(char*));
-		makeargvdelim(curr_listing_buff," \t\n", header_argv, -1,0);
+		makeargvdelim(curr_listing_buff," \t\n", header_argv, -1);
 		for(uint32_t j=0;j<NUM_OF_FIELDS_TO_PRINT;j++){
 			uint32_t i=print_order[j];
 			category_curr_sizes[i]=header_argv[i]?strnlen(header_argv[i],PATHSIZE-1):0;
@@ -126,7 +126,7 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 	memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
 	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
-		makeargvdelim(curr_listing_buff," \t\n", curr_listing_argv, FILE_NAME,1);
+		makeargvdelim(curr_listing_buff," \t\n", curr_listing_argv, FILE_NAME+1);
 		
 		char full_path_buff_to_test[PATH_MAX*4]={0};
 		
