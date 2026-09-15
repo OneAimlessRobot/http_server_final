@@ -63,7 +63,7 @@ static int compressFile(char* target){
 		
 		if(logging){
 		
-			printf("%s\n",cmd);
+			fprintf(logstream,"%s\n",cmd);
 		
 		}
 		

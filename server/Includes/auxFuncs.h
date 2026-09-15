@@ -2,6 +2,8 @@
 #define AUXFUNCS_H
 
 
+char *humanSize(uint64_t bytes, char *hrbytes);
+
 char* randStr(int size);
 char** randStrArr(int sizeOfStrs,int size);
 /*

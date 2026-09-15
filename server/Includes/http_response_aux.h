@@ -14,7 +14,6 @@
 
 #define HTTP_SERVER_FILE_AGE_HEADERS HTTP_SERVER_INTRO_HEADERS \
 									"Last-Modified: %s\r\n" \
-									"Last-Accessed: %s\r\n" \
 									"ETag: \"%s\"\r\n" \
 									"Cache-Control: %s, s-maxage=%lu\r\n"
 

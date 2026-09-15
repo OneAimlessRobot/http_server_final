@@ -60,10 +60,14 @@ static void generatePHPResultPrimitive(char* target){
 	snprintf(full_php_root,sizeof(full_php_root)-1,"%s/",defaultTarget);
 
 
-	printf("(PHP) Output file path: %s\n",currFetchedPHP);
 
 	snprintf(full_php_command,sizeof(full_php_command)-1,phpCmd,currFetchedPHP);
-	printf("%s\n",full_php_command);
+	if(logging){
+		
+		fprintf(logstream,"(PHP) Output file path: %s\n",currFetchedPHP);
+		fprintf(logstream,"%s\n",full_php_command);
+	
+	}
 	char* argv[ARGVMAX]={"php-cgi8.3",NULL};
 	int pid=fork();
 	switch(pid){

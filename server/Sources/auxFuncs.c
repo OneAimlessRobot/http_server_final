@@ -1,6 +1,26 @@
 #include "../Includes/preprocessor.h"
 
 
+/*
+ 
+	https://gist.github.com/dgoguerra/7194777 
+  
+*/
+char *humanSize(uint64_t bytes, char *hrbytes){
+    char   *suffix[] = { "B", "KB", "MB", "GB", "TB"};
+    char    length = sizeof(suffix) / sizeof(suffix[0]);
+    int     i;
+
+    for(i = 0; i < length; i++) {
+        if(bytes < 1024)
+            break;
+
+        bytes >>= 10;
+    }
+
+    snprintf(hrbytes, MICROTIMESIZESTRINGTHING, "%lu%s", bytes, suffix[i]);
+    return(hrbytes);
+}
 int url_decode(char *src, char *dst, char** reserved_characters_arr) {
     int result=0;
     int counter_src=0;
@@ -40,7 +60,6 @@ int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_
 
 		return -1;
 	}
-	printf("Num tags: %d\n",num_tags);
 	if(num_tags > 1){
 		argv[num_tags-1][strlen(argv[num_tags-1])-1]=0;
 	}

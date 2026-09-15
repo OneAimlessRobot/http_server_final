@@ -8,8 +8,6 @@
 char LE_TIMEUREUR_DATE[MICROTIMESIZESTRINGTHING] = {0},
 
 		LE_TIMEUREUR_LAST_MODIFIED_DATE[MICROTIMESIZESTRINGTHING] = {0},
-
-		LE_TIMEUREUR_LAST_ACCESS_DATE[MICROTIMESIZESTRINGTHING] = {0},
 		
 		ETag[ETAG_SIZE] = {0};
 
@@ -35,33 +33,40 @@ void build_date_buff(void){
 	strftime(LE_TIMEUREUR_DATE, sizeof(LE_TIMEUREUR_DATE), "%a, %d %b %Y %H:%M:%S %Z", struct_for_date.time_struct_ptr);
 
 }
-void build_last_modified_buff(char* full_file_path){
+
+int build_file_stat(char* full_file_path, char* modified_date_buff, struct stat* the_stat){
 	
 	if(!full_file_path){
 		
-		return;
+		return -1;
 		
 	}
-	int ret = lstat(full_file_path, &last_modified_stat_struct);
+	int ret = lstat(full_file_path, the_stat);
 	if (ret == -1) {
-		perror("lstat");
-		return;
+		perror(full_file_path);
+		return -1;
 	}
+    timer_struct_t the_struct_for_time = {0};
     
-    struct_for_mod_date.timeur = last_modified_stat_struct.st_mtime;
+    the_struct_for_time.timeur = last_modified_stat_struct.st_mtime;
     
-	struct_for_mod_date.time_struct_ptr = gmtime(&struct_for_mod_date.timeur);	
+	the_struct_for_time.time_struct_ptr = gmtime(&the_struct_for_time.timeur);	
 	
-	strftime(LE_TIMEUREUR_LAST_MODIFIED_DATE, sizeof(LE_TIMEUREUR_LAST_MODIFIED_DATE), 
-				"%a, %d %b %Y %H:%M:%S %Z", struct_for_mod_date.time_struct_ptr);
+	strftime(modified_date_buff, sizeof(LE_TIMEUREUR_LAST_MODIFIED_DATE), 
+				"%a, %d %b %Y %H:%M:%S %Z", the_struct_for_time.time_struct_ptr);
 
 	
-    struct_for_access_date.timeur = last_modified_stat_struct.st_atime;
-    
-	struct_for_access_date.time_struct_ptr = gmtime(&struct_for_access_date.timeur);	
+	return 0;
+}
+
+void build_last_modified_buff(char* full_file_path){
 	
-	strftime(LE_TIMEUREUR_LAST_ACCESS_DATE, sizeof(LE_TIMEUREUR_LAST_ACCESS_DATE), 
-				"%a, %d %b %Y %H:%M:%S %Z", struct_for_access_date.time_struct_ptr);
+	
+	int result = build_file_stat(full_file_path, LE_TIMEUREUR_LAST_MODIFIED_DATE, &last_modified_stat_struct);
+	
+	if(result){
+		return;
+	}
 
 	/*
 	 

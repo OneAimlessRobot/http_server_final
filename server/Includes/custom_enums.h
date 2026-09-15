@@ -3,7 +3,7 @@
 
 typedef enum {GET,HEAD,POST,INVALID,MAX_REQUEST_TYPE} http_req_type;
 
-typedef enum {PERMISSIONS,NUM_LINKS,OWNER_NAME,OWNER_GROUP,SIZE, DIR_DATE, TIME,FILE_NAME,CATEGORY_ID_MAX}category_id;
+typedef enum {SIZE, FULL_DATE,FILE_NAME,CATEGORY_ID_MAX}category_id;
 
 
 typedef enum {ATOM=0,XHTML,MAX_NAMESPACE_URI_ID}namespace_uri_id;

@@ -8,7 +8,6 @@
 #define FILL_UP_BORING_CRAP  LE_TIMEUREUR_DATE, \
 						KEEP_ALIVE_STRING, \
 						LE_TIMEUREUR_LAST_MODIFIED_DATE, \
-						LE_TIMEUREUR_LAST_ACCESS_DATE, \
 						ETag, \
 						curr_client.should_cache?"no-cache":"no-store", \
 						s_maxage

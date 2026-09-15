@@ -16,24 +16,14 @@
 
 #define FILE_REF_CLASS "ref_for_file"
 
-#define NUM_OF_FIELDS_TO_PRINT 4
+#define NUM_OF_FIELDS_TO_PRINT 3
 
-static char* category_names[CATEGORY_ID_MAX]={
-			"Permissions",
-			"num_links",
-			"Owner_name",
-			"Owner_group",
-			"Size",
-			"Date",
-			"time",
-			"Actual_file_name"
+static struct stat the_stat = {0};
 
-};
 
 static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
 	SIZE,
-	DIR_DATE,
-	TIME,
+	FULL_DATE,
 	FILE_NAME,
 };
 
@@ -47,18 +37,25 @@ static const char* dir_listing_css_file_path= "/webcrookedstuff/.dir_listing_sty
 static char currSearchedDir[PATHSIZE*3]={0};
 static char resolved_abs_path[PATH_MAX]={0};
 
-//ls -lhu --sort=time --time=mtime --time-style=long-iso --group-directories-first 
+//ls -1hu --sort=time --time=mtime --group-directories-first 
 
-static char* the_dir_command[]={"ls","-lhu","--sort=time", "--time=mtime", "--time-style=long-iso", "--group-directories-first",resolved_abs_path,NULL};
+static char* the_dir_command[]={"ls","-1hu","--sort=time", "--time=mtime", "--group-directories-first",resolved_abs_path,NULL};
 
 
 static char resolved_rel_path[PATH_MAX]={0},
 		resolved_default_path[PATH_MAX]={0},
 		header_buff[4+(PATHSIZE+4)*CATEGORY_ID_MAX]={0},
-		* curr_listing_argv[ARGVMAX]={0},
+		the_date_buff[MICROTIMESIZESTRINGTHING]= {0},
+		the_size_buff[MICROTIMESIZESTRINGTHING]= {0},
+		curr_listing_buff[4+(PATHSIZE+8)*CATEGORY_ID_MAX]={0},
+		* curr_listing_argv[ARGVMAX]={the_size_buff,the_date_buff,curr_listing_buff},
 		* header_argv[ARGVMAX]={0},
-		curr_listing_buff[4+(PATHSIZE+8)*CATEGORY_ID_MAX]={0};
+		* category_names[CATEGORY_ID_MAX]={
+			"Size",
+			"Full_Date",
+			"Actual_file_name"
 
+		};
 
 int isDirectory(char* resourceTarget){
        
@@ -108,11 +105,10 @@ static void print_header(int fd){
 static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv,char* dir){
 	
 	
-	dprintf(fd,"\n<span class='%s'>| %-30s | %-10s | %-10s |<a class='%s' href='%s/%s' >%-128s</a>|</span><br>\n",
+	dprintf(fd,"\n<span class='%s'>| %-30s | %-30s |<a class='%s' href='%s/%s' >%-128s</a>|</span><br>\n",
 			DIR_LISTING_TABLE_LINE_CLASS,
 			is_directory_this_one?"directory!":curr_listing_argv[SIZE],
-			curr_listing_argv[DIR_DATE],
-			curr_listing_argv[TIME],
+			curr_listing_argv[FULL_DATE],
 			is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,
 			dir,
 			curr_listing_argv[FILE_NAME],
@@ -123,15 +119,37 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 
 
 	memset(curr_listing_buff,0,PATHSIZE);
-	memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
-	fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
-		makeargvdelim(curr_listing_buff," \t\n", curr_listing_argv, FILE_NAME);
 		
-		char full_path_buff_to_test[PATH_MAX*4]={0};
+		b_zero(the_date_buff);
+		b_zero(the_size_buff);
 		
-		snprintf(full_path_buff_to_test,PATH_MAX*3-1,"%s/%s",dir,curr_listing_argv[FILE_NAME]);
-		int is_directory_this_one=isDirectory(full_path_buff_to_test);
+		
+		
+		int strlen_of_dirent_curr = strnlen(curr_listing_buff,PATHSIZE);
+		
+		
+		/*
+		  
+		  remove the newline
+		 
+		 
+		 */
+		
+		
+		curr_listing_buff[strlen_of_dirent_curr-1]=0;
+
+		char full_target_path_to_test[PATH_MAX*6]={0},
+		full_file_path_to_test[PATH_MAX*6]={0};
+		
+		snprintf(full_target_path_to_test,PATH_MAX*5-1,"%s/%s",dir,curr_listing_buff);
+		snprintf(full_file_path_to_test,PATH_MAX*5-1,"%s%s/%s",currDir,dir,curr_listing_buff);
+
+		build_file_stat(full_file_path_to_test,the_date_buff,&the_stat);
+		
+		humanSize(the_stat.st_size,the_size_buff);
+		
+		int is_directory_this_one=isDirectory(full_target_path_to_test);
 		if(is_directory_this_one){
 			print_dir_entry(fd, is_directory_this_one,curr_listing_argv, dir);
 		}
@@ -146,7 +164,6 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 			}
 		}
 		memset(curr_listing_buff,0,PATHSIZE);
-		memset(curr_listing_argv,0,ARGVMAX*sizeof(char*));
 	}
 
 }

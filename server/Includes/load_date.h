@@ -14,6 +14,8 @@ extern timer_struct_t struct_for_date,
 				
 int isDateReq(char* target);
 
+int build_file_stat(char* full_file_path, char* modified_date_buff, struct stat* the_stat);
+
 void build_date_buff(void);
 
 void build_last_modified_buff(char* full_file_path);

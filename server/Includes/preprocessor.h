@@ -42,6 +42,7 @@
 #include "buffSizes.h"
 #include "custom_types.h"
 #include "auxFuncs.h"
+#include <inttypes.h> // PRIu64
 #include "misc_preproc_consts.h"
 #include "../Includes/load_date.h"
 
