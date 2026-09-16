@@ -292,10 +292,9 @@ void generateDirListing(char* dir){
 	}
 	remove(tmpDir);
 	dprintf(curr_client.fd,STYLESHEET_FORMAT
-		"\n<body class='%s'>\n<br>%s\n\n<div class='%s'>\n<br>\n",
+		"\n<body class='%s'>\n\n<div class='%s'>\n<br>\n",
 					dir_listing_css_file_path,
 					DIR_LISTING_BODY_CLASS,
-					FREE_ALL_APPS_COUNTDOWN,
 					DIR_LISTING_BODY_CLASS);
 	if(atRoot){
 
@@ -313,7 +312,7 @@ void generateDirListing(char* dir){
 		uint64_t ptr_to_wanted_slash_num=(uint64_t)argv_for_slashes[wanted_slash_idx];
 		uint64_t subtraction_result=ptr_to_wanted_slash_num-ptr_to_path_num;
 		prev_dir_to_use[subtraction_result-1]=0;
-		dprintf(curr_client.fd,"\n<a class='%s' href='%s' >Prev</a><br><br><br>\n",
+		dprintf(curr_client.fd,"\n<a class='%s' href='%s'>Prev</a><br><br><br>\n",
 									DIR_REF_CLASS,
 									prev_dir_to_use);
 
@@ -322,7 +321,7 @@ void generateDirListing(char* dir){
 	fseek(fstream,0,SEEK_SET);
 	print_header(curr_client.fd);
 	process_lines_and_print_to_dest_file(curr_client.fd,fstream,dir);
-	dprintf(curr_client.fd,"</div>\n</body>\n</html>\n");
+	dprintf(curr_client.fd,"</div>\n<br>%s\n\n</body>\n</html>\n",audio_play_script_to_load);
 	fclose(fstream);
 
 }

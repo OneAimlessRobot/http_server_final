@@ -13,10 +13,7 @@
 			"\n<link rel='stylesheet' type='text/css' href='%s'>" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
 			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
-			"<script>\nvar %s = new Audio();\n" \
-			"%s.src = \"%s/%s\"\n" \
-			"%s.preload = 'auto';\n</script>\n" \
-			"\n</head>"
+			"<script src=\"%s/%s\"></head>"
 			
 			*/
 
