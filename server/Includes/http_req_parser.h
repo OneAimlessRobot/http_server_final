@@ -3,7 +3,6 @@
 
 
 #define REQUEST_SECTION_DELIMITER_STRING "\r\n\r\n"
-#define DOMAIN_NAME "lenasattic.ddns.net"
 
 
 

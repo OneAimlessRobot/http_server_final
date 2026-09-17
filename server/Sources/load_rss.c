@@ -4,9 +4,7 @@
 #include "../Includes/resource_consts.h"
 #include "../Includes/load_rss.h"
 
-static char* rss_feed_self_link= "/webcrookedstuff/rss/the_main_rss.rss",
-		
-		channel_string_buff[PATHSIZE*2]={0},
+static char channel_string_buff[PATHSIZE*2]={0},
 		
 		currFetchedRSS[PATHSIZE*2]={0};
 
@@ -167,9 +165,8 @@ void generateRss(char* dir){
 			"<rss version=\"2.0\" xmlns:atom=\"%s\">\n"
 			"<xhtml:script xmlns:xhtml=\"%s\" type=\"application/javascript\"/>\n"
 			"<channel>\n"
-			"<atom:link href=\"%s\" type=\"application/atom+xml\" />\n"
-			"<script src=\"%s\"></script>\n",
-			uris_for_namespace_ids[ATOM],uris_for_namespace_ids[XHTML],rss_feed_self_link,FREE_ALL_APPS_COUNTDOWN);
+			"<atom:link href=\"%s\" type=\"application/atom+xml\" />\n",
+			uris_for_namespace_ids[ATOM],uris_for_namespace_ids[XHTML],mainRssFeed);
 
 	int result_from_channel_printing=print_out_rss_line_to_fd(curr_client.fd,channel_string_buff,names_for_channel_tag_ids,empty_contents_for_channel_tag_ids,MAX_CH_TAG_ID+1);
 	if(result_from_channel_printing<0){

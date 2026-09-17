@@ -23,7 +23,6 @@
 #define DEF_FIND_ROOTDIR defaultTarget
 
 
-static const char* find_listing_css_file_path= "/webcrookedstuff/.find_listing_style.css";
 
 u_int64_t num_files_found = 0;
 
@@ -252,7 +251,8 @@ void generateFindResult(char* the_request_parameters){
 	dprintf(curr_client.fd,FIND_HTML_PREFIX
 		"\n<body class=\"%s\">\n<br>\n\n\n<div class='%s'>\n<br>\n"
 		"\n<h1>The files found on the server with the expression: |%s| </h1>\n<br>\n<br>\n",
-			find_listing_css_file_path,
+			defaultTarget,
+			defaultTarget,
 			FIND_LISTING_BODY_CLASS,
 			FIND_LISTING_DIV_CLASS,
 			aux_exp_buff);

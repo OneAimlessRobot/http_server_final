@@ -9,7 +9,6 @@
 #define TXT_PRETTIFY_DIV_CLASS TXT_PRETTIFY_BODY_CLASS
 
     
-static const char* txt_prettify_css_file_path= "/webcrookedstuff/.styles_file_exts/.stylesheet_txt_files.css";
 
 static char currFetchedText[PATHSIZE*2]={0};
 
@@ -128,7 +127,10 @@ void generateText(char* dir){
 	
 	
 	dprintf(curr_client.fd,TXT_HTML_PREFIX
-		"\n<body class='%s'>\n<br>\n<br>\n\n<br>\n<br><div class='%s'>\n<pre class='%s'>\n\n",txt_prettify_css_file_path,TXT_PRETTIFY_BODY_CLASS,TXT_PRETTIFY_DIV_CLASS,TXT_PRETTIFY_PRE_CLASS);
+		"\n<body class='%s'>\n<br>\n<br>\n\n<br>\n<br><div class='%s'>\n<pre class='%s'>\n\n",
+			defaultTarget,
+			defaultTarget,
+			TXT_PRETTIFY_BODY_CLASS,TXT_PRETTIFY_DIV_CLASS,TXT_PRETTIFY_PRE_CLASS);
 	
 
 	char currLine[PATHSIZE*2]={0};

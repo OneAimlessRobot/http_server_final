@@ -15,9 +15,7 @@
 
 
 
-static char* the_rcon_script="/webcrookedstuff/cstrike_folder/scripts/.send_command.sh";
-
-static char currFetchedRCON[PATHSIZE*2]={0};
+static char currFetchedRCON[PATHSIZE*3]={0};
 
 
 static arg_line parameters_arr[MAX_NUM_RCON_ARGS]={
@@ -64,7 +62,7 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
-	snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s%s", currDir,the_rcon_script);
+	snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s" RCON_SCRIPT_PATH, currDir,defaultTarget);
 
 	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRCON);
 	

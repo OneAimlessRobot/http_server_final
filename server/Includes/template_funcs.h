@@ -2,29 +2,19 @@
 #define TEMPLATE_FUNCS_H
 
 
-/*
-
 
 #define STYLESHEET_FORMAT "<!DOCTYPE html>" \
 			"\n<html>" \
 			"\n<head>" \
 			"\n<meta charset=\"UTF-8\">\n" \
 			"\n<base href=\'\'>" \
-			"\n<link rel='stylesheet' type='text/css' href='%s'>" \
+			"\n<link rel='stylesheet' type='text/css' href='" \
+			DIR_LISTING_CSS_FILE_PATH \
+			"'>" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
-			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
-			"<script src=\"%s/%s\"></head>"
-			
-			*/
-
-#define STYLESHEET_FORMAT "<!DOCTYPE html>" \
-			"\n<html>" \
-			"\n<head>" \
-			"\n<meta charset=\"UTF-8\">\n" \
-			"\n<base href=\'\'>" \
-			"\n<link rel='stylesheet' type='text/css' href='%s'>" \
-			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
-			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
+			"\n<link rel=\"manifest\" href=\"" \
+			WEBMANIFEST_FILE_PATH \
+			"\">" \
 			"\n</head>"
 			
 			
@@ -33,9 +23,13 @@
 			"\n<head>" \
 			"\n<meta charset=\"UTF-8\">\n" \
 			"\n<base href=\'\'>" \
-			"\n<link rel='stylesheet' type='text/css' href='%s'>" \
+			"\n<link rel='stylesheet' type='text/css' href='" \
+			TXT_PRETTIFY_CSS_FILE_PATH \
+			"'>" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
-			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
+			"\n<link rel=\"manifest\" href=\"" \
+			WEBMANIFEST_FILE_PATH \
+			"\">" \
 			"\n</head>"
 
 #define FIND_HTML_PREFIX "<!DOCTYPE html>" \
@@ -43,9 +37,13 @@
 			"\n<head>" \
 			"\n<meta charset=\"UTF-8\">\n" \
 			"\n<base href=\'\'>" \
-			"\n<link rel='stylesheet' type='text/css' href='%s'>" \
+			"\n<link rel='stylesheet' type='text/css' href='" \
+			FIND_LISTING_CSS_FILE_PATH \
+			"'>" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
-			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
+			"\n<link rel=\"manifest\" href=\"" \
+			WEBMANIFEST_FILE_PATH \
+			"\">" \
 			"\n</head>"
 			
 /*
@@ -58,9 +56,7 @@ window.setTimeout( function() {
 			"\n<head>" \
 			"\n<meta charset=\"UTF-8\">\n" \
 			"\n<base href=\'\'>" \
-			"\n<link rel='stylesheet' type='text/css' href=''>" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
-			"\n<link rel=\"manifest\" href=\"/webcrookedstuff/.site.webmanifest\">" \
 			"\n</head>\n<body>\n" \
 			"<script>\nwindow.setTimeout( function() {\n" \
 			"window.location.reload();\n" \

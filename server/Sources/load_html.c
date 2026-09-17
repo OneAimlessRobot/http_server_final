@@ -32,7 +32,6 @@ static uint16_t category_curr_sizes[CATEGORY_ID_MAX]={0};
 
 
 
-static const char* dir_listing_css_file_path= "/webcrookedstuff/.dir_listing_style.css";
 
 static char currSearchedDir[PATHSIZE*3]={0};
 static char resolved_abs_path[PATH_MAX]={0};
@@ -293,7 +292,8 @@ void generateDirListing(char* dir){
 	remove(tmpDir);
 	dprintf(curr_client.fd,STYLESHEET_FORMAT
 		"\n<body class='%s'>\n\n<div class='%s'>\n<br>\n",
-					dir_listing_css_file_path,
+					defaultTarget,
+					defaultTarget,
 					DIR_LISTING_BODY_CLASS,
 					DIR_LISTING_BODY_CLASS);
 	if(atRoot){
@@ -321,7 +321,7 @@ void generateDirListing(char* dir){
 	fseek(fstream,0,SEEK_SET);
 	print_header(curr_client.fd);
 	process_lines_and_print_to_dest_file(curr_client.fd,fstream,dir);
-	dprintf(curr_client.fd,"</div>\n<br>%s\n\n</body>\n</html>\n",audio_play_script_to_load);
+	dprintf(curr_client.fd,"</div>\n<br>" AUDIO_PLAY_SCRIPT_TO_LOAD "\n\n</body>\n</html>\n",defaultTarget);
 	fclose(fstream);
 
 }
