@@ -48,6 +48,7 @@ extern char currDir[PATHSIZE],
 	robotsTarget[FIELDSIZE],
 	excludePrettifyTarget[FIELDSIZE],
 	valgrindSuppressionsFile[FIELDSIZE],
+	bind_iface_addr[FIELDSIZE],
 	*tmp_file_dir,
 	*defaultMimetype,
 	*robotsMimetype;

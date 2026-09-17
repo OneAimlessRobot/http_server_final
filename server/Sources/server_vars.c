@@ -47,6 +47,7 @@ char currDir[PATHSIZE] = {0},
 	valgrindSuppressionsFile[FIELDSIZE] = {0},
 	tmp_directory_name[PATHSIZE] = {0},
 	excludePrettifyTarget[PATHSIZE] = {0},
+	bind_iface_addr[PATHSIZE] = {0},
 	*tmp_file_dir= NULL,
 	*defaultMimetype = "*/*",
 	*robotsMimetype = "text/plain";

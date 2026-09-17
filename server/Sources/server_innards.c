@@ -271,11 +271,16 @@ void initializeClientConstants(void){
 void initializeServerConstants(void){
 	
 	strncpy(valgrindSuppressionsFile,find_value_in_cfg_arr("valgrindSuppressionsFile",cfgs),FIELDSIZE-1);
+	strncpy(bind_iface_addr,find_value_in_cfg_arr("bind_iface_addr",cfgs),FIELDSIZE-1);
 	
 	int invalid_string_confs=
 				!((stringsAreEqual(valgrindSuppressionsFile,NO_SUCH_SETTING)
 				||
-				stringsAreEqual(valgrindSuppressionsFile,NO_SETTINGS_LOADED)));
+				stringsAreEqual(valgrindSuppressionsFile,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(bind_iface_addr,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(bind_iface_addr,NO_SETTINGS_LOADED)));
 				
 	if(!invalid_string_confs){
 
@@ -357,8 +362,8 @@ void initializeServer(void){
 
 	server_address.sin_family=AF_INET;
 	server_address.sin_port= htons(port);
-	//server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-	server_address.sin_addr.s_addr = inet_addr("127.0.0.1");
+	int strlen_bind_addr= strnlen(bind_iface_addr,sizeof(bind_iface_addr));
+	server_address.sin_addr.s_addr = strlen_bind_addr >0?inet_addr(bind_iface_addr):htonl(INADDR_ANY);
 	socklen_t socklength=sizeof(server_address);
         
 	int bind_result = bind(server_socket,(struct sockaddr*)(&server_address),socklength);
