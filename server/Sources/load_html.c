@@ -4,8 +4,6 @@
 #include "../Includes/resource_consts.h"
 #include "../Includes/template_funcs.h"
 
-#define SITE_PATH_HEADER_CLASS "header_for_site_path"
-
 #define DIR_LISTING_HEADER_CLASS "header_for_dir_listing"
 
 #define DIR_LISTING_TABLE_LINE_CLASS "dir_listing_table"
@@ -13,6 +11,8 @@
 #define DIR_LISTING_BODY_CLASS "dir_listing"
 
 #define DIR_REF_CLASS "ref_for_dir"
+
+#define PREV_DIR_REF_CLASS "ref_for_prev"
 
 #define FILE_REF_CLASS "ref_for_file"
 
@@ -296,11 +296,7 @@ void generateDirListing(char* dir){
 					defaultTarget,
 					DIR_LISTING_BODY_CLASS,
 					DIR_LISTING_BODY_CLASS);
-	if(atRoot){
-
-		dprintf(curr_client.fd,"\n<h1 class='%s'>DIRETORIA ROOT DO SERVER!!!!!</h1>\n<br>\n",SITE_PATH_HEADER_CLASS);
-	}
-	else{
+	if(!atRoot){
 		char prev_dir_rel_path[PATHSIZE*2]={0};
 		char prev_dir_to_use[PATHSIZE*2]={0};
 		snprintf(prev_dir_rel_path,PATHSIZE*2-1,"%s",dir);
@@ -313,7 +309,7 @@ void generateDirListing(char* dir){
 		uint64_t subtraction_result=ptr_to_wanted_slash_num-ptr_to_path_num;
 		prev_dir_to_use[subtraction_result-1]=0;
 		dprintf(curr_client.fd,"\n<a class='%s' href='%s'>Prev</a><br><br><br>\n",
-									DIR_REF_CLASS,
+									PREV_DIR_REF_CLASS,
 									prev_dir_to_use);
 
 	}
