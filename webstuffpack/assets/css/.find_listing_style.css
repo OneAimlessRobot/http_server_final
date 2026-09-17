@@ -1,0 +1,26 @@
+
+body.find_listing{
+	background-color: rgb(196, 237, 245);
+}
+span.find_listing_table{
+
+	background-color: rgb(80, 80, 80,0.7);
+	color: white;
+}
+div.find_listing_table{
+	border-radius: 25px;
+	padding: 20px;
+	background-image: url('/bg_images/.bg_find.png');
+    box-sizing: border-box;
+	background-repeat: no-repeat;
+    background-position: 0% 30%;
+	background-attachment: fixed;
+    background-size: cover;
+	font-size: 16px;
+}
+a.find_listing_line {
+	color: rgb(125, 88, 76);
+	/*margin: auto;*/
+	font-size: 16px;
+	background-color: rgb(250, 213, 150);
+}

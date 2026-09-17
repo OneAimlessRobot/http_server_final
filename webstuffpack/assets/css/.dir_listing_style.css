@@ -1,0 +1,58 @@
+
+h1.header_for_site_path{
+
+	/*background-color: rgb(250, 193, 132);*/
+	/*color: black;*/
+	color: white;
+	/*margin: auto;*/
+	/*background-size: 100%% 100%%;*/
+
+
+}
+h1.header_for_site_path span {
+    background-color: rgb(0, 0, 0);
+}
+h2.header_for_dir_listing{
+
+	/*background-color: rgb(250, 193, 132);*/
+	/*color: black;*/
+	color: white;
+	/*margin: auto;*/
+	/*background-size: 100%% 100%%;*/
+
+
+}
+h2.header_for_dir_listing span {
+    background-color: rgb(0, 0, 0, 1.0);
+}
+body.dir_listing{
+	background-color: rgb(139, 122, 158);
+}
+span.dir_listing_table{
+
+	background-color: rgb(80, 80, 80,0.7);
+	color: white;
+}
+div.dir_listing{
+	border-radius: 25px;
+	padding: 20px;
+	background-image: url('/bg_images/.bg_eternal.png');
+    box-sizing: border-box;
+	background-repeat: no-repeat;
+    background-position: 0% 10%;
+	background-attachment: fixed;
+    background-size: cover;
+	font-size: 16px;
+}
+a.ref_for_dir {
+	/*margin: auto;*/
+	font-size: 16px;
+	color: rgb(209, 188, 125);
+	background-color: rgb(70, 70, 70);
+}
+a.ref_for_file {
+	color: rgb(80,80,210);
+	background-color: rgb(240, 206, 127);
+	/*margin: auto;rgb(209, 188, 125)rgb(219, 99, 96) rgb(100,100,100)*/
+	font-size: 16px;
+}

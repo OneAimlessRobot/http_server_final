@@ -1,0 +1,11 @@
+p {
+	font-size: 10px;
+}
+body.rss_listing{
+	/*background-image: url('/webcrookedstuff/.rss_bg.png');*/
+	background-color: rgb(250, 193, 132);
+	font_size: 10px;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-size: 100%% 100%%;
+}

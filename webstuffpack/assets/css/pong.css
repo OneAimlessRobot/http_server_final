@@ -1,0 +1,16 @@
+
+a.LINKORIGINAL
+{
+font-size: 89px;
+
+}
+ body {
+ background-image: url('../images/madoi.jpeg');
+  /*background-color: blue;*/
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  text-align: center;
+}
+
+

@@ -1,0 +1,23 @@
+
+body.txt_prettify_body{
+	background-color: rgb(130, 130, 130, 1.0);
+}
+
+div.txt_prettify_body{
+	border-radius: 25px;
+	background-repeat: no-repeat;
+    background-position: center;
+	background-attachment: fixed;
+    background-size: cover;
+    box-sizing: border-box;
+	background-image: url('/bg_images/.Multicolor Gaussian Blur Gradient Wallpaper Background.png');
+}
+
+pre.txt_prettify_body{
+    font-size: 16px;
+	padding: 15px;
+	font-family: OCR A Std, monospace;
+	color: rgb(0, 20, 60);
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}

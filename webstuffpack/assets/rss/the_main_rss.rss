@@ -1,0 +1,87 @@
+;comments with semicolon
+
+;date command:
+
+;LC_TIME=C date "+%a, %d %b %Y %H:%M:%S %Z"
+
+; In the current spec, there are:
+; 1- channels
+; 2- items.
+; the first uncommented line will be the channel line.
+; subsequent (uncommented) lines will be items.
+; Channels and items have fields.
+; these are separated via "|" (pipe characters) and the fields for channels,
+; In the order presented,
+; are:
+; 
+; title|link|language|updatePeriod|updateFrequency|description|generator
+; 
+; and the fields for items will be:
+;
+; title|description|category|pubDate|link
+;
+; note: empty fields will get default content inserted into them
+; currently,
+; the current default fields for the channel are:
+; 
+; title: "No title here"
+; link: "about:blank"
+; language: "en"
+; updatePeriod: "hourly"
+; updateFrequency: "1"
+; description: "No description here"
+; pubDate: "1st second of epoch"
+; generator: "Le generateur"
+; 
+;
+; the current default fields for items are:
+;
+; title: "No title here"
+; description: "No description here"
+; category: "No category here"
+; pubDate: "1st second of epoch"
+; link: "about:blank"
+
+
+Lena's feed| http://lenasattic.ddns.net:11020/     |pt|monthly|8| If it updates, im alive| |Lenas RSS dumper shitter
+
+
+save free software|save free software|misc/news|07 mar 2026 22:53:33 WET| http://lenasattic.ddns.net:11020/webcrookedstuff/.keep_android_open_please.js
+
+First iteration of rss feed serving|First iteration of rss feed serving|cs1.6server|07 mar 2026 23:15:14 WET|
+
+updated damage logger plugin (CS 1.6 server)|updated damage logger plugin (CS 1.6 server)|cs1.6server|07 mar 2026 22:53:33 WET|http://lenasattic.ddns.net:11020/cstrike_folder/addons/amxmodx/scripting/my_plugins/my_heroes
+
+
+
+
+Dummy topic|Dummy topic|cs1.6server|07 mar 2026 23:18:15 WET|
+
+
+
+Dummy topic 2|Dummy topic 2|cs1.6server||
+
+
+
+
+
+
+Pushed upgraded http server!|Pushed upgraded http server!|main server|07 mar 2026 23:41:08 WET|https://github.com/OneAimlessRobot/http_server_final
+
+Pushed upgraded http server again!|Pushed upgraded http server again!|main server|07 mar 2026 23:59:05 WET|https://github.com/OneAimlessRobot/http_server_final
+
+Finalized rss rendering!|Finalized rss rendering!|main server|08 mar 2026 17:43:01 WET|https://github.com/OneAimlessRobot/http_server_final/commit/86a6fd2b78a7e6b5c38d2dc1f522bd86c0f8b4d6
+
+Stack smashed @ cs 1.6 server!|Trying to debug a memory issue by recompiling amxmodx|cs1.6server|09 mar 2026 14:17:01 WET|http://lenasattic.ddns.net:11020/cstrike_folder/addons/amxmodx/scripting/my_plugins
+
+Dummasss hero complains about my habits!|Its sooooooo over bro. soooo over -- MilkChan3PicG4M3R|writing|Mar  9 15:28:25 WET 2026|http://lenasattic.ddns.net:11020/webcrookedstuff/pages
+
+Dummasss hero complains about my habits! The finale is soooooooooooo over|Its sooooooo over bro. soooo over -- MilkChan3PicG4M3R its so like--- brooo cortes cortes corts|writing|09 mar 2026 17:45:35 WET|http://lenasattic.ddns.net:11020/webcrookedstuff/pages/BotchatsFASTNEWEST2/rps_pls_let_me_keep_them/girlprick_murders_hero.html
+
+Cs 1.6 server update!|Summary: does pragma kill the super yandere stack smash bug? Added more custom damage sources+ more!|cs1.6server|Mon, 09 Mar 2026 23:29:51 WET|http://lenasattic.ddns.net:11020/cstrike_folder/addons/amxmodx/scripting/my_plugins/my_heroes
+
+Cs 1.6 server update...|Summary: server didnt crash so far. removed healing from the yandere until solution is found. will disable Maria. Updated writing too.|cs1.6server & Writing|Tue, 10 Mar 2026 03:37:43 WET|http://lenasattic.ddns.net:11020/cstrike_folder/addons/amxmodx/scripting/my_plugins/my_heroes
+
+Global server update!|Cs 1.6 Server doesnt crash anymore! https works!|upgrades|sex 24 jul 2026 16:03:40 WEST|https://lenasattic.ddns.net:11020/
+
+Global server update!|Partial requests, selective compression, Many texts, layout update, etc.|upgrades|seg 17 ago 2026 09:59:38 WEST|https://lenasattic.ddns.net:11020/

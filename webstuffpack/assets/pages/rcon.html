@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+ body {
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  background-color: cyan;
+}
+
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>They should all die!</title>
+<base href="">
+<meta charset="UTF-8">
+<script type="text/javascript" src="/js/testscript.js"></script>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/.favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/.favicon-16x16.png">
+
+</head>
+<body>
+
+<h1 id="test" title="RCON Client">RCON client</h1>
+
+<br>
+	<form id="submitbutton" method="POST" action="/rcon.rcon">
+	<br>Escreve aqui o address<br>
+        <input  id="addr" name="addr" type="text" value="">
+    <br>Escreve aqui a porta<br>
+		<input id="port" name="port" type="text" value="">
+    <br>Escreve aqui a pass<br>
+		<input id="rcon_pass" name="rcon_pass" type="text" value="">
+    <br>Escreve aqui o comando<br>
+		<input id="cmd" name="cmd" type="text" value="">
+    <br>
+		<input type="submit" id="the_button" value="PRESS_THIS">
+	</form>
+<br>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+ body {
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+  background-color: green;
+}
+
+</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>They should all die!</title>
+<base href="">
+<meta charset="UTF-8">
+<script type="text/javascript" src="/js/testscript.js"></script>
+
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/.favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/.favicon-16x16.png">
+
+</head>
+<body>
+<h1 id="test" title="Find interface">FIND INTERFACE</h1>
+
+<h2 id="test" >Example usage:</h2>
+<h3 id="test" >|fifa 2 return| -> all files in the server</h3>
+<h3 id="test" >with the tokens "fifa" "2" and "return"</h3>
+<h3 id="test" >(In that order)</h3>
+<h3 id="test" >(case insensitive)</h3>
+<h3 id="test" >on the full filepath</h3>
+<h3 id="test" >(it includes directories and the name of the file itself)</h3>
+<h1 id="test" >Not putting anything</h1>
+<h1 id="test" >Will print every single file on the server</h1>
+<h1 id="test" >by default</h1>
+
+<br>
+	<form id="findbutton" method="POST" action="/find.find">
+	<h3 id="test" >Here goes the query</h3>
+	<input name="query" type="text" value="">
+	<br>
+	<legend>Automatic redirect for num_results equal to 1?</legend>
+ 	<input type="checkbox" id="take_me_there" onclick="check_it(this)" name="take_me_there" value="" >
+	<script type="text/javascript">
+		function check_it(elem){
+			var the_form_to_see = document.forms["findbutton"];
+			var the_elem = the_form_to_see.elements['take_me_there']
+			var checked_value = the_elem.checked
+			the_elem.checked = checked_value ? true: false;
+			the_elem.getAttributeNode("value").value = the_elem.checked? "1":"0";
+		}
+	</script>
+ 	<br>
+ 	<input type="submit" id="button" value="FIND_SHIT">
+	</form>
+<br>
+
+</body>
+</html>

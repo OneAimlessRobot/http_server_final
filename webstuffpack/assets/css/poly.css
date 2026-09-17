@@ -1,0 +1,19 @@
+
+audio.song {
+  
+  display: block; /* the default for span */
+}
+ h2.LABELTITLE {
+
+
+}
+div.LABEL {
+
+color: red;
+}
+body {
+  background-image: url('../images/poly.jpg');
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: 100% 100%;
+}
