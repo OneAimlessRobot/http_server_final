@@ -37,9 +37,8 @@ MimeEntry mime_types[] = {
     {".gif", "image/gif", 1,1},
     {".jfif", "image/jpeg", 1,1},
     {".avif", "image/avif", 1,1},
-    {".bmp", "image/bmp", 1,1},
-    {".tga", "image/x-targa", 1,1},
-    {".tga", "image/x-targa", 1,1},
+    {".bmp", "image/bmp", 0,1},
+    {".tga", "image/x-targa", 0,1},
     {".dds","image/x-dds", 1,1},
     {".vtf","image/x-vtf", 1,1},
     {".ico", "image/x-icon", 1,1},
@@ -81,7 +80,7 @@ MimeEntry mime_types[] = {
     {".css", "text/css", 1,0},
     {".yml", "text/yaml", 1,0},
     {".yaml", "text/yaml", 1,0},
-    {".txt", "text/html", 1,0},
+    {".txt", "text/html", 0,1},
     {".sp", "text/x-sourcepawn", 1,0},
     {".sma", "text/x-sourcepawn", 1,0},
     {".inc", "text/x-sourcepawn", 1,0},
@@ -122,14 +121,22 @@ MimeEntry mime_types[] = {
     {".pdf", "application/pdf", 1,0},
     {".rss", "application/rss+xml", 1,0},
     {".xml", "application/xml", 1,0},
+    /*
+     
+		MISC MIMETYPES
+     
+    */
+    
+    {".mdl", "application/octet-stream", 0,1},
+    {".spr", "application/octet-stream", 0,1},
+    {".bsp", "application/octet-stream", 0,1},
     
     /*
      
 		FALLBACK MIMETYPE
      
     */
-    
-    {NULL, "application/octet-stream", 1,0},
+    {NULL, "application/octet-stream", 0,1}
 };
 
 const char* get_mime_type(const char *filename, u_int64_t* index_obtained){
