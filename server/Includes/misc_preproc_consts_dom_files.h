@@ -24,5 +24,7 @@
 
 #define DIR_LISTING_CSS_FILE_PATH "%s/css/.dir_listing_style.css"
 
+
+
 #define RCON_SCRIPT_PATH "%s/cstrike_folder/scripts/.send_command.sh"
 #endif
