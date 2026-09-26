@@ -74,9 +74,15 @@ void build_last_modified_buff(char* full_file_path){
 	
 	*/
 	
-	snprintf(ETag,sizeof(ETag)-1, "%lx%lx%lx", last_modified_stat_struct.st_mtime,
+	snprintf(ETag,sizeof(ETag)-1, "%lx%lx%lx-%lx-%lx", last_modified_stat_struct.st_mtime,
 			last_modified_stat_struct.st_size,
-			last_modified_stat_struct.st_ino);
+			last_modified_stat_struct.st_ino,
+			curr_client.req->header->range_start,
+			curr_client.req->header->range_end<=0
+				?
+			(last_modified_stat_struct.st_size-1)
+				:
+			curr_client.req->header->range_end);
 	
 }
 void the_time_func(char* unused){
