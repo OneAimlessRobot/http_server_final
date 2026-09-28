@@ -52,6 +52,7 @@ typedef struct http_header{
 
 	http_req_type type;
 	char target[FIELDSIZE],
+		second_target[FIELDSIZE],
 		version[FIELDSIZE],
 		host[FIELDSIZE],
 		specific[FIELDSIZE],

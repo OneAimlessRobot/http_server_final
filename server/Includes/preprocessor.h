@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <time.h>
+#include <libgen.h>
 #include <openssl/opensslv.h>
 #include <openssl/ssl.h>
 #include <openssl/bio.h>

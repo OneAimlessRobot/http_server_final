@@ -67,6 +67,7 @@ void print_http_req_header(FILE* fstream){
 					"Specific: %s\n"
 					"Content-Length: %s\n"
 					"Target: %s\n"
+					"Second-Target: |%s|\n"
 					"Version: %s\n"
 					"Host: %s\n"
 					"User-Agent: %s\n"
@@ -99,6 +100,7 @@ void print_http_req_header(FILE* fstream){
 							curr_client.req->header->specific,
 							curr_client.req->header->content_length,
 							curr_client.req->header->target,
+							curr_client.req->header->second_target,
 							curr_client.req->header->version,
 							curr_client.req->header->host,
 							curr_client.req->header->user_agent,
@@ -171,6 +173,8 @@ static void spawnHTTPHeader(void){
 	b_zero(curr_client.req->header->content_length);
 	b_zero(curr_client.req->header->origin);
 	b_zero(curr_client.req->header->host);
+	b_zero(curr_client.req->header->second_target);
+	
 	b_zero(curr_client.req->header->mimetype);
 	b_zero(curr_client.req->header->specific);
 	
@@ -214,6 +218,16 @@ static void spawnHTTPHeader(void){
 	else{
 		strcpy(curr_client.req->header->target,firstHeaderArr[1]);
 		strcpy(curr_client.req->header->version,firstHeaderArr[2]);
+		strcpy(curr_client.req->header->second_target,find_field_value_in_field_arr("Target",fieldarr));
+		u_int64_t second_target_length = 
+				strnlen(curr_client.req->header->second_target,sizeof(curr_client.req->header->second_target));
+		
+		if(second_target_length>=1){
+			memmove(curr_client.req->header->second_target,&curr_client.req->header->second_target[1],
+						second_target_length-1);
+			curr_client.req->header->second_target[second_target_length-1]=0;
+		}
+		
 		strcpy(curr_client.req->header->host,find_field_value_in_field_arr("Host",fieldarr));
 		strcpy(curr_client.req->header->origin,find_field_value_in_field_arr("Origin",fieldarr));
 		strcpy(curr_client.req->header->mimetype,defaultMimetype);

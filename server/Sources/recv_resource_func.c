@@ -7,11 +7,13 @@
 #include "../Includes/io_ops.h"
 
 #include "../Includes/recv_resource_wrappers_for_file_exts.h"
-
+static char* the_location_str = NULL,
+	* file_name_base_here = NULL;
+static u_int64_t the_location_index = 0;
 static void send_header(void){
 
 	const char* the_mime_type= get_mime_type(curr_client.target,NULL);
-	fillUploadHeader(the_mime_type,curr_client.target);
+	fillUploadHeader(the_mime_type,the_location_str,file_name_base_here);
 	int header_size=strlen(curr_client.sent_header_buff);
 	if(logging > 5){
 		print_response_header(curr_client.sent_header_buff);
@@ -20,7 +22,9 @@ static void send_header(void){
 
 }
 void recvResource(void){
-	snprintf(upload_file_dest_dir,sizeof(upload_file_dest_dir)-1,"%s%s%s%s",currDir,defaultTarget,uploadTarget,curr_client.target);
+	the_location_str = (char*)get_upload_target(curr_client.req->header->second_target, &the_location_index);
+	file_name_base_here = basename(curr_client.target);
+	snprintf(upload_file_dest_dir,sizeof(upload_file_dest_dir)-1,"%s%s/%s/%s",currDir,defaultTarget,the_location_str,file_name_base_here);
 	if(logging>4){
 		fprintf(logstream,"The full path will be: %s\n",upload_file_dest_dir);
 	}

@@ -169,6 +169,10 @@ static void mainLoop(void){
 
 void initializeCommonConstants(void){
 	
+	port=ato_ull(find_value_in_cfg_arr("port",cfgs));
+	
+	want_tls=ato_ull(find_value_in_cfg_arr("want_tls",cfgs));
+	
 	bigtimeoutsecs=ato_ull(find_value_in_cfg_arr("bigtimeoutsecs",cfgs));
 	
 	bigtimeoutusecs=ato_ull(find_value_in_cfg_arr("bigtimeoutusecs",cfgs));
@@ -192,7 +196,6 @@ void initializeClientConstants(void){
 	strncpy(mainRssFeed,find_value_in_cfg_arr("mainRssFeed",cfgs),FIELDSIZE-1);
 	strncpy(host_cert_file_path,find_value_in_cfg_arr("host_cert_file_path",cfgs),FIELDSIZE-1);
 	strncpy(host_pkey_file_path,find_value_in_cfg_arr("host_pkey_file_path",cfgs),FIELDSIZE-1);
-	strncpy(uploadTarget,find_value_in_cfg_arr("uploadTarget",cfgs),FIELDSIZE-1);
 	strncpy(robotsTarget,find_value_in_cfg_arr("robotsTarget",cfgs),FIELDSIZE-1);
 	strncpy(excludePrettifyTarget,find_value_in_cfg_arr("excludePrettifyTarget",cfgs),FIELDSIZE-1);
 	int invalid_string_confs=
@@ -215,10 +218,6 @@ void initializeClientConstants(void){
 				(stringsAreEqual(host_pkey_file_path,NO_SUCH_SETTING)
 				||
 				stringsAreEqual(host_pkey_file_path,NO_SETTINGS_LOADED))
-				&&
-				(stringsAreEqual(uploadTarget,NO_SUCH_SETTING)
-				||
-				stringsAreEqual(uploadTarget,NO_SETTINGS_LOADED))
 				&&
 				(stringsAreEqual(excludePrettifyTarget,NO_SUCH_SETTING)
 				||
@@ -293,11 +292,6 @@ void initializeServerConstants(void){
 			"--suppressions=./%s",
 			valgrindSuppressionsFile);
 	
-	port=ato_ull(find_value_in_cfg_arr("port",cfgs));
-	
-	logging=ato_ull(find_value_in_cfg_arr("logging",cfgs));
-	
-	want_tls=ato_ull(find_value_in_cfg_arr("want_tls",cfgs));
 	
 	use_valgrind=ato_ull(find_value_in_cfg_arr("use_valgrind",cfgs));
 	

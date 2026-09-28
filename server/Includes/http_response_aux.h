@@ -152,13 +152,13 @@ void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
 					"%s" \
 					"://" \
 					DOMAIN_NAME \
-					":%hu%s%s" \
-					"%s\r\n" \
+					":%hu%s/%s/%s" \
+					"\r\n" \
 					"\r\n"
 
 
 
-void fillUploadHeader(const char* mimetype, char* target);
+void fillUploadHeader(const char* mimetype, char* target_location_dir, char* target_filename);
 
 
 /*

@@ -180,3 +180,38 @@ int check_stat_of_file(const char* full_file_path,struct stat * statbuf,u_int8_t
 	}
 	return result;
 }
+
+string_pair upload_target_to_location_mappings[] = {
+	
+	{ "agarioSkins", "agarioSkins" },
+	
+    /*
+     
+		FALLBACK TARGET
+     
+    */
+	{ NULL, "upload" }
+	
+};
+/*
+	slash at the end not included
+*/
+const char* get_upload_target(const char *target, u_int64_t* index_obtained){
+    u_int64_t safeguard_ptr = 0;
+    
+    index_obtained = ((index_obtained!=NULL)?index_obtained:&safeguard_ptr);
+	*index_obtained=-1;
+    
+    if (!target){
+		return "upload";
+	}
+    for ( (*index_obtained) = 0;
+		  upload_target_to_location_mappings[(*index_obtained)][0] != NULL;
+		  (*index_obtained)++ ) {
+
+        if (strcmp(target, upload_target_to_location_mappings[(*index_obtained)][0]) == 0) {
+            return upload_target_to_location_mappings[(*index_obtained)][1];
+        }
+    }
+    return "upload";
+}
