@@ -1,8 +1,11 @@
+
+
 document.getElementById("upload").onclick = async () => {
     const file = document.getElementById("file").files[0];
 
-    if (!file)
+    if (!file){
         return;
+    }
 	const file_target = encodeURIComponent(file.name)
 	var response = null;
     try {
@@ -14,7 +17,7 @@ document.getElementById("upload").onclick = async () => {
 			{
 				method: "POST",
 				headers: {
-					"Target": file_target,
+					"Target": "",
 					"Content-Type": "application/octet-stream",
 					"Specific": "upload"
 					
