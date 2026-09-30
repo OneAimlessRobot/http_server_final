@@ -20,8 +20,8 @@ static void handleRconRequest(http_request* req){
 				!strcmp(pair[0],"rcon_pass")||
 				!strcmp(pair[0],"cmd")){
 		replaceStringCharacter(pair[1],'+',' ');
-		the_ptr+=snprintf(the_ptr,
-				sizeof(req->processed_form)-1,
+		the_ptr+=snprintf(the_ptr+1,
+				sizeof(req->processed_form)-1-(the_ptr-req->processed_form),
 				"%s%s",pair[1],(i==(size-1))?" ":"|");
 		}
 	}

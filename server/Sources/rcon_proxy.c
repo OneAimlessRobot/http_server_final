@@ -63,7 +63,6 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
 	snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s" RCON_SCRIPT_PATH, currDir,defaultTarget);
-
 	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRCON);
 	
 	build_last_modified_buff(curr_client.og_filepath);
