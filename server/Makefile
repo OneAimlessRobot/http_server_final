@@ -12,9 +12,9 @@ LDLIBS := -pthread -lz -lssl -lcrypto -lm
 
 DEPFLAGS= -MP -MD
 
-CFLAGS= -Wall -DPROGRAMPATHAUX="$(CURRDIR)" -Wpedantic -Werror  -Wextra -g $(foreach D, $(INCLUDE), -I$(D)) $(DEPFLAGS)
+CFLAGS= -Wall -DPROGRAMPATHAUX="$(CURRDIR)" -Wpedantic -Wextra -g $(foreach D, $(INCLUDE), -I$(D)) $(DEPFLAGS) -std=c99 -O3
 
-#CFLAGS= -Wall -DPROGRAMPATHAUX="$(CURRDIR)" -fsanitize=address -Wpedantic  -Wextra -g $(foreach D, $(INCLUDE), -I$(D)) $(DEPFLAGS)
+#CFLAGS= -Wall -DPROGRAMPATHAUX="$(CURRDIR)" -fsanitize=address -Wpedantic   -g $(foreach D, $(INCLUDE), -I$(D)) $(DEPFLAGS) -std=c99 -O3
 
 SOURCEFILES=$(foreach D,$(SOURCES), $(wildcard $(D)/*.c))
 

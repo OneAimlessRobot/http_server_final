@@ -96,7 +96,7 @@ static void generateRssPrimitive(char* path){
 			break;
 
 	}
-	chdir("..");
+	(void)chdir("..");
 	close(outfd);
 
 }

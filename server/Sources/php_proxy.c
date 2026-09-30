@@ -14,7 +14,7 @@ static char* query=NULL;
 static char currFetchedPHP[PATHSIZE*2]={0},
 		full_php_target[PATHSIZE*2]={0},
 		full_php_root[PATHSIZE*2]={0},
-		full_php_command[PATHSIZE*2]={0};
+		full_php_command[PATHSIZE*4]={0};
 
 
 int isPHPRequest(char* resourceTarget){

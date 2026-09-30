@@ -71,7 +71,7 @@ int isDirectory(char* resourceTarget){
 static void generate_header_sizes_data(FILE* fstream){
 
 	memset(curr_listing_buff,0,PATHSIZE);
-	fgets(curr_listing_buff,PATHSIZE,fstream);
+	(void)fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
 		memset(header_argv,0,ARGVMAX*sizeof(char*));
 		makeargvdelim(curr_listing_buff," \t\n", header_argv, -1);

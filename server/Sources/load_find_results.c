@@ -185,7 +185,7 @@ static void generateFindResultPrimitive(char* the_request_parameters){
     user_wants_redirect = (u_int8_t)parameters_arr[SHOULD_WE_AUTOREDIRECT].the_actual_value[0]-48;
     
     
-	chdir(aux_buff);
+	(void)chdir(aux_buff);
     if(logging>40){
 		
 		fprintf(logstream,"Changing into %s directory for find command!\n",aux_buff);
