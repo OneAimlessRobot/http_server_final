@@ -9,7 +9,7 @@
 #include "../Includes/recv_resource_wrappers_for_file_exts.h"
 static char* the_location_str = NULL,
 	* file_name_base_here = NULL;
-static u_int64_t the_location_index = 0;
+static int64_t the_location_index = 0;
 static void send_header(void){
 
 	const char* the_mime_type= get_mime_type(curr_client.target,NULL);

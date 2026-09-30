@@ -1,67 +1,57 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/client.h"
 #include "../Includes/http_req_parser.h"
+#include "../Includes/request_consts.h"
 #include "../Includes/handlecustom.h"
 
 
-char* custompostreqs[]={RCON_REQUEST,FIND_REQUEST, NULL},
-	* custom_specificpostreqs[]={UPLOAD_SPECIFIC_REQUEST_STRING,NULL};
 
-
-static void handleRconRequest(http_request* req){
+    
+static void handlePostRequest(http_request* req){
 	char* argv2[ARGVMAX]={0};
-	int size=makeargvdelim(req->form,"&",argv2,-1);
+	
+	int size=make_str_arr(req->form,"&",argv2,ARGVMAX,0);
+	
 	char* the_ptr=req->processed_form;
 	for(int i=0;i<size;i++){
-		char* pair[2]={0};
-		splitString(argv2[i],"=",pair);
-		if(!strcmp(pair[0],"addr")||
-				!strcmp(pair[0],"port")||
-				!strcmp(pair[0],"rcon_pass")||
-				!strcmp(pair[0],"cmd")){
-		replaceStringCharacter(pair[1],'+',' ');
-		the_ptr+=snprintf(the_ptr+1,
-				sizeof(req->processed_form)-1-(the_ptr-req->processed_form),
-				"%s%s",pair[1],(i==(size-1))?" ":"|");
+		if(!argv2[i]){
+			continue;
 		}
-	}
-}
-
-static void handleFindRequest(http_request* req){
-	char* argv2[ARGVMAX]={0};
-	int size=makeargvdelim(req->form,"&",argv2,-1);
-	char* the_ptr = req->processed_form;
-	for(int i=0;i<size;i++){
-		char* pair[2]={0};
+		string_pair pair={0};
 		splitString(argv2[i],"=",pair);
-		if(!strcmp(pair[0],"query")
-				||
-		   !strcmp(pair[0],"take_me_there")){
-		
 		replaceStringCharacter(pair[1],'+',' ');
 		the_ptr+=snprintf(the_ptr,
-				sizeof(req->processed_form)-1,
-				"%s%s",pair[1],(i==(size-1))?" ":"|");
-		}
+				sizeof(req->processed_form)-(the_ptr-req->processed_form),
+				"%s%s",pair[1]?pair[1]:"","|");
+		
 	}
 }
 
-int isCustomPostReq(http_request* req){
-	int result=0;
-	result=(findInStringArr(custompostreqs,req->is_a_form?req->header->target:req->header->specific)>=0);
-	return result;
-}
 
-void handleCustomPostReq(http_request* req){
-	if(req->is_a_form){
-		if(!strncmp(req->header->target,RCON_REQUEST,sizeof(req->header->target))){
-			handleRconRequest(req);
 
-		}
-		else if(!strncmp(req->header->target,FIND_REQUEST,sizeof(req->header->target))){
-			handleFindRequest(req);
+SpecialPostReqEntry the_custom_post_request_handler_table[] = {
+	
+		{ "/find.find", handlePostRequest, 0},
+		
+		{ "/rcon.rcon", handlePostRequest, 0},
+		
+		{ "upload", NULL, 1},
+		
+		{NULL, NULL, 0}
+	
+	
+};
 
-		}
+
+int sanitize_post_form(http_request* req){
+	
+	request_handling_func_t the_handler = get_parser_handler(req->is_a_form?req->header->target:req->header->specific, &curr_client.post_request_table_cell);
+	
+	int result = (curr_client.post_request_table_cell>=0);
+	if(the_handler){
+		the_handler(req);
 	}
+	u_int8_t is_specific = get_parser_handler_is_specific(curr_client.post_request_table_cell);
+	return result&&!is_specific;
 }
 

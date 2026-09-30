@@ -18,6 +18,8 @@
 
 #define NUM_OF_FIELDS_TO_PRINT 3
 
+static u_int64_t entry_count = 0;
+
 static struct stat the_stat = {0};
 
 
@@ -52,7 +54,7 @@ static char resolved_rel_path[PATH_MAX]={0},
 		* category_names[CATEGORY_ID_MAX]={
 			"Size",
 			"Full_Date",
-			"Actual_file_name"
+			"Actual file_name"
 
 		};
 
@@ -71,10 +73,9 @@ int isDirectory(char* resourceTarget){
 static void generate_header_sizes_data(FILE* fstream){
 
 	memset(curr_listing_buff,0,PATHSIZE);
-	(void)fgets(curr_listing_buff,PATHSIZE,fstream);
 	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
 		memset(header_argv,0,ARGVMAX*sizeof(char*));
-		makeargvdelim(curr_listing_buff," \t\n", header_argv, -1);
+		make_str_arr(curr_listing_buff," ", header_argv, NUM_OF_FIELDS_TO_PRINT,0);
 		for(uint32_t j=0;j<NUM_OF_FIELDS_TO_PRINT;j++){
 			uint32_t i=print_order[j];
 			category_curr_sizes[i]=header_argv[i]?strnlen(header_argv[i],PATHSIZE-1):0;
@@ -151,6 +152,7 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 		int is_directory_this_one=isDirectory(full_target_path_to_test);
 		if(is_directory_this_one){
 			print_dir_entry(fd, is_directory_this_one,curr_listing_argv, dir);
+			entry_count++;
 		}
 		else
 		{
@@ -158,6 +160,7 @@ static void process_lines_and_print_to_dest_file(int fd,FILE* fstream, char* dir
 			if(extension){
 				if(findInStringArr(excluded_xtensions,extension)<0){
 					print_dir_entry(fd, 0,curr_listing_argv, dir);
+					entry_count++;
 					
 				}
 			}
@@ -302,7 +305,7 @@ void generateDirListing(char* dir){
 		snprintf(prev_dir_rel_path,PATHSIZE*2-1,"%s",dir);
 		snprintf(prev_dir_to_use,PATHSIZE*2-1,"%s",dir);
 		char* argv_for_slashes[ARGVMAX]={0};
-		uint32_t num_tokens=make_str_arr(prev_dir_rel_path,"/",argv_for_slashes,ARGVMAX)-1;
+		uint32_t num_tokens=make_str_arr(prev_dir_rel_path,"/",argv_for_slashes,ARGVMAX,0)-1;
 		uint32_t wanted_slash_idx=num_tokens;
 		uint64_t ptr_to_path_num=(uint64_t)prev_dir_rel_path;
 		uint64_t ptr_to_wanted_slash_num=(uint64_t)argv_for_slashes[wanted_slash_idx];
@@ -317,6 +320,7 @@ void generateDirListing(char* dir){
 	fseek(fstream,0,SEEK_SET);
 	print_header(curr_client.fd);
 	process_lines_and_print_to_dest_file(curr_client.fd,fstream,dir);
+	dprintf(curr_client.fd,"\n<br><h2 class='%s'><span>We got %lu entries!</span></h2>\n",DIR_LISTING_HEADER_CLASS, entry_count);
 	dprintf(curr_client.fd,"</div>\n<br>" AUDIO_PLAY_SCRIPT_TO_LOAD "\n\n</body>\n</html>\n",defaultTarget);
 	fclose(fstream);
 

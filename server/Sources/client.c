@@ -92,8 +92,8 @@ static void process_req_switch_block(void){
 			head_and_get_wrapper();
 		break;
 		case POST:
-			if(isCustomPostReq(curr_client.req)){
-				handleCustomPostReq(curr_client.req);
+			if(sanitize_post_form(curr_client.req)){
+				
 				fprintf(logstream,"The relative file path here is: %s\n"
 								"The processed target here is: <%s>\n",
 									curr_client.relative_file_path,

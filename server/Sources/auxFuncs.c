@@ -55,13 +55,10 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr) {
 }
 int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_t max_len){
 	char* argv[ARGVMAX]={0};
-	int num_tags=make_str_arr(the_separated_parameters,"|",argv,max_len);
+	int num_tags=make_str_arr(the_separated_parameters,"|",argv,max_len,0);
 	if(num_tags<=0){
 
 		return -1;
-	}
-	if(num_tags > 1){
-		argv[num_tags-1][strlen(argv[num_tags-1])-1]=0;
 	}
 	for(uint64_t i=0;i<max_len;i++){
 		arg_arr[i].the_actual_value=(argv[i] ?( ((strlen(argv[i]))?argv[i]:arg_arr[i].default_value)):arg_arr[i].default_value);
@@ -220,33 +217,6 @@ void generic_error_print(char* prefix_string){
 
 }
 
-int makeargvdelim(char *s, char* delim, char *argv[ARGVMAX], int n_max) {
-	int ntokens = 0;
-
-    if (s == NULL || argv == NULL || ARGVMAX == 0){
-        return -1;
-    }
-    argv[ntokens] = strtok(s, delim);
-    while ((argv[ntokens] != NULL) && (ntokens < ARGVMAX)) {
-        
-		if((n_max>0) && (ntokens >=  (n_max-1))){
-			break;
-		}
-		ntokens++;
-        argv[ntokens] = strtok(NULL, delim);
-    }
-    if((ntokens < n_max)){
-		ntokens++;
-        argv[ntokens] = strtok(NULL, "\n");
-		/*if(second_delim){
-			char* pair[2];
-			splitString(argv[ntokens], second_delim, pair);
-			argv[ntokens]= pair[0];
-		}*/
-	}
-    argv[ntokens+1] = NULL;
-    return ntokens;
-}
 
 int findInStringArr(char* arr[],char* nullTermStr){
 
@@ -307,7 +277,7 @@ void splitString(char *input, char *delimiter, char *pair[2]) {
     }
 }
 
-int make_str_arr(char *s,char* delim, char *argv[ARGVMAX],int maxlen) {
+int make_str_arr(char *s,char* delim, char *argv[ARGVMAX],int maxlen, int let_go_until_null_at_end) {
     int nheaders = 0;
     int lentoadvance=0;
     if (s == NULL || argv == NULL || maxlen<2 || maxlen>ARGVMAX ||ARGVMAX == 0){
@@ -324,22 +294,24 @@ int make_str_arr(char *s,char* delim, char *argv[ARGVMAX],int maxlen) {
     lentoadvance=strlen(argv[nheaders])+strlen(delim);
     s+=lentoadvance;
     nheaders++;
-    while ((nextHeader != NULL) && (nheaders < maxlen)) {
-	nextHeader = strstr(s, delim);
+    while ((nextHeader != NULL) && (nheaders < maxlen )) {
+		if(let_go_until_null_at_end && (nheaders == (maxlen-1))){
+			goto end_of_iteration;
+		}
+		nextHeader = strstr(s, delim);
     	if(nextHeader){
-	nextHeader[0]=0;
-    	argv[nheaders]=s;
-    	lentoadvance=strlen(argv[nheaders])+strlen(delim);
-    	s+=lentoadvance;
-    	nheaders++;
-	}
-	else {
-	argv[nheaders]=s;
-	nheaders++;
-	break;
-    	}
+			nextHeader[0]=0;
+			argv[nheaders]=s;
+			lentoadvance=strlen(argv[nheaders])+strlen(delim);
+			s+=lentoadvance;
+			nheaders++;
+			continue;
+		}
+		end_of_iteration:
+			argv[nheaders]=s;
+			nheaders++;
     }
-    argv[nheaders] = NULL;
+	argv[nheaders]=NULL;
     return nheaders;
 }
 

@@ -201,13 +201,13 @@ static void spawnHTTPHeader(void){
 	char* firstHeaderArr[ARGVMAX] = {0};
 	char test[sizeof(curr_client.peerbuff)+1] = {0};
 	memcpy(test,curr_client.peerbuff,strlen(curr_client.peerbuff)+1);
-	make_str_arr(test,"\r\n",headerArr,ARGVMAX);
+	make_str_arr(test,"\r\n",headerArr,ARGVMAX,0);
 	http_header_field* fieldarr= make_http_header_field_arr(headerArr);
 	int firstHeaderLength=strlen(fieldarr[0].field[0]);
 	char firstHeaderBuff[firstHeaderLength+1];
 	memset(firstHeaderBuff,0,firstHeaderLength+1);
 	memcpy(firstHeaderBuff,fieldarr[0].field[0],firstHeaderLength);
-	make_str_arr(firstHeaderBuff," ",firstHeaderArr,ARGVMAX);
+	make_str_arr(firstHeaderBuff," ",firstHeaderArr,ARGVMAX,0);
 	curr_client.req->header->type=getREQtypeFromString(firstHeaderArr[0]);
 	if(get_string_arr_size(firstHeaderArr)==1){
 		memset(curr_client.req->header->target,0,FIELDSIZE);
@@ -265,14 +265,14 @@ static void spawnHTTPHeader(void){
 		}
 		strcpy(curr_client.req->header->specific,find_field_value_in_field_arr("Specific",fieldarr));
 		strcpy(curr_client.req->header->encodingcopy,curr_client.req->header->encoding);
-		make_str_arr(curr_client.req->header->encoding,",",curr_client.req->header->split_encoding,ARGVMAX);
+		make_str_arr(curr_client.req->header->encoding,",",curr_client.req->header->split_encoding,ARGVMAX,0);
 		
 		strcpy(curr_client.req->header->content_type_raw,find_field_value_in_field_arr("Content-Type",fieldarr));
 		
 		
 		if(strlen(curr_client.req->header->content_type_raw)){
 			strcpy(curr_client.req->header->content_type_copy,curr_client.req->header->content_type_raw);
-			make_str_arr(curr_client.req->header->content_type_raw,"; ",curr_client.req->header->content_type_split,ARGVMAX);
+			make_str_arr(curr_client.req->header->content_type_raw,"; ",curr_client.req->header->content_type_split,ARGVMAX,0);
 			
 			strcpy(curr_client.req->header->content_type,curr_client.req->header->content_type_split[0]);
 			if(!curr_client.req->header->content_type_split[1]){

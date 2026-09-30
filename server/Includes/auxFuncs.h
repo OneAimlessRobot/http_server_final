@@ -36,9 +36,7 @@ void splitString(char *input, char *delimiter, char *pair[2]);
 
 void generic_error_print(char* prefix_string);
 
-int makeargvdelim(char *s,char* delim, char *argv[ARGVMAX], int maxlen);
-
-int make_str_arr(char *s,char*delim, char *argv[ARGVMAX],int maxlen);
+int make_str_arr(char *s,char*delim, char *argv[ARGVMAX],int maxlen, int let_go_until_null_at_end);
 
 int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_t max_len);
 

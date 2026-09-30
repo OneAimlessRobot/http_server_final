@@ -139,8 +139,8 @@ MimeEntry mime_types[] = {
     {NULL, "application/octet-stream", 0,1}
 };
 
-const char* get_mime_type(const char *filename, u_int64_t* index_obtained){
-    u_int64_t safeguard_ptr = 0;
+const char* get_mime_type(const char *filename, int64_t* index_obtained){
+    int64_t safeguard_ptr = 0;
     
     index_obtained = ((index_obtained!=NULL)?index_obtained:&safeguard_ptr);
 	*index_obtained=-1;
@@ -154,7 +154,7 @@ const char* get_mime_type(const char *filename, u_int64_t* index_obtained){
 		  mime_types[(*index_obtained)].extension != NULL;
 		  (*index_obtained)++ ) {
 
-        if (strcmp(dot, mime_types[(*index_obtained)].extension) == 0) {
+        if (strcicmp(dot, mime_types[(*index_obtained)].extension) == 0) {
             return mime_types[(*index_obtained)].mime_type;
         }
     }
@@ -196,8 +196,8 @@ string_pair upload_target_to_location_mappings[] = {
 /*
 	slash at the end not included
 */
-const char* get_upload_target(const char *target, u_int64_t* index_obtained){
-    u_int64_t safeguard_ptr = 0;
+const char* get_upload_target(const char *target, int64_t* index_obtained){
+    int64_t safeguard_ptr = 0;
     
     index_obtained = ((index_obtained!=NULL)?index_obtained:&safeguard_ptr);
 	*index_obtained=-1;

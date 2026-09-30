@@ -103,7 +103,7 @@ static void generateRssPrimitive(char* path){
 
 static int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const char* names_for_tag_ids[],const char* empty_contents_for_tag_ids[],uint64_t max_len){
 	char* argv[ARGVMAX]={0};
-	int num_tags=make_str_arr(the_listing,"|",argv,max_len);
+	int num_tags=make_str_arr(the_listing,"|",argv,max_len,0);
 	if(num_tags<=0){
 
 		return -1;

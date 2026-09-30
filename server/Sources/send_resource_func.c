@@ -68,7 +68,10 @@ static int compressFile(char* target){
 		}
 		
 		char* argv[ARGVMAX]={0};
-		makeargvdelim(cmd," \t\n",argv, 3);
+		make_str_arr(cmd," ",argv, 4,1);
+		if(logging>6){
+			print_string_arr(logstream,argv);
+		}
 		int pid=fork();
 		switch(pid){
 			case -1:
