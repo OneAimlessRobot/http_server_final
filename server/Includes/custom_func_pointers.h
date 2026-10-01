@@ -11,7 +11,6 @@ typedef struct {
 	
     const char *the_req_string;
 	request_handling_func_t the_func;
-	u_int8_t is_specific;
 
 } SpecialPostReqEntry;
 

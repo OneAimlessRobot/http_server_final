@@ -15,6 +15,8 @@
 
 #define CREATED_RESPONSE " 201 Created\r\n"
 
+#define NO_CONTENT_RESPONSE " 204 No Content\r\n"
+
 #define SEE_OTHER_RESPONSE " 301 See Other\r\n"
 
 #define NOT_FOUND_RESPONSE " 404 Not Found\r\n"

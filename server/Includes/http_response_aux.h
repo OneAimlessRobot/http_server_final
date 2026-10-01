@@ -157,8 +157,27 @@ void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
 					"\r\n"
 
 
+									
+#define HTTP_NO_CONTENT_OK_HEADER HTTP_VERSION_STRING NO_CONTENT_RESPONSE \
+													HTTP_SERVER_INTRO_HEADERS
+
+#define NO_CONTENT_HEADER HTTP_NO_CONTENT_OK_HEADER \
+					"Content-Type: %s\r\n" \
+					"ETag: \"%s\"\r\n" \
+					"Content-Location: " \
+					"%s" \
+					"://" \
+					DOMAIN_NAME \
+					":%hu%s/%s/%s" \
+					"\r\n" \
+					"\r\n"
+
+
 
 void fillUploadHeader(const char* mimetype, char* target_location_dir, char* target_filename);
+
+
+void fillNoContentHeader(const char* mimetype, char* target_location_dir, char* target_filename);
 
 
 /*

@@ -9,11 +9,16 @@
 #include "../Includes/recv_resource_wrappers_for_file_exts.h"
 static char* the_location_str = NULL,
 	* file_name_base_here = NULL;
+static u_int8_t the_file_already_exists = 0;
 static int64_t the_location_index = 0;
 static void send_header(void){
 
 	const char* the_mime_type= get_mime_type(curr_client.target,NULL);
-	fillUploadHeader(the_mime_type,the_location_str,file_name_base_here);
+	(the_file_already_exists?
+		fillNoContentHeader(the_mime_type,the_location_str,file_name_base_here)
+				:
+		fillUploadHeader(the_mime_type,the_location_str,file_name_base_here));
+
 	int header_size=strlen(curr_client.sent_header_buff);
 	if(logging > 5){
 		print_response_header(curr_client.sent_header_buff);
@@ -53,8 +58,17 @@ void recvResource(void){
 		fprintf(logstream,"We will upload to this location!: \n"
 						"%s\n",upload_file_dest_dir);
 	}
-	
-	recv_fd=open(upload_file_dest_dir,O_TRUNC|O_WRONLY|O_CREAT,0777);
+	struct stat the_stat_struct =  {0};
+	int ret = lstat(upload_file_dest_dir, &the_stat_struct);
+	if (!ret) {
+		if(logging>4){
+			fprintf(logstream,"the file %s already exists! No new files will be created...\n",
+						upload_file_dest_dir);
+		}
+		the_file_already_exists = 1;
+		build_last_modified_buff(upload_file_dest_dir);
+	}
+	recv_fd=open(upload_file_dest_dir,O_TRUNC|O_WRONLY|(the_file_already_exists?0:O_CREAT),0777);
 	if(recv_fd<0){
 		if(logging>4){
 			fprintf(logstream,"Upload destination fd could not be created!\n"
@@ -67,7 +81,6 @@ void recvResource(void){
 		fprintf(logstream,"Upload will happen!!!\n");
 	}
 	pull_bytes();
-	
 	send_header();
 	close(recv_fd);
 	if(logging){

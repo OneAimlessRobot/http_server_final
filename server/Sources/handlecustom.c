@@ -34,11 +34,9 @@ static void handlePostRequest(http_request* req){
 
 SpecialPostReqEntry the_custom_post_request_handler_table[] = {
 	
-		{ "/find.find", handlePostRequest, 0},
+		{ "/find.find", handlePostRequest},
 		
-		{ "/rcon.rcon", handlePostRequest, 0},
-		
-		{ "upload", NULL, 1},
+		{ "/rcon.rcon", handlePostRequest},
 		
 		{0}
 	
@@ -54,7 +52,6 @@ int sanitize_post_form(http_request* req){
 	if(the_handler){
 		the_handler(req);
 	}
-	u_int8_t is_specific = get_post_parser_handler_is_specific(curr_client.post_request_table_cell);
-	return result&&!is_specific;
+	return result;
 }
 

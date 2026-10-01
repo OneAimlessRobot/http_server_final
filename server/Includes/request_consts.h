@@ -21,8 +21,6 @@ request_handling_func_t get_post_parser_handler(const char *target, int64_t* ind
 */
 
 const char* get_post_parser_handler_string(int64_t table_index);
-u_int8_t get_post_parser_handler_is_specific(int64_t table_index);
-
 
 
 

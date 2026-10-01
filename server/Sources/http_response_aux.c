@@ -168,6 +168,21 @@ void fillUploadHeader(const char* mimetype, char* target_location_dir, char* tar
 				target_filename);
 }
 
+void fillNoContentHeader(const char* mimetype, char* target_location_dir, char* target_filename){
+	
+	char* defaultTarget_ptr= &defaultTarget[0];
+	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+				NO_CONTENT_HEADER,
+				LE_TIMEUREUR_DATE,
+				KEEP_ALIVE_STRING,
+				mimetype,
+				ETag,
+				curr_client.is_tls?"https":"http",
+				port,
+				defaultTarget_ptr,
+				target_location_dir,
+				target_filename);
+}
 
 /*
 -----------------------------------------------------------------------------------

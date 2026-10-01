@@ -26,6 +26,7 @@ const char* request_const_name_arr[MAX_REQUEST_TYPE] = {
 	"GET",
 	"HEAD",
 	"POST",
+	"PUT",
 	"INVALID"
 	
 };

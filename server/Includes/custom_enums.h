@@ -1,7 +1,7 @@
 #ifndef CUSTOM_ENUMS_H
 #define CUSTOM_ENUMS_H
 
-typedef enum {GET,HEAD,POST,INVALID,MAX_REQUEST_TYPE} http_req_type;
+typedef enum {GET,HEAD,POST,PUT,INVALID,MAX_REQUEST_TYPE} http_req_type;
 
 typedef enum {IS_DIRECTORY, SIZE, FULL_DATE,FILE_NAME,CATEGORY_ID_MAX}category_id;
 

@@ -47,9 +47,6 @@ request_handling_func_t get_post_parser_handler(const char *target, int64_t* ind
 const char* get_post_parser_handler_string(int64_t table_index) {
     return (the_custom_post_request_handler_table[table_index].the_req_string);
 }
-u_int8_t get_post_parser_handler_is_specific(int64_t table_index) {
-    return (the_custom_post_request_handler_table[table_index].is_specific);
-}
 
 generating_func_t get_fetch_parser_handler(char *target, int64_t* index_obtained){
 	

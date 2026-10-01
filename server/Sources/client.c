@@ -77,13 +77,15 @@ static void process_header_target(void){
 }
 static void process_req_switch_block(void){
 	
-
+	
+	u_int8_t is_head = 0;
 	switch(curr_client.req->header->type){
 		case GET:
 			head_and_get_wrapper();
 		break;
 		case HEAD:
 			head_and_get_wrapper();
+			is_head = 1;
 		break;
 		case POST:
 			if(sanitize_post_form(curr_client.req)){
@@ -107,9 +109,15 @@ static void process_req_switch_block(void){
 			snprintf(curr_client.target,sizeof(curr_client.target),
 							"%s",curr_client.relative_file_path);
 		break;
+		case PUT:
+			recvResource();
+			return;
+		break;
 		default:
 		break;
-	}	
+		
+	}
+	sendResource(is_head);
 }
 static void figure_out_compression(void){
 	
@@ -133,8 +141,8 @@ static void send_valid_requests_string(void){
 			written<sizeof(allowed_requests_string_buff)&&curr_request_index<INVALID;
 				curr_request_index++){
 		
-		written+=snprintf(ptr,
-				sizeof(allowed_requests_string_buff)-written,
+		written=snprintf(ptr,
+				sizeof(allowed_requests_string_buff)-(ptr-allowed_requests_string_buff),
 					"%s%s",
 						request_const_name_arr[curr_request_index],
 						curr_request_index>=(INVALID-1)?"":", ");
@@ -173,7 +181,6 @@ static void handleCurrentActivity(void){
 	
 	process_header_target();
 	
-	u_int8_t is_head = (curr_client.req->header->type==HEAD);
 	
 	
 	
@@ -181,13 +188,6 @@ static void handleCurrentActivity(void){
 		curr_client.generating_func = get_fetch_parser_handler(curr_client.target,&curr_client.fetch_request_table_cell);
 	}
 	process_req_switch_block();
-	
-	if(curr_client.req->is_a_form){
-		sendResource(is_head);
-	}
-	else{
-		recvResource();
-	}
 }
 void handleConnection(void){
 	int64_t obtained_read_size=readall(&curr_client,curr_client.peerbuff);
