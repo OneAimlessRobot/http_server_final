@@ -1,0 +1,16 @@
+
+body.rcon_body{
+	background-color: rgb(50, 50, 50);
+}
+div.rcon_framing{
+	border-radius: 25px;
+	padding: 20px;
+	font-size: 16px;
+
+}
+pre.rcon_pre{
+	border-radius: 25px;
+	padding: 20px;
+	background-color: rgb(25, 25, 25);
+	color: rgb(217, 35, 71);
+}
