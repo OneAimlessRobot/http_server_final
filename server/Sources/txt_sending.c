@@ -2,6 +2,7 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
 #include "../Includes/template_funcs.h"
 
 #define TXT_PRETTIFY_BODY_CLASS "txt_prettify_body"
@@ -15,26 +16,26 @@ static char currFetchedText[PATHSIZE*2]={0};
 
 
 
+int isNonPrettifiable(char* resourceTarget){
+    u_int8_t result1 = stringsAreEqual(resourceTarget,robotsTarget);
+	char * result2 = strstr(resourceTarget,excludePrettifyTarget);
+			
+	return result1 || result2;
+
+}
+
 int isText(char* resourceTarget){
         char path[PATHSIZE]={0};
 	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
 	char* ext=get_file_extension(path);
 	if(ext){
-		return stringsAreEqual(ext,"txt");
+		return stringsAreEqual(ext,"txt")&&!(curr_client.is_non_prettifyable=isNonPrettifiable(resourceTarget));
 	}
 	else{
 		return 0;
 
 	}
-
-}
-
-int isNonPrettifiable(char* resourceTarget){
-    u_int8_t result1 = stringsAreEqual(resourceTarget,robotsTarget);
-	char * result2 = strstr(resourceTarget,excludePrettifyTarget);
-			
-	return result1 || result2;
 
 }
 
@@ -44,9 +45,6 @@ static void generateTextPrimitive(char* path){
 		
 	snprintf(currFetchedText,sizeof(currFetchedText)-1,"%s%s",currDir,path);
 	
-    snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedText);
-	
-	
 	int stat_result = check_stat_of_file(currFetchedText,curr_client.the_stat_struct,logging,logstream);
 	if(stat_result<0){
 		if(logging){
@@ -54,12 +52,11 @@ static void generateTextPrimitive(char* path){
 														tmpDir,
 														strerror(errno));
 		}
-		curr_client.is_not_found = 1;
+		close(curr_client.fd);
+		curr_client.fd=-1;
 		return;
 		
 	}
-	
-    build_last_modified_buff(curr_client.og_filepath);
     
 	char* args_cmd[]={"cat", currFetchedText,NULL};
 	pid_t pid_fork_find_cmd=fork();
@@ -87,9 +84,12 @@ static void generateTextPrimitive(char* path){
 
 void generateText(char* dir){
 
-	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneTXT_HTML,dir, request_id);
+	const char* first_format = get_fetch_parser_handler_first_format(curr_client.fetch_request_table_cell),
+		* second_format = get_fetch_parser_handler_second_format(curr_client.fetch_request_table_cell);
+	
+	snprintf(tmpFile,sizeof(tmpFile)-1,first_format,dir, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoTXT_HTML,dir, request_id);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,second_format,dir, request_id);
 	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
 	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
 	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
@@ -108,7 +108,9 @@ void generateText(char* dir){
 		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
 	generateTextPrimitive(dir);
-	
+	if(curr_client.fd<0){
+		return;
+	}
 	FILE* fstream;
 	if(!(fstream=fopen(tmpDir,"r"))){
 			if(logging){

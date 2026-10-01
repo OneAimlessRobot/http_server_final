@@ -40,6 +40,8 @@ typedef struct {
 				*mime_type;
 	u_int8_t allows_compression,
 			to_be_cached;
+	int64_t maximum_size_to_compress_bytes,
+			maximum_size_to_cache_bytes;
 
 } MimeEntry;
 

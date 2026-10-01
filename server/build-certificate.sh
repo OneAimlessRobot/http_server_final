@@ -6,7 +6,7 @@ the_curr_directory=$(pwd)
 echo "The current directory is: \"${the_curr_directory}\""
 the_email_address="thrashbrat@gmail.com"
 the_server="https://acme.zerossl.com/v2/DV90"
-the_domains=("sablinasemporium.ddns.net" "lenasattic.ddns.net")
+the_domains=("sablinasemporium.ddns.net" "lenasattic.ddns.net" "localhost")
 the_domains_formatted_for_command=()
 num_of_domains="${#the_domains[@]}"
 

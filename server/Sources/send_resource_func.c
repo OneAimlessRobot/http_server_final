@@ -42,7 +42,7 @@ static int compressFile(char* target){
 		snprintf(buff_for_dotted_target, sizeof(buff_for_dotted_target), "%s",curr_client.relative_file_path);
 		replaceStringCharacter(&buff_for_dotted_target[1],'/','.');
 		memset(outpathbuff,0,sizeof(outpathbuff)-1);
-		snprintf(outpathbuff,sizeof(outpathbuff)-1,"%s%s%lu.%s",tmp_file_dir,buff_for_dotted_target,request_id,servComp->fileExt);
+		snprintf(outpathbuff,sizeof(outpathbuff)-1,"%s%s%lx.%s",tmp_file_dir,buff_for_dotted_target,request_id,servComp->fileExt);
 		int fd=comp_fd=open(outpathbuff,O_RDWR|O_CREAT,0777);
 		if(fd<0){
 				if(logging){
@@ -192,10 +192,9 @@ static void send_header(void){
 
 }
 void sendResource(int is_head){
-	if(curr_client.fd<0){
-		return;
-	}
 	if(curr_client.should_redirect){
+		
+		
 		if(logging){
 			fprintf(logstream,"WILL redirect!\n");
 		}
@@ -205,7 +204,6 @@ void sendResource(int is_head){
 			print_response_header(curr_client.sent_header_buff);
 		}
 		send_wrapper(curr_client.sent_header_buff,header_size);
-		close(curr_client.fd);
 		if(logging){
 			fprintf(logstream,"Done!\n");
 		}
@@ -213,54 +211,114 @@ void sendResource(int is_head){
 		
 		
 	}
-	if(!strlen(curr_client.og_filepath)){
-		
-		build_last_modified_buff(curr_client.filepath);
-		
+	if(curr_client.fd>=0){
+		close(curr_client.fd);
 	}
 	
-	close(curr_client.fd);
+	/*
+		because it starts at zero
+		it means we tried to initialize it in a special handler
+		(The generator funcs)
+		and it ended up as -1
+		so we are done
+		closing it doesnt change the variable's value
+	*/
+	
+	if(curr_client.fd<0){
+		goto file_not_found;
+	}
+	
+	/*
+		otherwise
+		it is suposedly a normal file
+		and we should try to stat it
+	*/
+	int stat_result=check_stat_of_file(curr_client.filepath,curr_client.the_stat_struct,logging,logstream);
+	if(stat_result){
+		goto file_not_found;
+	}
 	if(logging > 5){
-		fprintf(logstream,"Fetching %s...\nRecurso pedido por cliente de:\n%s:%hu\nNumero de request: %lu\n\n",curr_client.filepath,
+		fprintf(logstream,"Fetching %s...\nRecurso pedido por cliente de:\n%s:%hu\nNumero de request: %lu\n\n",
+								curr_client.filepath,
 								inet_ntoa(curr_client.client_addr.sin_addr) ,
 								ntohs(curr_client.client_addr.sin_port),
 								request_id);
 		
 	}
+	
+	
+	
 	snprintf(curr_client.response_mimetype,
 						sizeof(curr_client.response_mimetype)-1,
 						"%s",
 						get_mime_type(curr_client.filepath,&curr_client.mimetype_table_cell));
-	printf("The mimetype is: %s\nOur ETag: %s\nTheir ETag: %s\n",curr_client.response_mimetype,ETag,curr_client.req->header->if_none_match);
-	curr_client.should_cache = (!curr_client.generating_func && get_mime_type_cacheability(curr_client.mimetype_table_cell));
-	u_int64_t strlen_etag = strnlen(ETag,sizeof(ETag)-1);
-	curr_client.would_cache=strlen_etag&&!strncmp(ETag,curr_client.req->header->if_none_match,sizeof(ETag)-1);
-	if(WILL_CACHE){
-		if(logging){
-			fprintf(logstream,"WILL cache!\n");
+	/*
+		we will cache if:
+		- file type allows it
+		- the max cacheable size is superior to:
+			- file size if full request
+			- byte rage if partial
+	*/
+	curr_client.should_cache = (get_mime_type_cacheability(curr_client.mimetype_table_cell)
+									&&
+								(
+								get_mime_type_max_cacheable_size(curr_client.mimetype_table_cell)
+									>=
+								(
+								curr_client.req->header->range_end<=0
+									?
+								(curr_client.the_stat_struct->st_size)
+									:
+								curr_client.req->header->range_end-curr_client.req->header->range_start)
+								));			
+	
+	if(curr_client.should_cache){
+		
+		build_last_modified_buff(curr_client.filepath);
+		curr_client.would_cache=!strncmp(ETag,curr_client.req->header->if_none_match,sizeof(ETag)-1);
+		if(WILL_CACHE){
+			if(logging){
+				fprintf(logstream,"WILL cache!\nThe mimetype is: %s\nOur ETag: %s\nTheir ETag: %s\n",
+					curr_client.response_mimetype,
+					ETag,
+					curr_client.req->header->if_none_match);
+			}
+			fillUpNotModifiedHeader();
+			int header_size=strlen(curr_client.sent_header_buff);
+			if(logging > 5){
+				print_response_header(curr_client.sent_header_buff);
+			}
+			send_wrapper(curr_client.sent_header_buff,header_size);
+			if(logging){
+				fprintf(logstream,"Done!\n");
+			}
+			return;
 		}
-		fillUpNotModifiedHeader();
-		int header_size=strlen(curr_client.sent_header_buff);
-		if(logging > 5){
-			print_response_header(curr_client.sent_header_buff);
-		}
-		send_wrapper(curr_client.sent_header_buff,header_size);
-		close(curr_client.fd);
-		if(logging){
-			fprintf(logstream,"Done!\n");
-		}
-		return;
-	}
-	else if(strlen_etag<=0){
-		goto file_not_found;
+		
 	}
 	else if(logging){
 		fprintf(logstream,"Will NOT cache!\n");
-	}			
+	}		
+		
 	u_int8_t compressibility_selected=curr_client.compress;
-
+	
 	if(compressibility_selected){
-		curr_client.compress = (curr_client.compress && get_mime_type_compressibility(curr_client.mimetype_table_cell));
+		/*
+			we will compress if:
+			- file type allows it
+			- the max cacheable size is superior to:
+				- file size if full request
+				- request is NOT partial
+		*/
+		curr_client.compress = (curr_client.compress 
+									&& 
+							get_mime_type_compressibility(curr_client.mimetype_table_cell)
+									&&
+							(get_mime_type_max_compress_size(curr_client.mimetype_table_cell)
+									>=
+							(curr_client.the_stat_struct->st_size))
+									&&
+							(curr_client.req->header->range_end<=0));
 
 		if(logging > 5){
 			fprintf(logstream,"Server will use compression!\n"
@@ -273,6 +331,12 @@ void sendResource(int is_head){
 		}
 		
 	}
+	
+	/*
+		- put non null argument to compress a relative path to server root
+		- put null to compress current chambered file path
+	*/
+	
 	if(compressFile("")<0){
 
 		if(logging){

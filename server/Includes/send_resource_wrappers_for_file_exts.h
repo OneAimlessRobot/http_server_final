@@ -36,13 +36,27 @@ static void final_cleanup(void){
 	
 	close(comp_fd);
 
-	if(comp_enable&&!curr_client.is_not_found){
-		if(logging>3){
-			fprintf(logstream,"Trying to delete %s...\n",outpathbuff);
+	if(!curr_client.is_not_found){
+		if(comp_enable){
+			if(logging>3){
+				fprintf(logstream,"Trying to delete %s...\n",outpathbuff);
+			}
+			remove(outpathbuff);
 		}
-		remove(outpathbuff);
+		if(curr_client.generating_func){
+			/*
+			 * 
+			 * delete generator tmp file
+			 * (from dir/find/rss/etc requests)
+			 * if there is one
+			 * 
+			 */
+			if(logging>3){
+				fprintf(logstream,"Trying to delete %s...\n",curr_client.filepath);
+			}
+			remove(curr_client.filepath);
+		}
 	}
-
 }
 
 	

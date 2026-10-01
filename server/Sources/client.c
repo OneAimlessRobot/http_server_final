@@ -1,21 +1,15 @@
 #include "../Includes/preprocessor.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
 #include "../Includes/http_req_parser.h"
 #include "../Includes/http_response_aux.h"
 #include "../Includes/handlecustom.h"
 #include "../Includes/client.h"
-#include "../Includes/load_find_results.h"
-#include "../Includes/load_html.h"
 #include "../Includes/ssl_things.h"
-#include "../Includes/load_rss.h"
-#include "../Includes/php_proxy.h"
-#include "../Includes/rcon_proxy.h"
+#include "../Includes/io_ops.h"
 #include "../Includes/send_resource_func.h"
 #include "../Includes/recv_resource_func.h"
 #include "../Includes/server_vars.h"
-#include "../Includes/io_ops.h"
-#include "../Includes/txt_sending.h"
-
 
 static http_header header = {0};
 static http_request req = {0};
@@ -184,49 +178,12 @@ static void handleCurrentActivity(void){
 	
 	
 	if(curr_client.req->is_a_form){
-		if((curr_client.is_directory=isDirectory(curr_client.target))){
-			curr_client.generating_func = generateDirListing;
-		}
-		else if(isRssFeed(curr_client.target)){
-			curr_client.generating_func = generateRss;
-		}
-		else if(isDateReq(curr_client.target)){
-			curr_client.generating_func = the_time_func;
-		}
-		else if(isPHPRequest(curr_client.target)){
-			curr_client.generating_func = generatePHPResult;
-		}
-		else if(isText(curr_client.target)){
-			
-			curr_client.is_non_prettifyable = isNonPrettifiable(curr_client.target);
-			if(logging > 6){
-					fprintf(logstream,"%s is %s\n",
-								curr_client.target,
-								curr_client.is_non_prettifyable?
-										"non prettifyable"
-										:
-										"prettifyable!"
-										);
-			}
-			curr_client.generating_func = curr_client.is_non_prettifyable?NULL:generateText;
-		
-		}
-		else if(isRconRequest(curr_client.target)){
-			
-			curr_client.generating_func = generateRconResult;
-		}
-		else if(isFindRequest(curr_client.target)){
-			
-			curr_client.generating_func = generateFindResult;
-		}
+		curr_client.generating_func = get_fetch_parser_handler(curr_client.target,&curr_client.fetch_request_table_cell);
 	}
 	process_req_switch_block();
 	
 	if(curr_client.req->is_a_form){
 		sendResource(is_head);
-		if(curr_client.generating_func&&!curr_client.is_not_found){
-			remove(curr_client.filepath);
-		}
 	}
 	else{
 		recvResource();
@@ -279,7 +236,15 @@ int is_tls_connection(int client_fd) {
 }
 
 void runClientConnection(int32_t sock){
-	
+	if(logging){
+		
+		fprintf(logstream,"Socket: %d\n",sock);
+		
+	}
+	if(sock<0){
+		exit_function_client();
+		
+	}
 	exit_func_for_this_module = exit_function_client;
 	socklenpointer=sizeof(curr_client.client_addr);
 	curr_client.socket=sock;

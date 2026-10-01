@@ -2,6 +2,7 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
 
 
 
@@ -35,7 +36,7 @@ int isPHPRequest(char* resourceTarget){
 	}
 	char* ext=get_file_extension(path);
 	if(ext){
-		return (stringsAreEqual(ext,"php")||stringsAreEqual(ext,"php2"));
+		return (stringsAreEqual(ext,"php"));
 			
 	}
 	else{
@@ -50,10 +51,6 @@ static void generatePHPResultPrimitive(char* target){
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 	
 	snprintf(currFetchedPHP,sizeof(currFetchedPHP)-1,"%s%s",currDir,target);
-
-	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedPHP);
-	
-	build_last_modified_buff(curr_client.og_filepath);
 	
 	snprintf(full_php_target,sizeof(full_php_target)-1,"%s%s",target,query);
 
@@ -115,11 +112,14 @@ void generatePHPResult(char* request){
 
 		query="";
 	}
-
+	
+	const char* first_format = get_fetch_parser_handler_first_format(curr_client.fetch_request_table_cell),
+		* second_format = get_fetch_parser_handler_second_format(curr_client.fetch_request_table_cell);
+	
         
-	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOnePHP_HTML , request, request_id);
+	snprintf(tmpFile,sizeof(tmpFile)-1,first_format , request, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoPHP_HTML , request, request_id);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,second_format , request, request_id);
 	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
 	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
 	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);

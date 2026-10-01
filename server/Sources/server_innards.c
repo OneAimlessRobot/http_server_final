@@ -108,6 +108,7 @@ static void handleIncommingConnections(void){
 	if ((activity < 0) && (errno!=EINTR))
 	{
 		printf("select error");
+		serverOn=0;
 		return;
 	}
 	else if(activity>0){

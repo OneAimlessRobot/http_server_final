@@ -2,9 +2,14 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
 #include "../Includes/template_funcs.h"
 
 #define DIR_LISTING_HEADER_CLASS "header_for_dir_listing"
+
+#define DIR_LISTING_PATH_CLASS "dir_path"
+
+#define DIR_LISTING_FILE_COUNT_CLASS "file_count"
 
 #define DIR_LISTING_TABLE_LINE_CLASS "dir_listing_table"
 
@@ -16,7 +21,7 @@
 
 #define FILE_REF_CLASS "ref_for_file"
 
-#define NUM_OF_FIELDS_TO_PRINT 3
+#define NUM_OF_FIELDS_TO_PRINT 4
 
 static u_int64_t entry_count = 0;
 
@@ -24,13 +29,12 @@ static struct stat the_stat = {0};
 
 
 static category_id print_order[NUM_OF_FIELDS_TO_PRINT]={
+	IS_DIRECTORY,
 	SIZE,
 	FULL_DATE,
 	FILE_NAME,
 };
 
-static uint16_t category_max_sizes[CATEGORY_ID_MAX]={0};
-static uint16_t category_curr_sizes[CATEGORY_ID_MAX]={0};
 
 
 
@@ -49,9 +53,9 @@ static char resolved_rel_path[PATH_MAX]={0},
 		the_date_buff[MICROTIMESIZESTRINGTHING]= {0},
 		the_size_buff[MICROTIMESIZESTRINGTHING]= {0},
 		curr_listing_buff[4+(PATHSIZE+8)*CATEGORY_ID_MAX]={0},
-		* curr_listing_argv[ARGVMAX]={the_size_buff,the_date_buff,curr_listing_buff},
-		* header_argv[ARGVMAX]={0},
+		* curr_listing_argv[ARGVMAX]={NULL,the_size_buff,the_date_buff,curr_listing_buff},
 		* category_names[CATEGORY_ID_MAX]={
+			"Is Directory?",
 			"Size",
 			"Full_Date",
 			"Actual file_name"
@@ -64,27 +68,7 @@ int isDirectory(char* resourceTarget){
     char path[PATHSIZE]={0};
 	char* ptr=path;
 	ptr+=snprintf(ptr,PATHSIZE,"%s%s",currDir,resourceTarget);
-	return does_dir_exist_aux(path);
-
-}
-
-
-
-static void generate_header_sizes_data(FILE* fstream){
-
-	memset(curr_listing_buff,0,PATHSIZE);
-	while(fgets(curr_listing_buff,PATHSIZE,fstream)){
-		memset(header_argv,0,ARGVMAX*sizeof(char*));
-		make_str_arr(curr_listing_buff," ", header_argv, NUM_OF_FIELDS_TO_PRINT,0);
-		for(uint32_t j=0;j<NUM_OF_FIELDS_TO_PRINT;j++){
-			uint32_t i=print_order[j];
-			category_curr_sizes[i]=header_argv[i]?strnlen(header_argv[i],PATHSIZE-1):0;
-			if(category_curr_sizes[i]>category_max_sizes[i]){
-				category_max_sizes[i]=max(strlen(category_names[i]),min(PATHSIZE,category_curr_sizes[i]));
-			}
-		}
-		memset(curr_listing_buff,0,PATHSIZE);
-	}
+	return (does_dir_exist_aux(path));
 
 }
 static void print_header(int fd){
@@ -93,8 +77,8 @@ static void print_header(int fd){
 	char* curr_ptr=header_buff;
 	for(uint32_t j=0;j<NUM_OF_FIELDS_TO_PRINT;j++){
 		uint32_t i=print_order[j];
-		char curr_printed_category_header_buff[category_max_sizes[i]+PATHSIZE];
-		memset(curr_printed_category_header_buff,0,category_max_sizes[i]+PATHSIZE);
+		char curr_printed_category_header_buff[PATHSIZE];
+		memset(curr_printed_category_header_buff,0,PATHSIZE);
 		snprintf(curr_printed_category_header_buff,PATHSIZE,"| %s  ",category_names[i]);
 		curr_ptr+=snprintf(curr_ptr,PATHSIZE-1,"%s",curr_printed_category_header_buff);
 
@@ -105,9 +89,10 @@ static void print_header(int fd){
 static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv,char* dir){
 	
 	
-	dprintf(fd,"\n<span class='%s'>| %-30s | %-30s |<a class='%s' href='%s/%s' >%-128s</a>|</span><br>\n",
+	dprintf(fd,"\n<span class='%s'>| %-30s | %-30s | %-30s |<a class='%s' href='%s/%s' >%-128s</a>|</span><br>\n",
 			DIR_LISTING_TABLE_LINE_CLASS,
-			is_directory_this_one?"directory!":curr_listing_argv[SIZE],
+			is_directory_this_one?"directory!":"normal file",
+			curr_listing_argv[SIZE],
 			curr_listing_argv[FULL_DATE],
 			is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,
 			dir,
@@ -212,11 +197,7 @@ static void generateDirListingPrimitive(char* path){
     snprintf(currSearchedDir,sizeof(currSearchedDir)-1,"%s%s",currDir,path);
 	
 	resolve_canonical_path(currSearchedDir,resolved_abs_path);
-	
-    snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",resolved_abs_path);
-	
-    build_last_modified_buff(curr_client.og_filepath);
-    
+
 	pid_t pid_fork_find_cmd=fork();
 	switch(pid_fork_find_cmd){
 
@@ -260,10 +241,13 @@ void generateDirListing(char* dir){
 		pathsize2=pathsize3;
 	}
 	int atRoot=(pathsize2==pathsize3);
-
-	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneDIR_HTML ,dir, request_id);
+	
+	const char* first_format = get_fetch_parser_handler_first_format(curr_client.fetch_request_table_cell),
+		* second_format = get_fetch_parser_handler_second_format(curr_client.fetch_request_table_cell);
+	
+	snprintf(tmpFile,sizeof(tmpFile)-1,first_format ,dir, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoDIR_HTML, dir, request_id);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,second_format, dir, request_id);
 	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
 	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
 	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
@@ -293,12 +277,23 @@ void generateDirListing(char* dir){
 			return;
 	}
 	remove(tmpDir);
+	
 	dprintf(curr_client.fd,STYLESHEET_FORMAT
-		"\n<body class='%s'>\n\n<div class='%s'>\n<br>\n",
+		"\n<body class='%s'>\n\n<div class='%s'>\n<br>\n"
+		"\n<h1 class=\"%s\">\n<br>"
+		"<span>",
 					defaultTarget,
 					defaultTarget,
 					DIR_LISTING_BODY_CLASS,
-					DIR_LISTING_BODY_CLASS);
+					DIR_LISTING_BODY_CLASS,
+					DIR_LISTING_PATH_CLASS);
+					
+		(atRoot
+				?
+		dprintf(curr_client.fd,"ROOT</span></h1><br>\n")
+				:
+		dprintf(curr_client.fd,"%s</span></h1><br>\n",dir)
+		);
 	if(!atRoot){
 		char prev_dir_rel_path[PATHSIZE*2]={0};
 		char prev_dir_to_use[PATHSIZE*2]={0};
@@ -316,13 +311,12 @@ void generateDirListing(char* dir){
 									prev_dir_to_use);
 
 	}
-	generate_header_sizes_data(fstream);
-	fseek(fstream,0,SEEK_SET);
 	print_header(curr_client.fd);
 	process_lines_and_print_to_dest_file(curr_client.fd,fstream,dir);
-	dprintf(curr_client.fd,"\n<br><h2 class='%s'><span>We got %lu entries!</span></h2>\n",DIR_LISTING_HEADER_CLASS, entry_count);
+	dprintf(curr_client.fd,"\n<br><h2 class='%s'><span>We got %lu entries!</span></h2>\n",DIR_LISTING_FILE_COUNT_CLASS, entry_count);
 	dprintf(curr_client.fd,"</div>\n<br>" AUDIO_PLAY_SCRIPT_TO_LOAD "\n\n</body>\n</html>\n",defaultTarget);
 	fclose(fstream);
+	lseek(curr_client.fd,0,SEEK_SET);
 
 }
 

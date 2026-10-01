@@ -40,6 +40,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <openssl/provider.h>
+#include <openssl/evp.h>
 #include "buffSizes.h"
 #include "custom_types.h"
 #include "auxFuncs.h"

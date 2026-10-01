@@ -6,6 +6,8 @@
 extern char LE_TIMEUREUR_DATE[MICROTIMESIZESTRINGTHING],
 	LE_TIMEUREUR_LAST_MODIFIED_DATE[MICROTIMESIZESTRINGTHING],
 	LE_TIMEUREUR_LAST_ACCESS_DATE[MICROTIMESIZESTRINGTHING],
+	MD5Hash[EVP_MAX_MD_SIZE],
+	MD5HashTextForm[ETAG_SIZE/2],
 	ETag[ETAG_SIZE];
 
 extern timer_struct_t struct_for_date,
@@ -20,6 +22,6 @@ void build_date_buff(void);
 
 void build_last_modified_buff(char* full_file_path);
 
-void the_time_func(char* unused);
+void generateDate(char* unused);
 
 #endif

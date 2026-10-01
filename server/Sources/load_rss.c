@@ -2,6 +2,7 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
 #include "../Includes/load_rss.h"
 
 static char channel_string_buff[PATHSIZE*2]={0},
@@ -73,10 +74,6 @@ static void generateRssPrimitive(char* path){
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
 	snprintf(currFetchedRSS,sizeof(currFetchedRSS)-1,"%s%s",currDir,path);
-
-	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRSS);
-	
-	build_last_modified_buff(curr_client.og_filepath);
 	
 	char* args_cmd[]={"cat", currFetchedRSS,NULL};
 	pid_t pid_fork_find_cmd=fork();
@@ -118,10 +115,12 @@ static int print_out_rss_line_to_fd(int fd, char the_listing[PATHSIZE*2],const c
 
 
 void generateRss(char* dir){
-
-	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneRSS_XML,dir, request_id);
+	const char* first_format = get_fetch_parser_handler_first_format(curr_client.fetch_request_table_cell),
+		* second_format = get_fetch_parser_handler_second_format(curr_client.fetch_request_table_cell);
+	
+	snprintf(tmpFile,sizeof(tmpFile)-1,first_format,dir, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoRSS_XML,dir, request_id);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,second_format,dir, request_id);
 	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
 	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
 	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);

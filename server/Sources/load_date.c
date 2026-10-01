@@ -2,13 +2,15 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
 #include "../Includes/template_funcs.h"
 #include "../Includes/load_date.h"
 
 char LE_TIMEUREUR_DATE[MICROTIMESIZESTRINGTHING] = {0},
 
 		LE_TIMEUREUR_LAST_MODIFIED_DATE[MICROTIMESIZESTRINGTHING] = {0},
-		
+		MD5Hash[EVP_MAX_MD_SIZE] = {0},
+		MD5HashTextForm[ETAG_SIZE/2] = {0},
 		ETag[ETAG_SIZE] = {0};
 
 timer_struct_t struct_for_date = {0},
@@ -48,7 +50,7 @@ int build_file_stat(char* full_file_path, char* modified_date_buff, struct stat*
 	}
     timer_struct_t the_struct_for_time = {0};
     
-    the_struct_for_time.timeur = last_modified_stat_struct.st_mtime;
+    the_struct_for_time.timeur = the_stat->st_mtime;
     
 	the_struct_for_time.time_struct_ptr = gmtime(&the_struct_for_time.timeur);	
 	
@@ -73,10 +75,25 @@ void build_last_modified_buff(char* full_file_path){
 	 https://stackoverflow.com/questions/4533/http-generating-etag-header
 	
 	*/
+    FILE *inFile = fopen (full_file_path, "rb");
+    EVP_MD_CTX* mdContext = EVP_MD_CTX_create();
+    int bytes;
+    unsigned char data[1024];
+	EVP_DigestInit(mdContext, EVP_md5());
+    while ((bytes = fread (data, 1, 1024, inFile)) != 0){
+        EVP_DigestUpdate(mdContext, data, bytes);
+    }
+    fclose (inFile);
+    EVP_DigestFinal_ex(mdContext,(unsigned char*)MD5Hash,NULL);
+    EVP_MD_CTX_reset(mdContext);
+    EVP_MD_CTX_free(mdContext);
+    
+	for(int i = 0; i < EVP_MAX_MD_SIZE; i++) {
+		snprintf(&MD5HashTextForm[i*2],10, "%02x", (unsigned int)MD5Hash[i]);
+	}
 	
-	snprintf(ETag,sizeof(ETag)-1, "%lx%lx%lx-%lx-%lx", last_modified_stat_struct.st_mtime,
-			last_modified_stat_struct.st_size,
-			last_modified_stat_struct.st_ino,
+	snprintf(ETag,sizeof(ETag), "%s-%lx-%lx",
+			MD5HashTextForm,
 			curr_client.req->header->range_start,
 			curr_client.req->header->range_end<=0
 				?
@@ -85,13 +102,15 @@ void build_last_modified_buff(char* full_file_path){
 			curr_client.req->header->range_end);
 	
 }
-void the_time_func(char* unused){
+void generateDate(char* unused){
 	
 	if(unused){
 		unused[0]=0;
 	}
 	
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoDATE_HTML, request_id);
+	const char* first_format = get_fetch_parser_handler_first_format(curr_client.fetch_request_table_cell);
+	
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,first_format, request_id);
 	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
 	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s%s",tmp_file_dir,curr_client.relative_file_path,unused);
 	

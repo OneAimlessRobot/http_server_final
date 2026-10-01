@@ -19,6 +19,28 @@
 
 #define PARTIAL_SIZE_TO_SEND max(0,min(BUFFSIZE,size_to_send-num_bytes_sent))
 
-#define buff_2_ptr(a) (&a[0])
+
+typedef enum {BYTE=0,KILO,MEGA,GIGA,TERA}magnitude_order;
+
+
+#define byte_to_high_order(a,b) (a>>(10*(magnitude_order)b))
+
+#define high_order_to_byte(a,b) (a<<(10*(magnitude_order)b))
+
+/*
+	it means 10 mega
+	the default size at which things will stop
+	being cached after.
+	If this size were absurd
+	Videos would take ages to load
+	With no real benefit
+	
+*/
+
+#define DEFALT_MAX_CACHE_SIZE (high_order_to_byte((int64_t)10,MEGA))
+/*
+	same thing for compression
+*/
+#define DEFAULT_MAX_COMPRESS_SIZE (high_order_to_byte((int64_t)10,MEGA))
 
 #endif

@@ -44,7 +44,9 @@ int64_t sendsome(int sd,char* buff,u_int64_t size, int flags){
 }
 
 int64_t sendsome_ssl(SSL* ssl,const char* buf, int64_t len) {
-
+	if(!ssl){
+		return -1;
+	}
 	int sd= SSL_get_fd(ssl);
 	if(sd < 0){
 		return -1;
@@ -181,7 +183,9 @@ int64_t readsome(int sd,char buff[],int64_t size,int flags){
 }
 
 int64_t readsome_ssl(SSL* ssl,char* buf, int64_t len) {
-	
+	if(!ssl){
+		return -1;
+	}
 	int sd= SSL_get_fd(ssl);
 	if(sd < 0){
 		return -1;

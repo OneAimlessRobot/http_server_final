@@ -2,8 +2,14 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
+#include "../Includes/template_funcs.h"
 
+#define RCON_BODY_CLASS "rcon_body"
 
+#define RCON_FRAMING_CLASS "rcon_framing"
+
+#define RCON_PRE_CLASS "rcon_pre"
 
 #define DEF_RCON_ADDRESS "192.168.0.100"
 
@@ -63,9 +69,19 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 	int outfd= open(tmpDir,O_WRONLY|O_CREAT,0777);
 		
 	snprintf(currFetchedRCON,sizeof(currFetchedRCON)-1,"%s" RCON_SCRIPT_PATH, currDir,defaultTarget);
-	snprintf(curr_client.og_filepath,sizeof(curr_client.og_filepath)-1,"%s",currFetchedRCON);
 	
-	build_last_modified_buff(curr_client.og_filepath);
+	int stat_result = check_stat_of_file(currFetchedRCON,curr_client.the_stat_struct,logging,logstream);
+	if(stat_result<0){
+		if(logging){
+		fprintf(logstream,"ERRO NO RCON SENDING %s\nErro: %s\n",
+														tmpDir,
+														strerror(errno));
+		}
+		close(curr_client.fd);
+		curr_client.fd=-1;
+		return;
+		
+	}
 	
 	char* args_cmd[]={"bash",currFetchedRCON,
 					parameters_arr[ADDR].the_actual_value,
@@ -99,12 +115,12 @@ static void generateRconResultPrimitive(char* the_separated_parameters){
 }
 void generateRconResult(char* the_request_parameters){
 
-	logging=1;
-    logstream=stderr;
-
-	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneRCON_HTML, request_id);
+	const char* first_format = get_fetch_parser_handler_first_format(curr_client.fetch_request_table_cell),
+		* second_format = get_fetch_parser_handler_second_format(curr_client.fetch_request_table_cell);
+	
+	snprintf(tmpFile,sizeof(tmpFile)-1,first_format, request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoRCON_HTML, request_id);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,second_format, request_id);
 	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
 	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
 	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
@@ -112,7 +128,7 @@ void generateRconResult(char* the_request_parameters){
 	curr_client.fd= open(curr_client.filepath,O_WRONLY|O_CREAT,0777);
 	if(curr_client.fd <0){
 			if(logging){
-			fprintf(logstream,"ERRO NO RCON|!|\nErro: %s\n",strerror(errno));
+			fprintf(logstream,"ERRO NO RCON!\nErro: %s\n",strerror(errno));
 			}
 			curr_client.fd = -1;
 			return;
@@ -121,6 +137,11 @@ void generateRconResult(char* the_request_parameters){
 		fprintf(logstream,"Ficheiro criado!\n%s\n",curr_client.filepath);
 	}
 	generateRconResultPrimitive(the_request_parameters);
+	
+	if(curr_client.fd<0){
+		return;
+	}
+	
 	FILE* fstream;
 	if(!(fstream=fopen(tmpDir,"r"))){
 			if(logging){
@@ -131,18 +152,13 @@ void generateRconResult(char* the_request_parameters){
 			return;
 	}
 	remove(tmpDir);
-	dprintf(curr_client.fd ,"<!DOCTYPE html>"
-			"\n<html>"
-			"\n<head>"
-			"\n<base href=''>"
-			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-			"\n</head>\n<body>\n<pre>\n");
+	dprintf(curr_client.fd ,RCON_HTML_PREFIX "\n<body class=\"%s\">\n<div class=\"%s\">\n<br><pre  class=\"%s\">\n",defaultTarget,defaultTarget,RCON_BODY_CLASS,RCON_FRAMING_CLASS,RCON_PRE_CLASS);
 
 	char currListing[PATHSIZE*2]={0};
 	while(fgets(currListing,PATHSIZE,fstream)){
 		dprintf(curr_client.fd,"%s",currListing);
 	}
-	dprintf(curr_client.fd,"</pre>\n</body>\n</html>\n");
+	dprintf(curr_client.fd,"</pre>\n<br></div>\n</body>\n</html>\n");
 	fclose(fstream);
 	lseek(curr_client.fd,0,SEEK_SET);
 

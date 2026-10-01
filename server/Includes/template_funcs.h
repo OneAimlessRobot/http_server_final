@@ -13,6 +13,9 @@
 			"\n<link rel='stylesheet' type='text/css' href='" \
 			DIR_LISTING_CSS_FILE_PATH \
 			"'>" \
+			"\n<title>" \
+			DIR_LISTING_TITLE \
+			"</title>\n" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
 			"\n<link rel=\"manifest\" href=\"" \
 			WEBMANIFEST_FILE_PATH \
@@ -30,6 +33,29 @@
 			"\n<link rel='stylesheet' type='text/css' href='" \
 			TXT_PRETTIFY_CSS_FILE_PATH \
 			"'>" \
+			"\n<title>" \
+			TEXT_PAGE_TITLE \
+			"</title>\n" \
+			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
+			"\n<link rel=\"manifest\" href=\"" \
+			WEBMANIFEST_FILE_PATH \
+			"\">" \
+			"\n</head>"
+
+			
+#define RCON_HTML_PREFIX "<!DOCTYPE html>" \
+			"\n<html>" \
+			"\n<head>" \
+			"\n<meta charset=\"UTF-8\">\n" \
+			"\n<base href=\'\'>" \
+			"\n<link rel=\"icon\" type=\"image/png\" sizes=\"32x32\" href=\"/icons/.favicon-32x32.png\">" \
+			"\n<link rel=\"icon\" type=\"image/png\" sizes=\"16x16\" href=\"/icons/.favicon-16x16.png\">" \
+			"\n<link rel='stylesheet' type='text/css' href='" \
+			RCON_CSS_FILE_PATH \
+			"'>" \
+			"\n<title>" \
+			RCON_TITLE \
+			"</title>\n" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
 			"\n<link rel=\"manifest\" href=\"" \
 			WEBMANIFEST_FILE_PATH \
@@ -46,6 +72,9 @@
 			"\n<link rel='stylesheet' type='text/css' href='" \
 			FIND_LISTING_CSS_FILE_PATH \
 			"'>" \
+			"\n<title>" \
+			FIND_LISTING_TITLE \
+			"</title>\n" \
 			"\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>" \
 			"\n<link rel=\"manifest\" href=\"" \
 			WEBMANIFEST_FILE_PATH \

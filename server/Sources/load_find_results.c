@@ -2,6 +2,7 @@
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
+#include "../Includes/request_consts.h"
 #include "../Includes/template_funcs.h"
 
 #define FIND_LISTING_HEADER_CLASS "header_for_find_listing"
@@ -16,6 +17,7 @@
 
 #define DEF_SHOULD_WE_AUTOREDIRECT "0"
 
+#define RESULT_CAP 800
 
 #define FIND_CMD_TO_USE (exec_find_arr[use_fancy_find])
 
@@ -123,6 +125,12 @@ static int process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
 	
 	memset(curr_listing_buff,0,sizeof(curr_listing_buff));
 	while(fgets(curr_listing_buff,sizeof(curr_listing_buff)-1,fstream)){
+		
+		if(num_files_found >= RESULT_CAP){
+			
+				break;
+		}
+			
 		curr_listing_buff[strnlen(curr_listing_buff,sizeof(curr_listing_buff))-1]='\0';
 		/*
 		 * if we have a dot at the beginning AND we have a forward slash there, too
@@ -144,7 +152,6 @@ static int process_lines_and_print_to_dest_file_find(int fd,FILE* fstream){
 		}
 		char* extension= get_file_extension(&curr_listing_buff[2]);
 		if(extension){
-			
 			if(findInStringArr(excluded_xtensions,extension)<0){
 				if(!num_files_found && user_wants_redirect){
 					
@@ -196,6 +203,7 @@ static void generateFindResultPrimitive(char* the_request_parameters){
 		fprintf(logstream,"Here is the issued command:\n");
 		print_string_arr(logstream,FIND_CMD_TO_USE);
 	}
+	
 	pid_t pid_fork_find_cmd=fork();
 	switch(pid_fork_find_cmd){
 
@@ -219,9 +227,13 @@ static void generateFindResultPrimitive(char* the_request_parameters){
 void generateFindResult(char* the_request_parameters){
 
 
-	snprintf(tmpFile,sizeof(tmpFile)-1,tmpOneFIND_HTML , request_id);
+	const char* first_format = get_fetch_parser_handler_first_format(curr_client.fetch_request_table_cell),
+		* second_format = get_fetch_parser_handler_second_format(curr_client.fetch_request_table_cell);
+	
+
+	snprintf(tmpFile,sizeof(tmpFile)-1,first_format , request_id);
 	replaceStringCharacter(&tmpFile[1],'/','.');
-	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,tmpTwoFIND_HTML, request_id);
+	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path)-1,second_format, request_id);
 	replaceStringCharacter(&curr_client.relative_file_path[1],'/','.');
 	snprintf(tmpDir,sizeof(tmpDir)-1,"%s%s",tmp_file_dir,tmpFile);
 	snprintf(curr_client.filepath,sizeof(curr_client.filepath)-1,"%s%s",tmp_file_dir,curr_client.relative_file_path);
@@ -250,7 +262,7 @@ void generateFindResult(char* the_request_parameters){
 	remove(tmpDir);
 	dprintf(curr_client.fd,FIND_HTML_PREFIX
 		"\n<body class=\"%s\">\n<br>\n\n\n<div class='%s'>\n<br>\n"
-		"\n<h1>The files found on the server with the expression: |%s| </h1>\n<br>\n<br>\n",
+		"\n<h1>We files found on the server with pattern \"%s\"</h1>\n<br>\n<br>\n",
 			defaultTarget,
 			defaultTarget,
 			FIND_LISTING_BODY_CLASS,
@@ -260,11 +272,21 @@ void generateFindResult(char* the_request_parameters){
 	fseek(fstream,0,SEEK_SET);
 	curr_client.should_redirect = process_lines_and_print_to_dest_file_find(curr_client.fd,fstream);
 	if(!curr_client.should_redirect){
-		dprintf(curr_client.fd,"\n<h1>%ld files were found! </h1>\n<br>\n<br>\n"
-				,num_files_found);
+		dprintf(curr_client.fd,"\n<h1>%ld files were found!</h1>\n<br>",
+			num_files_found);
+		
+		if(num_files_found>=RESULT_CAP){
+			dprintf(curr_client.fd,
+				"<h1>The number of results was capped at %d\n</h1>\n"
+				"<h1><br>Please narrow your query down</h1>\n<br>\n<br>\n",
+				RESULT_CAP);
+		}
+		
 		dprintf(curr_client.fd,"</div>\n</body>\n</html>\n");
 	}
+    
 	fclose(fstream);
+	lseek(curr_client.fd,0,SEEK_SET);
 
 }
 
