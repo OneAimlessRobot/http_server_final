@@ -133,7 +133,7 @@ static void send_valid_requests_string(void){
 			written<sizeof(allowed_requests_string_buff)&&curr_request_index<INVALID;
 				curr_request_index++){
 		
-		written=snprintf(ptr,
+		written+=snprintf(ptr,
 				sizeof(allowed_requests_string_buff)-written,
 					"%s%s",
 						request_const_name_arr[curr_request_index],
