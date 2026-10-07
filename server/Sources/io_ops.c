@@ -180,6 +180,7 @@ int64_t readsome(int sd,char buff[],int64_t size,int flags){
 			}
 			return -1;
 		}
+		return read_total;
 }
 
 int64_t readsome_ssl(SSL* ssl,char* buf, int64_t len) {
