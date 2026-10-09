@@ -5,6 +5,10 @@
 
 #define max(a,b) ((int64_t)a>(int64_t)b?(int64_t)a:(int64_t)b)
 
+#define is_between_both_closed(n,s,B) ((n>=s)&&(n<=B))
+
+#define is_between_both_open(n,s,B) ((n>s)&&(n<B))
+
 #define b_zero(a) (memset(a,0,sizeof(a)))
 
 #define ato_ull(a) (strtoull(a, NULL, 10))

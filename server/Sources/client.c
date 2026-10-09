@@ -59,7 +59,7 @@ static void head_and_get_wrapper(void){
 }
 static void process_req_data(void){
 	
-	url_decode(curr_client.req->processed_form, curr_client.req->final_form,reserved_characters_for_special);
+	url_decode(curr_client.req->processed_form, curr_client.req->final_form,reserved_characters_special);
 	
 	if(logging>3){
 		fprintf(logstream,"The data is: %s\n", curr_client.req->final_form);

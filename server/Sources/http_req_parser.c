@@ -4,19 +4,17 @@
 #include "../Includes/http_req_parser.h"
 
 char* reserved_characters[]={
+	">",
+	"<",
+	"\\",
+	":",
+	NULL
+},
+* reserved_characters_special[]={
 	"|",
 	">",
 	"<",
 	"\\",
-	"\""
-	":",
-	NULL
-},
-* reserved_characters_for_special[]={
-	">",
-	"<",
-	"\\",
-	"\""
 	":",
 	NULL
 };
@@ -316,7 +314,7 @@ void spawnHTTPRequest(void){
 	
 	splitString(curr_client.peerbuff,REQUEST_SECTION_DELIMITER_STRING,split_one);
 
-
+	printf("Raw request: %s\n", curr_client.peerbuff);
 
 	spawnHTTPHeader();
 	if(!split_one[1]){

@@ -1,4 +1,5 @@
 #include "../Includes/preprocessor.h"
+#include "../Includes/http_req_parser.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
@@ -88,15 +89,20 @@ static void print_header(int fd){
 }
 static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listing_argv,char* dir){
 	
+	char fucking_buffer_idfk[PATHSIZE*64]={0},
+			fucking_buffer_idfk2[PATHSIZE*64]={0};
+	snprintf(fucking_buffer_idfk,sizeof(fucking_buffer_idfk),"%s/%s",dir,
+															curr_listing_argv[FILE_NAME]);
 	
-	dprintf(fd,"\n<span class='%s'>| %-30s | %-30s | %-30s |<a class='%s' href='%s/%s' >%-128s</a>|</span><br>\n",
+	url_encode(fucking_buffer_idfk,fucking_buffer_idfk2, reserved_characters);
+	
+	dprintf(fd,"\n<span class='%s'>| %-30s | %-30s | %-30s |<a class='%s' href='%s' >%-128s</a>|</span><br>\n",
 			DIR_LISTING_TABLE_LINE_CLASS,
 			is_directory_this_one?"directory!":"normal file",
 			curr_listing_argv[SIZE],
 			curr_listing_argv[FULL_DATE],
 			is_directory_this_one?DIR_REF_CLASS:FILE_REF_CLASS,
-			dir,
-			curr_listing_argv[FILE_NAME],
+			fucking_buffer_idfk2,
 			curr_listing_argv[FILE_NAME]
 			);
 }

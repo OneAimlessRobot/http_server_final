@@ -26,28 +26,66 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr) {
     int counter_src=0;
     int counter_dst=0;
     while (strnlen(&src[counter_src],PATHSIZE-1)) {
-	if (src[counter_src] == '%' && isxdigit(src[counter_src+1]) && isxdigit(src[counter_src+2])) {
-        
-	    sscanf(&src[counter_src],"%%%2hhx",(unsigned char*)&dst[counter_dst]);
-	    if(dst[counter_dst]>126){
+		//decode branch
+		if (src[counter_src] == '%' && isxdigit(src[counter_src+1]) && isxdigit(src[counter_src+2])) {
 			
-		dst[counter_dst] = '\0';
-	    	return 0;
-	    }
-	    counter_dst+=1;
-	    counter_src += 3;
-        }
-	else if(findInStringArrN(reserved_characters_arr,&src[counter_src],1)>=0){
-		
-		dst[counter_dst] = '\0';
-    		return 0;
-	}
-	 else {
-		 
-	    dst[counter_dst] = src[counter_src];
-	    counter_dst++;
-	    counter_src++;
-	}
+			sscanf(&src[counter_src],"%%%2hhx",(unsigned char*)&dst[counter_dst]);
+			if(dst[counter_dst]>126){
+				
+				dst[counter_dst] = '\0';
+				return 0;
+			}
+			counter_dst+=1;
+			counter_src += 3;
+		}
+		//reject branch
+		else if(findInStringArrN(reserved_characters_arr,&src[counter_src],1)>=0){
+			
+			dst[counter_dst] = '\0';
+			return 0;
+		}
+		//passthrough branch
+		else {
+			 
+			dst[counter_dst] = src[counter_src];
+			counter_dst++;
+			counter_src++;
+		}
+    }
+    dst[counter_dst] = '\0';
+    result=1;
+    return result;
+}
+int url_encode(char *src, char *dst, char** reserved_characters_arr) {
+    int result=0;
+    int counter_src=0;
+    int counter_dst=0;
+    while (strnlen(&src[counter_src],PATHSIZE-1)) {
+		//reject branch
+		if((findInStringArrN(reserved_characters_arr,&src[counter_src],1)>=0)||(src[counter_src]>126)){
+			
+			dst[counter_dst] = '\0';
+			return 0;
+		 }
+		 //encode branch
+		 else if(is_between_both_closed(src[counter_src],32,46)
+						||
+					is_between_both_closed(src[counter_src],63,64)
+						||
+					(src[counter_src]==96)){
+				
+			snprintf(&dst[counter_dst],PATHSIZE-1,"%%%2hhx",src[counter_src]);
+			
+			counter_dst+=3;
+			counter_src +=1;
+		 }
+		 //passthrough branch
+		 else {
+			 
+			dst[counter_dst] = src[counter_src];
+			counter_dst++;
+			counter_src++;
+		}
     }
     dst[counter_dst] = '\0';
     result=1;

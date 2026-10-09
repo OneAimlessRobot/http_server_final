@@ -43,8 +43,8 @@ int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_
 void super_mkdir(const char *dir);
 
 int stringsAreEqual(char* s1,char* s2);
-char from_hex(char c);
 int url_decode(char *src, char *dst, char** reserved_characters_arr);
+int url_encode(char *src, char *dst, char** reserved_characters_arr);
 int stringsAreEqualN(char* s1,char*s2,int n);
 
 int findInStringArrN(char* arr[],char* nullTermStr,int n);
