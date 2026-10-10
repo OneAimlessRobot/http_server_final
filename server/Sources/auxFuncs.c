@@ -21,19 +21,25 @@ char *humanSize(uint64_t bytes, char *hrbytes){
     snprintf(hrbytes, MICROTIMESIZESTRINGTHING, "%lu%s", bytes, suffix[i]);
     return(hrbytes);
 }
-int url_decode(char *src, char *dst, char** reserved_characters_arr) {
+
+/*
+
+	WE ASSUME the size of what dst points to is at least 3x bigger than src.
+
+*/
+
+int url_decode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc) {
     int result=0;
     int counter_src=0;
     int counter_dst=0;
-    while (strnlen(&src[counter_src],PATHSIZE-1)) {
+    while (strnlen(&src[counter_src],sizesrc-(counter_src+2))) {
 		//decode branch
 		if (src[counter_src] == '%' && isxdigit(src[counter_src+1]) && isxdigit(src[counter_src+2])) {
 			
 			sscanf(&src[counter_src],"%%%2hhx",(unsigned char*)&dst[counter_dst]);
 			if(dst[counter_dst]>126){
 				
-				dst[counter_dst] = '\0';
-				return 0;
+				goto end;
 			}
 			counter_dst+=1;
 			counter_src += 3;
@@ -52,21 +58,31 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr) {
 			counter_src++;
 		}
     }
-    dst[counter_dst] = '\0';
     result=1;
-    return result;
+    end:
+		dst[counter_dst] = '\0';
+		return result;
 }
-int url_encode(char *src, char *dst, char** reserved_characters_arr) {
+
+
+/*
+
+	WE ASSUME the size of what dst points to is at least the same size of src.
+
+*/
+
+
+
+int url_encode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc) {
     int result=0;
     int counter_src=0;
     int counter_dst=0;
-    while (strnlen(&src[counter_src],PATHSIZE-1)) {
+    while (strnlen(&src[counter_src],sizesrc-(counter_src+2))) {
 		//reject branch
 		if((findInStringArrN(reserved_characters_arr,&src[counter_src],1)>=0)||(src[counter_src]>126)){
 			
-			dst[counter_dst] = '\0';
-			return 0;
-		 }
+			goto end;
+		}
 		 //encode branch
 		 else if(is_between_both_closed(src[counter_src],32,46)
 						||
@@ -87,9 +103,10 @@ int url_encode(char *src, char *dst, char** reserved_characters_arr) {
 			counter_src++;
 		}
     }
-    dst[counter_dst] = '\0';
     result=1;
-    return result;
+    end:
+		dst[counter_dst] = '\0';
+		return result;
 }
 int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_t max_len){
 	char* argv[ARGVMAX]={0};

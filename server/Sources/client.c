@@ -59,7 +59,7 @@ static void head_and_get_wrapper(void){
 }
 static void process_req_data(void){
 	
-	url_decode(curr_client.req->processed_form, curr_client.req->final_form,reserved_characters_special);
+	url_decode(curr_client.req->processed_form, curr_client.req->final_form,reserved_characters_special, sizeof(curr_client.req->processed_form));
 	
 	if(logging>3){
 		fprintf(logstream,"The data is: %s\n", curr_client.req->final_form);
@@ -67,7 +67,7 @@ static void process_req_data(void){
 }
 static void process_header_target(void){
 	
-	url_decode(curr_client.req->header->target, curr_client.target,reserved_characters);
+	url_decode(curr_client.req->header->target, curr_client.target,reserved_characters, sizeof(curr_client.req->header->target));
 	snprintf(curr_client.relative_file_path,sizeof(curr_client.relative_file_path),"%s",curr_client.target);
 	
 	if(logging>3){

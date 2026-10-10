@@ -43,8 +43,24 @@ int build_arg_line_arr(char* the_separated_parameters,arg_line arg_arr[],uint64_
 void super_mkdir(const char *dir);
 
 int stringsAreEqual(char* s1,char* s2);
-int url_decode(char *src, char *dst, char** reserved_characters_arr);
-int url_encode(char *src, char *dst, char** reserved_characters_arr);
+
+/*
+
+	WE ASSUME the size of what dst points to is at least 3x bigger than src.
+
+*/
+
+int url_decode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc);
+
+
+/*
+
+	WE ASSUME the size of what dst points to is at least the same size of src.
+
+*/
+
+
+int url_encode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc);
 int stringsAreEqualN(char* s1,char*s2,int n);
 
 int findInStringArrN(char* arr[],char* nullTermStr,int n);
