@@ -1,4 +1,5 @@
 #include "../Includes/preprocessor.h"
+#include "../Includes/http_req_parser.h"
 #include "../Includes/client.h"
 #include "../Includes/server_vars.h"
 #include "../Includes/resource_consts.h"
@@ -17,7 +18,7 @@
 
 #define DEF_SHOULD_WE_AUTOREDIRECT "0"
 
-#define RESULT_CAP 800
+#define RESULT_CAP 250
 
 #define FIND_CMD_TO_USE (exec_find_arr[use_fancy_find])
 
@@ -106,11 +107,19 @@ int isFindRequest(char* resourceTarget){
 static void print_dir_entry(int fd, char* curr_listing_arg){
 	
 	
-	dprintf(fd,"\n<span class='%s'>|<a class='%s' href='%s/%s'>%s</a>|</span><br>\n",
+	char fucking_buffer_idfk[PATHSIZE*8]={0},
+			fucking_buffer_idfk2[PATHSIZE*8]={0};
+	snprintf(fucking_buffer_idfk,sizeof(fucking_buffer_idfk),
+										"%s/%s",
+										DEF_FIND_ROOTDIR,
+										curr_listing_arg);
+	
+	url_encode(fucking_buffer_idfk,fucking_buffer_idfk2, reserved_characters,sizeof(fucking_buffer_idfk));
+	
+	dprintf(fd,"\n<span class='%s'>|<a class='%s' href='%s'>%s</a>|</span><br>\n",
 			FIND_LISTING_DIV_CLASS,
 			FIND_LISTING_LINE_CLASS,
-			DEF_FIND_ROOTDIR,
-			curr_listing_arg,
+			fucking_buffer_idfk2,
 			curr_listing_arg
 			);
 }
