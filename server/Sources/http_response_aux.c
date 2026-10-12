@@ -29,9 +29,9 @@
 */
 
 
-void fillUpNormalHeader(const char* mimetype,int64_t size){
+uint64_t fillUpNormalHeader(const char* mimetype,int64_t size){
 
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_HEADER,
 						FILL_UP_BORING_CRAP,
 						mimetype,
@@ -39,9 +39,9 @@ void fillUpNormalHeader(const char* mimetype,int64_t size){
 
 }
 
-void fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size){
+uint64_t fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size){
 
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_HEADER_COMP,
 						FILL_UP_BORING_CRAP,
 						mimetype,
@@ -51,16 +51,16 @@ void fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size){
 }
 
 
-void fillUpChunkedHeader(const char* mimetype){
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+uint64_t fillUpChunkedHeader(const char* mimetype){
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_HEADER,
 						FILL_UP_BORING_CRAP,
 						mimetype);
 
 }
 
-void fillUpChunkedHeaderComp(const char* mimetype,char* method){
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+uint64_t fillUpChunkedHeaderComp(const char* mimetype,char* method){
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_HEADER_COMP,
 						FILL_UP_BORING_CRAP,
 						mimetype,
@@ -80,12 +80,12 @@ void fillUpChunkedHeaderComp(const char* mimetype,char* method){
 */
 
 
-void fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,
+uint64_t fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,
 										int64_t end_point,
 										int64_t size,
 										int64_t file_size){
 											
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_PARTIAL_HEADER,
 						FILL_UP_BORING_CRAP,
 						mimetype,
@@ -95,11 +95,11 @@ void fillUpNormalPartialHeader(const char* mimetype, int64_t start_point,
 						file_size);
 }
 			   
-void fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t start_point,
+uint64_t fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t start_point,
 										int64_t end_point,
 										int64_t size,
 										int64_t file_size){
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						NORMAL_PARTIAL_HEADER_COMP,
 						FILL_UP_BORING_CRAP,
 						mimetype,
@@ -111,12 +111,12 @@ void fillUpNormalPartialHeaderComp(const char* mimetype,char* method, int64_t st
 }
 		   
 
-void fillUpChunkedPartialHeader(const char* mimetype,
+uint64_t fillUpChunkedPartialHeader(const char* mimetype,
 										int64_t start_point,
 										int64_t end_point,
 										int64_t file_size){
 
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_PARTIAL_HEADER,
 						FILL_UP_BORING_CRAP,
 						mimetype,
@@ -125,13 +125,13 @@ void fillUpChunkedPartialHeader(const char* mimetype,
 						file_size);
 }
 
-void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
+uint64_t fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
 										int64_t start_point,
 										int64_t end_point,
 										int64_t file_size){
 	
 	
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 						CHUNKED_PARTIAL_HEADER_COMP,
 						FILL_UP_BORING_CRAP,
 						mimetype,
@@ -153,10 +153,10 @@ void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
 */
 
 
-void fillUploadHeader(const char* mimetype, char* target_location_dir, char* target_filename){
+uint64_t fillUploadHeader(const char* mimetype, char* target_location_dir, char* target_filename){
 	
 	char* defaultTarget_ptr= &defaultTarget[0];
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 				UPLOAD_HEADER,
 				LE_TIMEUREUR_DATE,
 				KEEP_ALIVE_STRING,
@@ -168,10 +168,10 @@ void fillUploadHeader(const char* mimetype, char* target_location_dir, char* tar
 				target_filename);
 }
 
-void fillNoContentHeader(const char* mimetype, char* target_location_dir, char* target_filename){
+uint64_t fillNoContentHeader(const char* mimetype, char* target_location_dir, char* target_filename){
 	
 	char* defaultTarget_ptr= &defaultTarget[0];
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 				NO_CONTENT_HEADER,
 				LE_TIMEUREUR_DATE,
 				KEEP_ALIVE_STRING,
@@ -196,9 +196,9 @@ void fillNoContentHeader(const char* mimetype, char* target_location_dir, char* 
 
 
 
-void fillUpRedirectHeader(char* path){
+uint64_t fillUpRedirectHeader(char* path){
 
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 							REDIRECT_HEADER,
 							LE_TIMEUREUR_DATE,
 							KEEP_ALIVE_STRING,
@@ -206,9 +206,9 @@ void fillUpRedirectHeader(char* path){
 
 }
 
-void fillUpFileNotFoundHeader(int64_t size,const char* mimetype){
+uint64_t fillUpFileNotFoundHeader(int64_t size,const char* mimetype){
 
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 							HTTP_NOT_FOUND_HEADER,
 							LE_TIMEUREUR_DATE,
 							KEEP_ALIVE_STRING,
@@ -217,9 +217,17 @@ void fillUpFileNotFoundHeader(int64_t size,const char* mimetype){
 
 }
 
-void fillUpNotModifiedHeader(void){
+uint64_t fillUpInternalErrorHeader(void){
+
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+							HTTP_INTERNAL_ERROR_HEADER,
+							LE_TIMEUREUR_DATE,
+							KEEP_ALIVE_STRING);
+
+}
+uint64_t fillUpNotModifiedHeader(void){
 	
-	snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
+	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 							HTTP_NOT_MODIFIED_HEADER,
 							FILL_UP_BORING_CRAP_NOT_MODIFIED);
 	

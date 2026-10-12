@@ -108,6 +108,7 @@ static int compressFile(char* target){
 static void send_header(void){
 
 	int64_t fileSize=0;
+	uint64_t header_size=0;
 	const char* the_mime_type= curr_client.is_non_prettifyable
 								?
 								robotsMimetype
@@ -132,7 +133,7 @@ static void send_header(void){
 	curr_client.send_size = curr_client.req->header->range_end-curr_client.req->header->range_start+1;
 	
 	
-	(!curr_client.is_not_found)?
+	header_size = ((!curr_client.is_not_found)?
 		((comp_enable)?
 			((use_chunked)?
 				((!curr_client.req->header->is_partial)?
@@ -183,8 +184,7 @@ static void send_header(void){
 			)
 		)
 		:
-		fillUpFileNotFoundHeader(fileSize,the_mime_type);
-	int header_size=strlen(curr_client.sent_header_buff);
+		fillUpFileNotFoundHeader(fileSize,the_mime_type));
 	if(logging > 5){
 		print_response_header(curr_client.sent_header_buff);
 	}
@@ -351,6 +351,8 @@ void sendResource(int is_head){
 
 					fprintf(logstream,"Erro na compressão %s...\n",strerror(errno));
 				}
+				send_internal_error_response();
+				goto final_cleanup_label;
 			}
 			else{
 				curr_client.is_not_found=1;
@@ -367,9 +369,10 @@ void sendResource(int is_head){
 	if(!is_head){
 		push_bytes();
 	}
-	final_cleanup();
-	
-	if(logging){
-		fprintf(logstream,"Done!\n");
-	}
+	final_cleanup_label:
+		final_cleanup();
+		
+		if(logging){
+			fprintf(logstream,"Done!\n");
+		}
 }

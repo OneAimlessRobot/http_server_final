@@ -130,6 +130,15 @@ static void figure_out_compression(void){
 		}
 	}
 }
+void send_internal_error_response(void){
+	
+	uint64_t header_size = fillUpInternalErrorHeader();
+	if(logging > 5){
+		print_response_header(curr_client.sent_header_buff);
+	}
+	send_wrapper((char*)curr_client.sent_header_buff,header_size);
+	
+}
 static void send_valid_requests_string(void){
 	
 	char *ptr=&allowed_requests_string_buff[0];

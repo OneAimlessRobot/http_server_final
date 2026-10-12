@@ -59,12 +59,12 @@
                           "Transfer-Encoding: %s, chunked\r\n" \
                           "\r\n"
                           
-void fillUpNormalHeader(const char* mimetype,int64_t size);
-void fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size);
+uint64_t fillUpNormalHeader(const char* mimetype,int64_t size);
+uint64_t fillUpNormalHeaderComp(const char* mimetype,char* method,int64_t size);
 
 
-void fillUpChunkedHeader(const char* mimetype);
-void fillUpChunkedHeaderComp(const char* mimetype,char* method);
+uint64_t fillUpChunkedHeader(const char* mimetype);
+uint64_t fillUpChunkedHeaderComp(const char* mimetype,char* method);
 
 
 /*
@@ -108,25 +108,25 @@ void fillUpChunkedHeaderComp(const char* mimetype,char* method);
 							  "Transfer-Encoding: %s, chunked\r\n" \
 							  "\r\n"
 							  
-void fillUpNormalPartialHeader(const char* mimetype,
+uint64_t fillUpNormalPartialHeader(const char* mimetype,
 										int64_t start_point,
 										int64_t end_point,
 										int64_t size,
 										int64_t file_size);
 										
-void fillUpNormalPartialHeaderComp(const char* mimetype,char* method,
+uint64_t fillUpNormalPartialHeaderComp(const char* mimetype,char* method,
 										int64_t start_point,
 										int64_t end_point,
 										int64_t size,
 										int64_t file_size);
 
 
-void fillUpChunkedPartialHeader(const char* mimetype,
+uint64_t fillUpChunkedPartialHeader(const char* mimetype,
 										int64_t start_point,
 										int64_t end_point,
 										int64_t file_size);
 										
-void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
+uint64_t fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
 										int64_t start_point,
 										int64_t end_point,
 										int64_t file_size);
@@ -174,10 +174,10 @@ void fillUpChunkedPartialHeaderComp(const char* mimetype,char* method,
 
 
 
-void fillUploadHeader(const char* mimetype, char* target_location_dir, char* target_filename);
+uint64_t fillUploadHeader(const char* mimetype, char* target_location_dir, char* target_filename);
 
 
-void fillNoContentHeader(const char* mimetype, char* target_location_dir, char* target_filename);
+uint64_t fillNoContentHeader(const char* mimetype, char* target_location_dir, char* target_filename);
 
 
 /*
@@ -215,18 +215,25 @@ void fillNoContentHeader(const char* mimetype, char* target_location_dir, char* 
 								"Content-Length: 0\r\n" \
 								"Allow: %s\r\n" \
 								"\r\n"
+
+#define HTTP_INTERNAL_ERROR_HEADER  HTTP_VERSION_STRING INTERNAL_SERVER_ERROR \
+								HTTP_SERVER_INTRO_HEADERS \
+								"\r\n"
 								
 #define HTTP_NOT_MODIFIED_HEADER  HTTP_VERSION_STRING NOT_MODIFIED_RESPONSE \
 								HTTP_SERVER_FILE_AGE_HEADERS_NOT_MODIFIED \
 								"\r\n"
 
-void fillUpRedirectHeader(char* path);
+uint64_t fillUpRedirectHeader(char* path);
 
-void fillUpFileNotFoundHeader(int64_t size,const char* mimetype);
+uint64_t fillUpFileNotFoundHeader(int64_t size,const char* mimetype);
 
-void fillUpRequestErrorHeader(void);
+uint64_t fillUpInternalErrorHeader(void);
 
-void fillUpNotModifiedHeader(void);
+uint64_t fillUpRequestErrorHeader(void);
+
+
+uint64_t fillUpNotModifiedHeader(void);
 
 /*
 -----------------------------------------------------------------------------------

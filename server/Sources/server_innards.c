@@ -194,6 +194,7 @@ void initializeClientConstants(void){
 
 	strncpy(defaultTarget,find_value_in_cfg_arr("defaultTarget",cfgs),FIELDSIZE-1);
 	strncpy(notFoundDefaultTarget,find_value_in_cfg_arr("notFoundDefaultTarget",cfgs),FIELDSIZE-1);
+	strncpy(internalServerErrorTarget,find_value_in_cfg_arr("internalServerErrorTarget",cfgs),FIELDSIZE-1);
 	strncpy(mainRssFeed,find_value_in_cfg_arr("mainRssFeed",cfgs),FIELDSIZE-1);
 	strncpy(host_cert_file_path,find_value_in_cfg_arr("host_cert_file_path",cfgs),FIELDSIZE-1);
 	strncpy(host_pkey_file_path,find_value_in_cfg_arr("host_pkey_file_path",cfgs),FIELDSIZE-1);
@@ -222,7 +223,11 @@ void initializeClientConstants(void){
 				&&
 				(stringsAreEqual(excludePrettifyTarget,NO_SUCH_SETTING)
 				||
-				stringsAreEqual(excludePrettifyTarget,NO_SETTINGS_LOADED)));
+				stringsAreEqual(excludePrettifyTarget,NO_SETTINGS_LOADED))
+				&&
+				(stringsAreEqual(internalServerErrorTarget,NO_SUCH_SETTING)
+				||
+				stringsAreEqual(internalServerErrorTarget,NO_SETTINGS_LOADED)));
 	
 	if(!invalid_string_confs){
 
