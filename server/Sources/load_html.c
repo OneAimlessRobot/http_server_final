@@ -94,7 +94,7 @@ static void print_dir_entry(int fd, int is_directory_this_one, char** curr_listi
 	snprintf(fucking_buffer_idfk,sizeof(fucking_buffer_idfk),"%s/%s",dir,
 															curr_listing_argv[FILE_NAME]);
 	
-	url_encode(fucking_buffer_idfk,fucking_buffer_idfk2, reserved_characters,sizeof(fucking_buffer_idfk));
+	url_encode(fucking_buffer_idfk,fucking_buffer_idfk2, sizeof(fucking_buffer_idfk));
 	
 	dprintf(fd,"\n<span class='%s'>| %-30s | %-30s | %-30s |<a class='%s' href='%s' >%-128s</a>|</span><br>\n",
 			DIR_LISTING_TABLE_LINE_CLASS,

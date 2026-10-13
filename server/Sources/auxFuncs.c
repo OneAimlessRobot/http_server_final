@@ -1,13 +1,15 @@
 #include "../Includes/preprocessor.h"
 
+static const char   *suffix[] = { "B", "KB", "MB", "GB", "TB"};
 
+static const char reserved_characters[]= "><\\:";
 /*
  
 	https://gist.github.com/dgoguerra/7194777 
   
 */
 char *humanSize(uint64_t bytes, char *hrbytes){
-    char   *suffix[] = { "B", "KB", "MB", "GB", "TB"};
+    
     char    length = sizeof(suffix) / sizeof(suffix[0]);
     int     i;
 
@@ -28,7 +30,7 @@ char *humanSize(uint64_t bytes, char *hrbytes){
 
 */
 
-int url_decode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc) {
+int url_decode(char *src, char *dst, uint64_t sizesrc) {
     int result=0;
     int counter_src=0;
     int counter_dst=0;
@@ -45,7 +47,7 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr, uint64_t si
 			counter_src += 3;
 		}
 		//reject branch
-		else if(findInStringArrN(reserved_characters_arr,&src[counter_src],1)>=0){
+		else if(strchr(reserved_characters,src[counter_src])!=NULL){
 			
 			dst[counter_dst] = '\0';
 			return 0;
@@ -73,13 +75,13 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr, uint64_t si
 
 
 
-int url_encode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc) {
+int url_encode(char *src, char *dst, uint64_t sizesrc) {
     int result=0;
     int counter_src=0;
     int counter_dst=0;
     while (strnlen(&src[counter_src],sizesrc-(counter_src+2))) {
 		//reject branch
-		if((findInStringArrN(reserved_characters_arr,&src[counter_src],1)>=0)||(src[counter_src]>126)){
+		if((strchr(reserved_characters,src[counter_src])!=NULL)||(src[counter_src]>126)){
 			
 			goto end;
 		}

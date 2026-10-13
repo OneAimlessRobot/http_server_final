@@ -196,9 +196,18 @@ int check_stat_of_file(const char* full_file_path,struct stat * statbuf,u_int8_t
 	return result;
 }
 
+/*
+	these paths are relative to defaultTarget (The root of the server)
+	slash at the end not included
+	(The second member is the actual target)
+	(The first member is an alias received from the uploader)
+*/
 string_pair upload_target_to_location_mappings[] = {
 	
-	{ "agarioSkins", "agarioSkins" },
+	{ "agarioSkin", "agarioSkins" },
+	
+	
+	{ "uploadVideo", "videos/uploadedVideos" },
 	
     /*
      
@@ -208,9 +217,6 @@ string_pair upload_target_to_location_mappings[] = {
 	{ NULL, "upload" }
 	
 };
-/*
-	slash at the end not included
-*/
 const char* get_upload_target(const char *target, int64_t* index_obtained){
     int64_t safeguard_ptr = 0;
     
@@ -224,7 +230,7 @@ const char* get_upload_target(const char *target, int64_t* index_obtained){
 		  upload_target_to_location_mappings[(*index_obtained)][0] != NULL;
 		  (*index_obtained)++ ) {
 
-        if (strcmp(target, upload_target_to_location_mappings[(*index_obtained)][0]) == 0) {
+        if (!strcmp(target, upload_target_to_location_mappings[(*index_obtained)][0])) {
             return upload_target_to_location_mappings[(*index_obtained)][1];
         }
     }

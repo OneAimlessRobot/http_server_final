@@ -50,7 +50,7 @@ int stringsAreEqual(char* s1,char* s2);
 
 */
 
-int url_decode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc);
+int url_decode(char *src, char *dst, uint64_t sizesrc);
 
 
 /*
@@ -60,7 +60,7 @@ int url_decode(char *src, char *dst, char** reserved_characters_arr, uint64_t si
 */
 
 
-int url_encode(char *src, char *dst, char** reserved_characters_arr, uint64_t sizesrc);
+int url_encode(char *src, char *dst, uint64_t sizesrc);
 int stringsAreEqualN(char* s1,char*s2,int n);
 
 int findInStringArrN(char* arr[],char* nullTermStr,int n);

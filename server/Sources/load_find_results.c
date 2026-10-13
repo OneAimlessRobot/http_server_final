@@ -114,7 +114,7 @@ static void print_dir_entry(int fd, char* curr_listing_arg){
 										DEF_FIND_ROOTDIR,
 										curr_listing_arg);
 	
-	url_encode(fucking_buffer_idfk,fucking_buffer_idfk2, reserved_characters,sizeof(fucking_buffer_idfk));
+	url_encode(fucking_buffer_idfk,fucking_buffer_idfk2, sizeof(fucking_buffer_idfk));
 	
 	dprintf(fd,"\n<span class='%s'>|<a class='%s' href='%s'>%s</a>|</span><br>\n",
 			FIND_LISTING_DIV_CLASS,

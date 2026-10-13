@@ -1,23 +1,23 @@
 
 
-document.getElementById("upload").onclick = async () => {
-    const file = document.getElementById("file").files[0];
+function generate_upload_with_target(target_name){
+	
+	
+		const file = document.getElementById("file").files[0];
 
-    if (!file){
-        return;
-    }
-	const file_target = encodeURIComponent(file.name)
-	var response = null;
-    try {
+		if (!file){
+			return;
+		}
 		
+		const file_target = encodeURIComponent(file.name)
 		alert("Clear this box 2 start uploadin!!!\nWait for the ding <3!");
-		
-		 response = await fetch(
+			
+		return fetch(
 			file_target,
 			{
-				method: "POST",
+				method: "PUT",
 				headers: {
-					"Target": "",
+					"Target": target_name,
 					"Content-Type": "application/octet-stream",
 					"Specific": "upload"
 					
@@ -30,21 +30,26 @@ document.getElementById("upload").onclick = async () => {
 				},
 				body: file
 			}
-		);
-		
+		)
+    .then(response=>{
 		console.log(response.status);
-    
+	
 		if(!response.ok){
+			alert(`HTTP ${response.status}`);
 			throw new Error(`HTTP ${response.status}`);
 			
 		}
-		alert("DIIIIING~\nUpload complete! Yippieee!!!");
-	}
-	catch(err){
+		
+		if(response!=null){
+			alert("DIIIIING~\nUpload complete! Yippieee!!!" + `Non null response! HTTP ${response.status}`);
+		}
+		else{
+			
 			alert("Upload failed! FAK-!\n");
 			console.error(err);
-	}
-	if(response!=null){
-		alert(`HTTP ${response.status}`);
-	}
-};
+		}
+		
+		})
+		
+		
+}

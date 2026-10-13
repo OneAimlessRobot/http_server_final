@@ -6,8 +6,7 @@
 
 
 
-extern char* reserved_characters[],
-	* reserved_characters_special[];
+extern char reserved_characters[];
 
 extern const char* request_const_name_arr[MAX_REQUEST_TYPE];
 

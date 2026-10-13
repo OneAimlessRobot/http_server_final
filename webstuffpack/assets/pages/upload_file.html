@@ -15,6 +15,7 @@
 <base href="">
 <meta charset="UTF-8">
 <script type="text/javascript" src="/js/testscript.js"></script>
+<script type="text/javascript" src="/js/upload_file_func.js"></script>
 
 <link rel="icon" type="image/png" sizes="32x32" href="/icons/.favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/icons/.favicon-16x16.png">
@@ -22,10 +23,21 @@
 </head>
 <body>
 
-<input type="file" id="file">
-<br>
-<button id="upload">put file here!</button>
 
-<script type="text/javascript" src="/js/upload_file_func.js"></script>
-</body>
+<input type="file" id="file">
+
+<br>
+
+<button id="upload" onclick="generate_upload_with_target('agarioSkin')">put agario skin here!</button>
+
+<br>
+
+<button id="upload" onclick="generate_upload_with_target('uploadVideo')">put video here!</button>
+
+<br>
+
+<button id="upload" onclick="generate_upload_with_target('')">put misc file here!</button>
+
+
+
 </html>

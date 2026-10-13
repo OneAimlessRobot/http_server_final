@@ -3,21 +3,6 @@
 #include "../Includes/server_vars.h"
 #include "../Includes/http_req_parser.h"
 
-char* reserved_characters[]={
-	">",
-	"<",
-	"\\",
-	":",
-	NULL
-},
-* reserved_characters_special[]={
-	"|",
-	">",
-	"<",
-	"\\",
-	":",
-	NULL
-};
 
 const char* request_const_name_arr[MAX_REQUEST_TYPE] = {
 	
@@ -314,7 +299,6 @@ void spawnHTTPRequest(void){
 	
 	splitString(curr_client.peerbuff,REQUEST_SECTION_DELIMITER_STRING,split_one);
 
-	printf("Raw request: %s\n", curr_client.peerbuff);
 
 	spawnHTTPHeader();
 	if(!split_one[1]){
