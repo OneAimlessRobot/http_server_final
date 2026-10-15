@@ -198,7 +198,8 @@ void sendResource(int is_head){
 		if(logging){
 			fprintf(logstream,"WILL redirect!\n");
 		}
-		fillUpRedirectHeader(curr_client.redirect_file_path);
+		fillUpRedirectHeader(curr_client.redirect_file_path,
+								curr_client.req->header->upgrade_to_tls_value && !curr_client.is_tls);
 		int header_size=strlen(curr_client.sent_header_buff);
 		if(logging > 5){
 			print_response_header(curr_client.sent_header_buff);

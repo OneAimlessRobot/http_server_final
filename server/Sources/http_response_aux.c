@@ -196,12 +196,14 @@ uint64_t fillNoContentHeader(const char* mimetype, char* target_location_dir, ch
 
 
 
-uint64_t fillUpRedirectHeader(char* path){
+uint64_t fillUpRedirectHeader(char* path, u_int8_t upgrade_obligatory){
 
 	return snprintf(curr_client.sent_header_buff,sizeof(curr_client.sent_header_buff)-1,
 							REDIRECT_HEADER,
 							LE_TIMEUREUR_DATE,
 							KEEP_ALIVE_STRING,
+							upgrade_obligatory?"https":"http",
+							port,
 							path);
 
 }

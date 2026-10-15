@@ -1,8 +1,6 @@
 #include "../Includes/preprocessor.h"
+#include "../Includes/cool_buffs.h"
 
-static const char   *suffix[] = { "B", "KB", "MB", "GB", "TB"};
-
-static const char reserved_characters[]= "><\\:";
 /*
  
 	https://gist.github.com/dgoguerra/7194777 
@@ -10,10 +8,9 @@ static const char reserved_characters[]= "><\\:";
 */
 char *humanSize(uint64_t bytes, char *hrbytes){
     
-    char    length = sizeof(suffix) / sizeof(suffix[0]);
-    int     i;
+    int  i;
 
-    for(i = 0; i < length; i++) {
+    for(i = 0; i < MAX_SUFFIX; i++) {
         if(bytes < 1024)
             break;
 

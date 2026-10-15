@@ -24,7 +24,7 @@
 #define PARTIAL_SIZE_TO_SEND max(0,min(BUFFSIZE,size_to_send-num_bytes_sent))
 
 
-typedef enum {BYTE=0,KILO,MEGA,GIGA,TERA}magnitude_order;
+typedef enum {BYTE=0,KILO,MEGA,GIGA,TERA, MAX_SUFFIX}magnitude_order;
 
 
 #define byte_to_high_order(a,b) (a>>(10*(magnitude_order)b))

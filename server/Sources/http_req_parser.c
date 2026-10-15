@@ -72,6 +72,9 @@ void print_http_req_header(FILE* fstream){
 					"if-none-match: |%s|\n"
 					
 					"mimetype: %s\n"
+					"Upgrade-Insecure-Requests? (raw): %s\n"
+					"Upgrade-Insecure-Requests? (Captured Value): %hhu\n"
+					
 					"Mobile? (raw): %s\n"
 					"Mobile? (captured value): %hhu\n"
 					"Range (string): |%s|\n"
@@ -104,6 +107,8 @@ void print_http_req_header(FILE* fstream){
 							curr_client.req->header->if_none_match,
 							
 							curr_client.req->header->mimetype,
+							curr_client.req->header->upgrade_to_tls,
+							curr_client.req->header->upgrade_to_tls_value,
 							curr_client.req->header->is_mobile,
 							curr_client.req->header->is_mobile_value,
 							curr_client.req->header->range_string,
@@ -153,33 +158,6 @@ http_header_field* make_http_header_field_arr(char *strarr[ARGVMAX]) {
 
 static void spawnHTTPHeader(void){
 	curr_client.req->header->type=INVALID;
-	b_zero(curr_client.req->header->target);
-	b_zero(curr_client.req->header->content_length);
-	b_zero(curr_client.req->header->origin);
-	b_zero(curr_client.req->header->host);
-	b_zero(curr_client.req->header->second_target);
-	
-	b_zero(curr_client.req->header->mimetype);
-	b_zero(curr_client.req->header->specific);
-	
-	b_zero(curr_client.req->header->is_mobile);
-	b_zero(curr_client.req->header->version);
-	b_zero(curr_client.req->header->user_agent);
-	b_zero(curr_client.req->header->range);
-	b_zero(curr_client.req->header->range_string);
-	b_zero(curr_client.req->header->cloudfare_ip);
-	
-	b_zero(curr_client.req->header->refer);
-	b_zero(curr_client.req->header->accept);
-	b_zero(curr_client.req->header->accept_language);
-	b_zero(curr_client.req->header->sec_fetch_site);
-	b_zero(curr_client.req->header->sec_fetch_mode);
-	b_zero(curr_client.req->header->sec_fetch_dest);
-	b_zero(curr_client.req->header->sec_fetch_user);
-	b_zero(curr_client.req->header->sec_ch_ua);
-	b_zero(curr_client.req->header->sec_ch_ua_platform);
-	b_zero(curr_client.req->header->cookie);
-	b_zero(curr_client.req->header->if_none_match);
 	
 	char* headerArr[ARGVMAX] = {0};
 	char* firstHeaderArr[ARGVMAX] = {0};
@@ -216,11 +194,24 @@ static void spawnHTTPHeader(void){
 		strcpy(curr_client.req->header->origin,find_field_value_in_field_arr("Origin",fieldarr));
 		strcpy(curr_client.req->header->mimetype,defaultMimetype);
 		strcpy(curr_client.req->header->is_mobile,find_field_value_in_field_arr("sec-ch-ua-mobile",fieldarr));
+		
 		if(strnlen(curr_client.req->header->is_mobile,FIELDSIZE)>0){
 			
 			sscanf(curr_client.req->header->is_mobile,"?%hhu",&curr_client.req->header->is_mobile_value);
 			
 		}
+		
+		strcpy(curr_client.req->header->upgrade_to_tls,find_field_value_in_field_arr("upgrade-insecure-requests",fieldarr));
+
+		if(strnlen(curr_client.req->header->upgrade_to_tls,FIELDSIZE)>0){
+			
+			
+			
+		 
+			sscanf(curr_client.req->header->upgrade_to_tls,"%hhu",&curr_client.req->header->upgrade_to_tls_value);
+			
+		}
+		
 
 		strcpy(curr_client.req->header->encoding,find_field_value_in_field_arr("Accept-Encoding",fieldarr));
 		strcpy(curr_client.req->header->content_length,find_field_value_in_field_arr("Content-Length",fieldarr));

@@ -196,7 +196,12 @@ uint64_t fillNoContentHeader(const char* mimetype, char* target_location_dir, ch
 #define REDIRECT_HEADER HTTP_VERSION_STRING SEE_OTHER_RESPONSE \
 						HTTP_SERVER_INTRO_HEADERS \
 						"Accept-Ranges: bytes\r\n" \
-						"Location: %s\r\n" \
+						"Location: " \
+						"%s" \
+						"://" \
+						DOMAIN_NAME \
+						":%hu%s\r\n" \
+						"Vary: Upgrade-Insecure-Requests\r\n" \
 						"Content-Length: 0\r\n" \
 						"\r\n"
 
@@ -224,7 +229,7 @@ uint64_t fillNoContentHeader(const char* mimetype, char* target_location_dir, ch
 								HTTP_SERVER_FILE_AGE_HEADERS_NOT_MODIFIED \
 								"\r\n"
 
-uint64_t fillUpRedirectHeader(char* path);
+uint64_t fillUpRedirectHeader(char* path, u_int8_t upgrade_obligatory);
 
 uint64_t fillUpFileNotFoundHeader(int64_t size,const char* mimetype);
 

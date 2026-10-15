@@ -7,6 +7,8 @@ extern char tmpFile[PATHSIZE*3],
 	
 void send_internal_error_response(void);
 
+void tls_conversion_ritual(void);
+
 void runClientConnection(int32_t sock);
 
 #endif

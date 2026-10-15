@@ -49,7 +49,6 @@ typedef struct http_header_field{
 	char* field[2];
 
 }http_header_field;
-
 typedef struct http_header{
 
 	http_req_type type;
@@ -65,6 +64,7 @@ typedef struct http_header{
 		origin[FIELDSIZE],
 		if_none_match[ETAG_SIZE],
 		mimetype[FIELDSIZE],
+		upgrade_to_tls[FIELDSIZE],
 		is_mobile[FIELDSIZE],
 		user_agent[FIELDSIZE],
 		range_string[FIELDSIZE],
@@ -86,8 +86,8 @@ typedef struct http_header{
 		sec_ch_ua[FIELDSIZE],
 		sec_ch_ua_platform[FIELDSIZE],
 		cookie[FIELDSIZE];
-		
-	u_int8_t is_partial,
+	u_int8_t upgrade_to_tls_value,
+			is_partial,
 			is_mobile_value;
 	int64_t range_start,range_end;
 

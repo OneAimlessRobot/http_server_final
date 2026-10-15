@@ -179,8 +179,19 @@ static void handleCurrentActivity(void){
 		send_valid_requests_string();
 		return;
 	}
-	
 	build_date_buff();
+	if(curr_client.req->header->upgrade_to_tls_value && !curr_client.is_tls){
+		
+		uint64_t header_size = fillUpRedirectHeader(
+									curr_client.req->header->target,
+									1);
+		if(logging > 5){
+			print_response_header(curr_client.sent_header_buff);
+		}
+		send_wrapper((char*)curr_client.sent_header_buff,header_size);
+		return;						
+	}
+	
 
 	if(!strcmp(curr_client.req->header->target,"/")){
 
@@ -243,7 +254,17 @@ int is_tls_connection(int client_fd) {
     
     return 0;
 }
-
+void tls_conversion_ritual(void){
+		
+	if(curr_client.is_tls){
+		if(logging>0){
+			fprintf(logstream,"Its tls we do eht!\n");
+		} 
+		InitializeSSL();
+		init_openssl_libs_server_side();
+		convert_server_con_to_ssl(&curr_client.ctx_if_ssl,curr_client.socket);
+	}
+}
 void runClientConnection(int32_t sock){
 	if(logging){
 		
@@ -258,14 +279,9 @@ void runClientConnection(int32_t sock){
 	socklenpointer=sizeof(curr_client.client_addr);
 	curr_client.socket=sock;
 	curr_client.is_tls=is_tls_connection(curr_client.socket) && want_tls;
-	if(curr_client.is_tls){
-		if(logging>0){
-			fprintf(logstream,"Its tls we do eht!\n");
-		}
-		InitializeSSL();
-		init_openssl_libs_server_side();
-		convert_server_con_to_ssl(&curr_client.ctx_if_ssl,curr_client.socket);
-	}
+	
+	tls_conversion_ritual();
+	
 	req.header=&header;
 	curr_client.req= &req;
 	curr_client.the_stat_struct= &the_stat_struct_here;
