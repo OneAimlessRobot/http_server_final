@@ -258,6 +258,8 @@ void initializeClientConstants(void){
 	
 	use_compression=ato_ull(find_value_in_cfg_arr("use_compression",cfgs));
 	
+	upgrade_insecure_requests=ato_ull(find_value_in_cfg_arr("upgrade_insecure_requests",cfgs));
+	
 	compression_level=ato_ull(find_value_in_cfg_arr("compression_level",cfgs));
 	
 	use_chunked=ato_ull(find_value_in_cfg_arr("use_chunked",cfgs));

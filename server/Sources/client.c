@@ -180,7 +180,7 @@ static void handleCurrentActivity(void){
 		return;
 	}
 	build_date_buff();
-	if(curr_client.req->header->upgrade_to_tls_value && !curr_client.is_tls){
+	if(upgrade_insecure_requests && curr_client.req->header->upgrade_to_tls_value && !curr_client.is_tls){
 		
 		uint64_t header_size = fillUpRedirectHeader(
 									curr_client.req->header->target,
